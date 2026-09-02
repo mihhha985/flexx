@@ -1,21 +1,71 @@
 // use prisma-next
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String    @unique
+  price       Float
+  description String
+  imageUrl    String?
+  isActive    Boolean   @default(true)
+  stock       Int       @default(0)
+  categoryId  Int
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  orderItems  OrderItem[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+
+  @@index([categoryId])
+  @@index([isActive])
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  order    Int
+  products Product[]
+}
+
+enum order_status {
+  @@type("pg/text@1")
+
+  pending   = "pending"
+  confirmed = "confirmed"
+  paid      = "paid"
+  shipped   = "shipped"
+  completed = "completed"
+  cancelled = "cancelled"
+}
+
+model Order {
+  id              Int          @id @default(autoincrement())
+  publicId        String       @unique @default(uuid())
+  status          order_status @default(pending)
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  comment         String?
+  total           Float
+  items           OrderItem[]
+  createdAt       TimestamptzString @default(now())
+  updatedAt       temporal.updatedAtString()
+
+  @@index([status])
+  @@index([customerEmail])
+}
+
+model OrderItem {
+  id              Int     @id @default(autoincrement())
+  orderId         Int
+  productId       Int
+  productName     String
+  unitPrice       Float
+  quantity        Int
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
 }
