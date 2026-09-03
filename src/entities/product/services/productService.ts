@@ -21,6 +21,7 @@ export async function getValidatedProducts(props: ProductProps): Promise<Product
     const products = await getAllProducts(data.category, data.limit, data.offset)
     return products
   } catch (error) {
+    console.error(error);
     throw error
   }
 }
@@ -53,6 +54,7 @@ export async function getRandomProducts(): Promise<ProductWithCategory[]> {
       })
       .slice(0, 4)
   } catch (error) {
+    console.error(error);
     throw error
   }
 }

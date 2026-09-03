@@ -9,13 +9,14 @@ import {
 import { Badge } from "@/src/shared/ui/badge"
 import { LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
-
-export const metadata = {
+import type { Metadata } from "next"
+export const metadata: Metadata = {
   title: "Контакты — Контур",
   description: "Контакты магазина, график работы, доставка и ответы на вопросы.",
 }
 
 export default function ContactsPage() {
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">

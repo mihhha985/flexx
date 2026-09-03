@@ -1,7 +1,7 @@
 "use server"
 
-import { db } from "@/src/prisma/db";
-import { ProductWithCategory } from "../domain";
+import { db } from "@/src/prisma/db"
+import type { ProductWithCategory } from "../domain"
 
 function getActiveProductsQuery() {
   return db.orm.public.Product
@@ -22,15 +22,17 @@ export async function getAllProducts(category?: string,limit: number = 12, offse
       .offset(offset)
       .all();
   } catch (error) {
-    throw error;
+    console.error(error);
+    throw error
   }
 }
 
 export async function getAllActiveProducts(): Promise<ProductWithCategory[]> {
   try {
-    return await getActiveProductsQuery().all();
+    return await getActiveProductsQuery().all()
   } catch (error) {
-    throw error;
+    console.error(error);
+    throw error
   }
 }
 
@@ -40,8 +42,9 @@ export async function getProductBySlug(slug: string): Promise<ProductWithCategor
       .select("id", "name", "slug", "stock", "price", "imageUrl", "description", "isActive")
       .include("category", (category) => category.select("name", "slug", "order"))
       .where({ "isActive": true, "slug": slug })
-      .first();
+      .first()
   } catch (error) {
-    throw error;
+    console.error(error);
+    throw error
   }
 }
