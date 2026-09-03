@@ -5,7 +5,21 @@ import { Category } from "../domain";
 
 export async function getAllCategory(): Promise<Category[]> {
   try {
-    return await db.orm.public.Category.all();
+    return await db.orm.public.Category
+      .select("name", "slug", "order")
+      .orderBy((category) => category.order.asc())
+      .all();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getCategoryBySlug(slug: string): Promise<Category | null> {
+  try {
+    return await db.orm.public.Category
+      .select("name", "slug", "order")
+      .where({ slug })
+      .first();
   } catch (error) {
     throw error;
   }

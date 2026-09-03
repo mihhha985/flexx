@@ -5,10 +5,10 @@ import { LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/shared/ui/card"
 import { MainCategoryList } from "../../shared/components/main-category-list"
 //import { featuredProducts } from "@/src/shared/lib/catalog"
-import { getAllProducts } from "../../entities/product/repositiry/getProduct"
+import { getRandomProducts } from "../../entities/product/services/productService"
 
 export default async function Home() {
-  const featuredProducts = await getAllProducts(undefined, 4, 0);
+  const featuredProducts = await getRandomProducts();
 
   return (
     <div className="flex flex-col gap-12">

@@ -9,7 +9,7 @@ export async function MainCategoryList() {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
       {categories.map((category) => (
-        <Link key={category.slug} href={`/catalog?category=${category.slug}`} className="group">
+        <Link key={category.slug} href={`/catalog/${category.slug}`} className="group">
           <Card size="sm" className="h-full transition-shadow group-hover:shadow-sm">
             <CardContent className="flex flex-col gap-3 pt-1">
               <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">

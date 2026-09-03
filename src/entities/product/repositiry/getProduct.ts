@@ -3,12 +3,17 @@
 import { db } from "@/src/prisma/db";
 import { ProductWithCategory } from "../domain";
 
+function getActiveProductsQuery() {
+  return db.orm.public.Product
+    .select("id", "name", "slug", "stock", "price", "imageUrl", "isActive")
+    .include("category", (category) => category.select("name", "slug", "order"))
+    .where({ "isActive": true })
+    .orderBy((product) => product.name.asc());
+}
+
 export async function getAllProducts(category?: string,limit: number = 12, offset: number = 0): Promise<ProductWithCategory[]> {
   try {
-    const products = db.orm.public.Product
-      .select("id", "name", "slug", "stock", "price", "imageUrl", "isActive")
-      .include("category", (category) => category.select("name", "slug", "order"))
-      .where({ "isActive": true });
+    const products = getActiveProductsQuery();
 
     return await (category
       ? products.where((product) => product.category.some({ slug: category }))
@@ -16,6 +21,14 @@ export async function getAllProducts(category?: string,limit: number = 12, offse
       .limit(limit)
       .offset(offset)
       .all();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getAllActiveProducts(): Promise<ProductWithCategory[]> {
+  try {
+    return await getActiveProductsQuery().all();
   } catch (error) {
     throw error;
   }

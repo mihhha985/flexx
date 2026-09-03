@@ -8,7 +8,15 @@ import type { Category } from "@/src/entities/category/domain"
 
 
 export function CatalogFilter(
-  { categories, productCount }: { categories: Category[]; productCount: number }
+  {
+    categories,
+    productCount,
+    activeCategorySlug,
+  }: {
+    categories: Category[]
+    productCount: number
+    activeCategorySlug?: string
+  },
 ) {
   const router = useRouter();
 
@@ -32,15 +40,16 @@ export function CatalogFilter(
         <ToggleGroup
           selectionMode="single"
           disallowEmptySelection
+          selectedKeys={[activeCategorySlug ?? "all"]}
           variant="outline"
           aria-label="Категория товара"
         >
-          <ToggleGroupItem id="all">Все</ToggleGroupItem>
+          <ToggleGroupItem id="all" onClick={() => router.push("/catalog")}>Все</ToggleGroupItem>
           {categories.map((item) => (
             <ToggleGroupItem
               key={item.slug}
               id={item.slug}
-              onClick={() => router.push(`/catalog?category=${item.slug}`)}
+              onClick={() => router.push(`/catalog/${item.slug}`)}
             >
               {item.name}
             </ToggleGroupItem>
