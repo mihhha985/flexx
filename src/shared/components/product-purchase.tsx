@@ -5,7 +5,7 @@ import Link from "next/link"
 import { CheckIcon, MinusIcon, PlusIcon, ShoppingBagIcon } from "lucide-react"
 import { toast } from "sonner"
 
-import { useCart } from "@/src/shared/components/cart-provider"
+import { useCartStore } from "@/src/store/cart-store"
 import { formatPrice } from "@/src/shared/lib/catalog"
 import { cn } from "@/src/shared/lib/utils"
 import { Badge } from "@/src/shared/ui/badge"
@@ -17,7 +17,8 @@ import type { ProductWithCategory } from "@/src/entities/product/domain"
 export function ProductPurchase({ product }: { product: ProductWithCategory }) {
   const [quantity, setQuantity] = React.useState(1)
   const [added, setAdded] = React.useState(false)
-  const { addItem } = useCart()
+  const addItem = useCartStore((state) => state.addItem)
+  const ready = useCartStore((state) => state.ready)
 
   function handleAdd() {
     addItem(product, quantity)
@@ -71,7 +72,7 @@ export function ProductPurchase({ product }: { product: ProductWithCategory }) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-        <Button className="w-full" size="lg" onPress={handleAdd}>
+        <Button className="w-full" size="lg" isDisabled={!ready || product.stock < 1} onPress={handleAdd}>
           {added ? <CheckIcon data-icon="inline-start" /> : <ShoppingBagIcon data-icon="inline-start" />}
           {added ? "Добавлено" : "Добавить в корзину"}
         </Button>

@@ -2,7 +2,7 @@ import { Suspense } from "react"
 
 import { getAllCategory } from "@/src/entities/category/repository/getCategory"
 import { CatalogFilter } from "@/src/shared/components/catalog-filter"
-import { CatalogFilterSkeleton } from "@/src/shared/components/catalog-skeleton"
+import { CatalogFilterSkeleton } from "@/src/shared/components/skeleton/catalog-skeleton"
 
 async function CatalogFilters() {
   const categories = await getAllCategory()

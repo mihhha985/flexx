@@ -1,14 +1,24 @@
+import { Suspense } from "react"
 import { ArrowRightIcon, CheckIcon, PackageCheckIcon, ShoppingBagIcon } from "lucide-react"
 import { ProductCard } from "@/src/shared/components/product-card"
 import { Badge } from "@/src/shared/ui/badge"
 import { LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/shared/ui/card"
-import { MainCategoryList } from "../../shared/components/main-category-list"
-import { getRandomProducts } from "../../entities/product/services/productService"
+import { MainCategoryList } from "@/src/shared/components/main-category-list"
+import { FeaturedProductsSkeleton, MainCategoryListSkeleton } from "@/src/shared/components/skeleton/home-skeleton"
+import { getRandomProducts } from "@/src/entities/product/services/productService"
 
-export default async function Home() {
-  const featuredProducts = await getRandomProducts();
+async function FeaturedProducts() {
+  const products = await getRandomProducts()
 
+  return (
+    <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
+      {products.map((product) => <ProductCard key={product.slug} product={product} />)}
+    </div>
+  )
+}
+
+export default function Home() {
   return (
     <div className="flex flex-col gap-12">
       <section>
@@ -47,7 +57,9 @@ export default async function Home() {
             Все товары <ArrowRightIcon data-icon="inline-end" />
           </LinkButton>
         </div>
-        <MainCategoryList />
+        <Suspense fallback={<MainCategoryListSkeleton />}>
+          <MainCategoryList />
+        </Suspense>
       </section>
 
       <section className="flex flex-col gap-4">
@@ -60,9 +72,9 @@ export default async function Home() {
             Смотреть всё <ArrowRightIcon data-icon="inline-end" />
           </LinkButton>
         </div>
-        <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
-          {featuredProducts.map((product) => <ProductCard key={product.slug} product={product} />)}
-        </div>
+        <Suspense fallback={<FeaturedProductsSkeleton />}>
+          <FeaturedProducts />
+        </Suspense>
       </section>
 
       <section className="flex flex-col gap-4">

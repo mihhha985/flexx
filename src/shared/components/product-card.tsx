@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ShoppingBagIcon } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { useCart } from "@/src/shared/components/cart-provider"
+import { useCartStore } from "@/src/store/cart-store"
 import { ProductVisual } from "@/src/shared/components/product-visual"
 import { formatPrice } from "@/src/shared/lib/catalog"
 import { cn } from "@/src/shared/lib/utils"
@@ -23,7 +23,8 @@ import type { ProductWithCategory } from "@/src/entities/product/domain";
 
 export function ProductCard({ product }: { product: ProductWithCategory }) {
   const router = useRouter()
-  const { addItem } = useCart()
+  const addItem = useCartStore((state) => state.addItem)
+  const ready = useCartStore((state) => state.ready)
 
   function handleAdd() {
     addItem(product)
@@ -55,7 +56,7 @@ export function ProductCard({ product }: { product: ProductWithCategory }) {
         >
           Подробнее
         </Link>
-        <Button size="sm" className="w-full" onPress={handleAdd}>
+        <Button size="sm" className="w-full" isDisabled={!ready || product.stock < 1} onPress={handleAdd}>
           <ShoppingBagIcon data-icon="inline-start" />
           В корзину
         </Button>

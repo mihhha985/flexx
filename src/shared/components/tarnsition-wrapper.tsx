@@ -8,12 +8,13 @@ export function TransitionWrapper({ children }: { children: React.ReactNode }) {
     ? "/catalog"
     : pathname;
   return (
-    <AnimatePresence initial={false}>
+    <AnimatePresence initial={false} mode="wait">
       <motion.div
         key={transitionKey}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3}}
+        exit={{opacity:0, y: 20}}
+        transition={{ duration: 0.8}}
       >
         {children}
       </motion.div>

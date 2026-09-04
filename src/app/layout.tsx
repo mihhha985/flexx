@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { CartProvider } from "@/src/shared/components/cart-provider"
+import { CartHydration } from "@/src/shared/components/cart-hydration"
 import { PwaRegister } from "@/src/shared/components/pwa-register"
 import { Toaster } from "@/src/shared/ui/sonner"
 
@@ -36,11 +36,10 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <CartProvider>
-          {children}
-          <Toaster theme="light" position="top-center" richColors />
-          <PwaRegister />
-        </CartProvider>
+        <CartHydration />
+        {children}
+        <Toaster theme="light" position="top-center" richColors />
+        <PwaRegister />
       </body>
     </html>
   )

@@ -1,4 +1,4 @@
-import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/shared/ui/card"
+import { ProductCardSkeleton } from "@/src/shared/components/skeleton/product-card-skeleton"
 import { Skeleton } from "@/src/shared/ui/skeleton"
 
 export function CatalogFilterSkeleton() {
@@ -27,18 +27,7 @@ export function CatalogResultsSkeleton() {
       </div>
       <div aria-hidden="true" className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4 [&_[data-slot=skeleton]]:motion-reduce:animate-none">
         {Array.from({ length: 12 }, (_, index) => (
-          <Card key={index} size="sm" className="h-full">
-            <Skeleton className="aspect-4/3 w-full rounded-none" />
-            <CardHeader>
-              <CardTitle><Skeleton className="h-5 w-full" /></CardTitle>
-              <CardAction><Skeleton className="h-5 w-16" /></CardAction>
-            </CardHeader>
-            <CardContent><Skeleton className="h-6 w-24" /></CardContent>
-            <CardFooter className="grid grid-cols-2 gap-2">
-              <Skeleton className="h-7 w-full" />
-              <Skeleton className="h-7 w-full" />
-            </CardFooter>
-          </Card>
+          <ProductCardSkeleton key={index} />
         ))}
       </div>
     </section>

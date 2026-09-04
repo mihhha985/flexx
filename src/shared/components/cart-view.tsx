@@ -13,7 +13,8 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { useCart } from "@/src/shared/components/cart-provider"
+import { selectCartItemCount, selectCartTotal, useCartStore } from "@/src/store/cart-store"
+import { CartSkeleton } from "@/src/shared/components/skeleton/cart-skeleton"
 import { ProductVisual } from "@/src/shared/components/product-visual"
 import { formatPrice } from "@/src/shared/lib/catalog"
 import { cn } from "@/src/shared/lib/utils"
@@ -43,7 +44,13 @@ const initialDraft: OrderDraft = {
 }
 
 export function CartView() {
-  const { items, itemCount, total, updateQuantity, removeItem, clearCart } = useCart()
+  const ready = useCartStore((state) => state.ready)
+  const items = useCartStore((state) => state.items)
+  const itemCount = useCartStore(selectCartItemCount)
+  const total = useCartStore(selectCartTotal)
+  const updateQuantity = useCartStore((state) => state.updateQuantity)
+  const removeItem = useCartStore((state) => state.removeItem)
+  const clearCart = useCartStore((state) => state.clearCart)
   const [draft, setDraft] = React.useState(initialDraft)
   const [publicId, setPublicId] = React.useState<string | null>(null)
 
@@ -62,6 +69,8 @@ export function CartView() {
     clearCart()
     toast.success("Заказ принят", { description: `Номер ${id}` })
   }
+
+  if (!ready) return <CartSkeleton />
 
   if (publicId) {
     return (

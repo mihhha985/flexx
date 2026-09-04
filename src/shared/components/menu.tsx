@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { useCart } from "@/src/shared/components/cart-provider";
+import { selectCartItemCount, useCartStore } from "@/src/store/cart-store";
 import { cn } from "@/src/shared/lib/utils";
 import { Badge } from "@/src/shared/ui/badge";
 import { buttonVariants } from "@/src/shared/ui/button";
@@ -23,7 +23,7 @@ const icons: Record<NavigationIcon, typeof HouseIcon> = {
 
 export default function Menu() {
   const pathname = usePathname();
-  const { itemCount } = useCart();
+  const itemCount = useCartStore(selectCartItemCount);
 
   return (
     <>
