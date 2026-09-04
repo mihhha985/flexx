@@ -4,7 +4,6 @@ import { Badge } from "@/src/shared/ui/badge"
 import { LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/shared/ui/card"
 import { MainCategoryList } from "../../shared/components/main-category-list"
-//import { featuredProducts } from "@/src/shared/lib/catalog"
 import { getRandomProducts } from "../../entities/product/services/productService"
 
 export default async function Home() {
