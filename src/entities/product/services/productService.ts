@@ -1,16 +1,21 @@
-"use server"
-
 import { z } from "zod"
-import { getAllActiveProducts, getAllProducts } from "../repositiry/getProduct"
-import type { ProductWithCategory } from "../domain"
-
-const LIMIT = 12
+import {
+  getActiveProductsCount,
+  getAllActiveProducts,
+  getAllProductsByCategory,
+} from "../repositiry/getProduct"
+import type { ProductWithCategory, Product } from "../domain"
+import { LIMIT } from "../domain"
 
 function getFirstParam(value: unknown): unknown {
   return Array.isArray(value) ? value[0] : value
 }
 
 const searchParamsSchema = z.object({
+  search: z.preprocess(
+    getFirstParam,
+    z.string().trim().catch(""),
+  ).transform((value) => value || undefined),
   page: z.preprocess(
     getFirstParam,
     z.coerce.number().int().min(1).catch(1),
@@ -30,18 +35,19 @@ type SearchParams = z.infer<typeof searchParamsSchema>
 export async function getValidatedProducts(
   category: string | undefined,
   data: unknown,
-): Promise<ProductWithCategory[]> {
+): Promise<Product[]> {
   try {
     const validatedData: SearchParams = searchParamsSchema.parse(data)
     console.log("getValidatedProducts - someData:", validatedData);
     const offset = (validatedData.page - 1) * LIMIT
 
-    return await getAllProducts(
+    return await getAllProductsByCategory(
       category,
       LIMIT,
       offset,
       validatedData.sort,
       validatedData.order,
+      validatedData.search,
     )
   } catch (error) {
     console.error(error)
@@ -80,4 +86,13 @@ export async function getRandomProducts(): Promise<ProductWithCategory[]> {
     console.error(error)
     throw error
   }
+}
+
+export async function getTotalActiveProducts(
+  category?: string,
+  data?: unknown,
+): Promise<number> {
+  const { search } = searchParamsSchema.parse(data)
+
+  return await getActiveProductsCount(category, search)
 }

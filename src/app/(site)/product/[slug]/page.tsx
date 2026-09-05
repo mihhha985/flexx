@@ -40,6 +40,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <BreadcrumbLink href="/catalog">Каталог</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbItem>
+            <BreadcrumbLink href={`/catalog/${product.category.slug}`}>{product.category.name}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
             <BreadcrumbPage>{product.name}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>

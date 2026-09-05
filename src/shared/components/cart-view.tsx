@@ -58,7 +58,7 @@ export function CartView() {
     setDraft((current) => ({ ...current, [field]: value }))
   }
 
-  function submitOrder(event: React.FormEvent<HTMLFormElement>) {
+  function submitOrder(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     const id = crypto.randomUUID().split("-")[0].toUpperCase()
     window.localStorage.setItem(

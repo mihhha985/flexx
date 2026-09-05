@@ -1,22 +1,14 @@
 import { Suspense } from "react"
 import { ArrowRightIcon, CheckIcon, PackageCheckIcon, ShoppingBagIcon } from "lucide-react"
-import { ProductCard } from "@/src/shared/components/product-card"
 import { Badge } from "@/src/shared/ui/badge"
 import { LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/shared/ui/card"
 import { MainCategoryList } from "@/src/shared/components/main-category-list"
-import { FeaturedProductsSkeleton, MainCategoryListSkeleton } from "@/src/shared/components/skeleton/home-skeleton"
-import { getRandomProducts } from "@/src/entities/product/services/productService"
-
-async function FeaturedProducts() {
-  const products = await getRandomProducts()
-
-  return (
-    <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
-      {products.map((product) => <ProductCard key={product.slug} product={product} />)}
-    </div>
-  )
-}
+import { RandomProductList } from "@/src/shared/components/random-product-list"
+import {
+  FeaturedProductsSkeleton,
+  MainCategoryListSkeleton
+} from "@/src/shared/components/skeleton/home-skeleton"
 
 export default function Home() {
   return (
@@ -73,7 +65,7 @@ export default function Home() {
           </LinkButton>
         </div>
         <Suspense fallback={<FeaturedProductsSkeleton />}>
-          <FeaturedProducts />
+          <RandomProductList />
         </Suspense>
       </section>
 

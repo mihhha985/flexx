@@ -10,8 +10,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/ui/empty"
-import type { ProductWithCategory } from "@/src/entities/product/domain"
-export function CatalogView({ visibleProducts }: { visibleProducts: ProductWithCategory[] }) {
+import type { Product } from "@/src/entities/product/domain"
+export function CatalogView({ visibleProducts }: { visibleProducts: Product[] }) {
 
   return (
     <div>

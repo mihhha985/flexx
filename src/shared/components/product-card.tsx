@@ -19,9 +19,9 @@ import {
   CardTitle,
 } from "@/src/shared/ui/card"
 
-import type { ProductWithCategory } from "@/src/entities/product/domain";
+import type { Product } from "@/src/entities/product/domain";
 
-export function ProductCard({ product }: { product: ProductWithCategory }) {
+export function ProductCard({ product }: { product: Product }) {
   const router = useRouter()
   const addItem = useCartStore((state) => state.addItem)
   const ready = useCartStore((state) => state.ready)

@@ -4,7 +4,7 @@ import { db } from "@/src/prisma/db"
 import type { Category } from "../domain"
 
 export async function getAllCategory(): Promise<Category[]> {
-  await new Promise((resolve) => setTimeout(resolve, 1000))
+
   try {
     return await db.orm.public.Category
       .select("name", "slug", "order")

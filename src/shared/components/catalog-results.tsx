@@ -1,4 +1,4 @@
-import { getAllProducts } from "@/src/entities/product/repositiry/getProduct"
+import { getAllProductsByCategory } from "@/src/entities/product/repositiry/getProduct"
 import { CatalogView } from "@/src/shared/components/catalog-view"
 import { CatalogResultsTransition } from "@/src/shared/components/catalog-results-transition"
 import { Badge } from "@/src/shared/ui/badge"
@@ -12,7 +12,7 @@ export async function CatalogResults({
   categoryOrder?: number
   title?: string
 }) {
-  const products = await getAllProducts(categorySlug)
+  const products = await getAllProductsByCategory(categorySlug)
 
   return (
     <CatalogResultsTransition

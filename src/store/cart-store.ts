@@ -4,17 +4,17 @@ import { create } from "zustand"
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware"
 import { z } from "zod"
 
-import type { ProductWithCategory } from "@/src/entities/product/domain"
+import type { Product } from "@/src/entities/product/domain"
 
 export type CartItem = {
-  product: ProductWithCategory
+  product: Product
   quantity: number
 }
 
 type CartState = {
   ready: boolean
   items: CartItem[]
-  addItem: (product: ProductWithCategory, quantity?: number) => void
+  addItem: (product: Product, quantity?: number) => void
   updateQuantity: (productId: number, quantity: number) => void
   removeItem: (productId: number) => void
   clearCart: () => void

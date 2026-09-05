@@ -1,13 +1,17 @@
 "use server"
-
-import { unstable_cache } from "next/cache"
 import { db } from "@/src/prisma/db"
-import type { ProductOrder, ProductSort, ProductWithCategory } from "../domain"
+import { or } from "@prisma/orm-postgres/orm-client"
+import type {
+  ProductOrder,
+  ProductSort,
+  Product,
+  ProductWithCategory
+} from "../domain"
+import { LIMIT } from "../domain"
 
 function getActiveProductsQuery(sort: ProductSort = "name", order: ProductOrder = "asc") {
   const products = db.orm.public.Product
     .select("id", "name", "slug", "stock", "price", "imageUrl", "isActive")
-    .include("category", (category) => category.select("name", "slug", "order"))
     .where({ "isActive": true })
 
   return sort === "price"
@@ -15,36 +19,32 @@ function getActiveProductsQuery(sort: ProductSort = "name", order: ProductOrder 
     : products.orderBy((product) => order === "asc" ? product.name.asc() : product.name.desc())
 }
 
-const getCachedProducts = unstable_cache(
-  async (
-    category: string,
-    limit: number,
-    offset: number,
-    sort: ProductSort,
-    order: ProductOrder,
-  ): Promise<ProductWithCategory[]> => {
-    const products = getActiveProductsQuery(sort, order)
-
-    return await (category
-      ? products.where((product) => product.category.some({ slug: category }))
-      : products)
-      .limit(limit)
-      .offset(offset)
-      .all()
-  },
-  ["active-products"],
-  { revalidate: 3600, tags: ["products"] },
-)
-
-export async function getAllProducts(
+export async function getAllProductsByCategory(
   category?: string,
-  limit = 12,
+  limit = LIMIT,
   offset = 0,
   sort: ProductSort = "name",
   order: ProductOrder = "asc",
-): Promise<ProductWithCategory[]> {
+  search?: string,
+): Promise<Product[]> {
   try {
-    return await getCachedProducts(category ?? "", limit, offset, sort, order)
+    const products = getActiveProductsQuery(sort, order)
+    const productsInCategory = category
+      ? products.where((product) => product.category.some({ slug: category }))
+      : products
+    const query = search?.trim()
+
+    return await (query
+      ? productsInCategory.where((product) =>
+        or(
+          product.name.ilike(`%${query}%`),
+          product.description.ilike(`%${query}%`),
+        ),
+      )
+      : productsInCategory)
+      .limit(limit)
+      .offset(offset)
+      .all()
   } catch (error) {
     console.error(error)
     throw error
@@ -53,9 +53,42 @@ export async function getAllProducts(
 
 export async function getAllActiveProducts(): Promise<ProductWithCategory[]> {
   try {
-    return await getActiveProductsQuery().all()
+    return await db.orm.public.Product
+      .select("id", "name", "slug", "stock", "price", "imageUrl", "description", "isActive")
+      .include("category", (category) => category.select("name", "slug", "order"))
+      .where({ "isActive": true })
+      .all()
   } catch (error) {
     console.error(error);
+    throw error;
+  }
+}
+
+export async function getActiveProductsCount(
+  category?: string,
+  search?: string,
+): Promise<number> {
+  try {
+    const products = db.orm.public.Product
+      .where({ "isActive": true })
+    const productsInCategory = category
+      ? products.where((product) => product.category.some({ slug: category }))
+      : products
+    const query = search?.trim()
+
+    const { total } = await (query
+      ? productsInCategory.where((product) =>
+        or(
+          product.name.ilike(`%${query}%`),
+          product.description.ilike(`%${query}%`),
+        ),
+      )
+      : productsInCategory)
+      .aggregate((aggregate) => ({ total: aggregate.count() }))
+
+    return total
+  } catch (error) {
+    console.error(error)
     throw error
   }
 }
