@@ -103,6 +103,20 @@ test("finishes hydration for missing, malformed and invalid saved data", async (
   }
 })
 
+test("restores catalog products without category data", async () => {
+  const catalogProduct = { ...product }
+  Reflect.deleteProperty(catalogProduct, "category")
+  useCartStore.getState().addItem(catalogProduct, 2)
+  useCartStore.setState({ items: [], ready: false })
+  // setState persists too, so restore the saved checkout cart before hydration.
+  storage.set("kontur-cart", JSON.stringify({
+    state: { items: [{ product: catalogProduct, quantity: 2 }] }, version: 0,
+  }))
+  await useCartStore.persist.rehydrate()
+  assert.equal(selectCartItemCount(useCartStore.getState()), 2)
+  assert.equal(useCartStore.getState().items[0].product.category, undefined)
+})
+
 test("keeps cart actions working when browser storage is unavailable", async (context) => {
   context.mock.method(console, "warn", () => {})
   Object.defineProperty(globalThis, "localStorage", {

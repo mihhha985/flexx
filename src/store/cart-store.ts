@@ -4,10 +4,12 @@ import { create } from "zustand"
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware"
 import { z } from "zod"
 
-import type { Product } from "@/src/entities/product/domain"
+import type { Product, ProductWithCategory } from "@/src/entities/product/domain"
+
+type CartProduct = Product & Partial<Pick<ProductWithCategory, "category">>
 
 export type CartItem = {
-  product: Product
+  product: CartProduct
   quantity: number
 }
 
@@ -32,7 +34,7 @@ const savedCartSchema = z.object({
       imageUrl: z.string().nullable(),
       stock: z.number().int().positive(),
       isActive: z.boolean(),
-      category: z.object({ name: z.string(), slug: z.string(), order: z.number() }),
+      category: z.object({ name: z.string(), slug: z.string(), order: z.number() }).optional(),
     }),
     quantity: z.number().int().positive(),
   })),

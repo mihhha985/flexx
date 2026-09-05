@@ -2,9 +2,10 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { createValidatedOrder } from "@/src/entities/order/services/orderService"
 import {
   ArrowRightIcon,
-  CheckCircle2Icon,
   MinusIcon,
   PackageCheckIcon,
   PlusIcon,
@@ -52,42 +53,42 @@ export function CartView() {
   const removeItem = useCartStore((state) => state.removeItem)
   const clearCart = useCartStore((state) => state.clearCart)
   const [draft, setDraft] = React.useState(initialDraft)
-  const [publicId, setPublicId] = React.useState<string | null>(null)
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isRedirecting, setIsRedirecting] = React.useState(false)
+  const submitting = React.useRef(false)
 
   function updateDraft(field: keyof OrderDraft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }))
   }
 
-  function submitOrder(event: React.SubmitEvent<HTMLFormElement>) {
+  async function submitOrder(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
-    const id = crypto.randomUUID().split("-")[0].toUpperCase()
-    window.localStorage.setItem(
-      `kontur-order-${id}`,
-      JSON.stringify({ publicId: id, status: "pending", ...draft, total, items }),
-    )
-    setPublicId(id)
-    clearCart()
-    toast.success("Заказ принят", { description: `Номер ${id}` })
+    if (submitting.current) return
+    submitting.current = true
+    setIsSubmitting(true)
+
+    try {
+      const result = await createValidatedOrder({
+        ...draft,
+        items: items.map(({ product, quantity }) => ({ productId: product.id, quantity })),
+      })
+      if (!result.success) {
+        toast.error(result.error)
+        return
+      }
+      setIsRedirecting(true)
+      clearCart()
+      router.replace(`/order/${result.publicId}/thanks`)
+    } catch {
+      toast.error("Не удалось оформить заказ. Проверьте соединение и попробуйте ещё раз.")
+    } finally {
+      submitting.current = false
+      setIsSubmitting(false)
+    }
   }
 
-  if (!ready) return <CartSkeleton />
-
-  if (publicId) {
-    return (
-      <Empty className="min-h-[60vh] border">
-        <EmptyHeader>
-          <EmptyMedia variant="icon"><CheckCircle2Icon /></EmptyMedia>
-          <EmptyTitle>Заказ {publicId} принят</EmptyTitle>
-          <EmptyDescription>Мы свяжемся с вами, чтобы подтвердить состав и время доставки.</EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Link href="/catalog" className={cn(buttonVariants({ size: "lg" }), "w-full")}>
-            Продолжить покупки <ArrowRightIcon data-icon="inline-end" />
-          </Link>
-        </EmptyContent>
-      </Empty>
-    )
-  }
+  if (!ready || isRedirecting) return <CartSkeleton />
 
   if (items.length === 0) {
     return (
@@ -114,7 +115,7 @@ export function CartView() {
           <h1 className="text-3xl font-medium tracking-tight sm:text-4xl">Корзина</h1>
           <p className="text-muted-foreground">Проверьте товары и заполните данные для связи.</p>
         </div>
-        <Button variant="ghost" size="sm" onPress={clearCart}>
+        <Button variant="ghost" size="sm" isDisabled={isSubmitting} onPress={clearCart}>
           <Trash2Icon data-icon="inline-start" /> Очистить
         </Button>
       </div>
@@ -128,7 +129,7 @@ export function CartView() {
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <div>
                     <Link href={`/product/${product.slug}`} className="font-medium hover:underline">{product.name}</Link>
-                    <p className="text-sm text-muted-foreground">{product.category.name}</p>
+                    {product.category && <p className="text-sm text-muted-foreground">{product.category.name}</p>}
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1" aria-label={`Количество товара ${product.name}`}>
@@ -136,7 +137,7 @@ export function CartView() {
                         variant="outline"
                         size="icon-sm"
                         aria-label="Уменьшить"
-                        isDisabled={quantity <= 1}
+                        isDisabled={isSubmitting || quantity <= 1}
                         onPress={() => updateQuantity(product.id, quantity - 1)}
                       >
                         <MinusIcon />
@@ -146,7 +147,7 @@ export function CartView() {
                         variant="outline"
                         size="icon-sm"
                         aria-label="Увеличить"
-                        isDisabled={quantity >= product.stock}
+                        isDisabled={isSubmitting || quantity >= product.stock}
                         onPress={() => updateQuantity(product.id, quantity + 1)}
                       >
                         <PlusIcon />
@@ -158,7 +159,7 @@ export function CartView() {
               </CardContent>
               <CardFooter className="justify-between gap-3">
                 <span className="text-xs text-muted-foreground">{formatPrice(product.price)} за шт.</span>
-                <Button variant="ghost" size="xs" onPress={() => removeItem(product.id)}>
+                <Button variant="ghost" size="xs" isDisabled={isSubmitting} onPress={() => removeItem(product.id)}>
                   <Trash2Icon data-icon="inline-start" /> Удалить
                 </Button>
               </CardFooter>
@@ -166,7 +167,7 @@ export function CartView() {
           ))}
         </div>
 
-        <form onSubmit={submitOrder}>
+        <form onSubmit={submitOrder} aria-busy={isSubmitting}>
           <Card>
             <CardHeader>
               <CardTitle>Оформление</CardTitle>
@@ -174,7 +175,7 @@ export function CartView() {
               <CardAction><Badge variant="outline">1 шаг</Badge></CardAction>
             </CardHeader>
             <CardContent>
-              <FieldSet>
+              <FieldSet disabled={isSubmitting}>
                 <FieldLegend className="sr-only">Контактные данные и адрес доставки</FieldLegend>
                 <FieldGroup>
                   <Field>
@@ -211,8 +212,8 @@ export function CartView() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-              <Button type="submit" size="lg" className="w-full">
-                <PackageCheckIcon data-icon="inline-start" /> Оформить заказ
+              <Button type="submit" size="lg" className="w-full" isDisabled={isSubmitting}>
+                <PackageCheckIcon data-icon="inline-start" /> {isSubmitting ? "Оформляем заказ…" : "Оформить заказ"}
               </Button>
               <p className="text-xs text-muted-foreground">Оплату согласуем после подтверждения заказа.</p>
             </CardFooter>
