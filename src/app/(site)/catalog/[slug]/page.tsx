@@ -41,5 +41,5 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound()
   }
 
-  return <CatalogResults categorySlug={category.slug} title={category.name} />
+  return <CatalogResults categorySlug={category.slug} categoryOrder={category.order} title={category.name} />
 }

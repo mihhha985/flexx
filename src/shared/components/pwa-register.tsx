@@ -5,7 +5,7 @@ import * as React from "react"
 export function PwaRegister() {
   React.useEffect(() => {
     if ("serviceWorker" in navigator) {
-      void navigator.serviceWorker.register("/sw.js")
+      void navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" })
     }
   }, [])
 

@@ -4,7 +4,7 @@ import { Separator } from "@/src/shared/ui/separator";
 
 import Menu from "@/src/shared/components/menu";
 import MobileMenu from "@/src/shared/components/mobile-menu";
-import { TransitionWrapper } from "@/src/shared/components/tarnsition-wrapper";
+import { TransitionWrapper } from "@/src/shared/components/transition-wrapper";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 

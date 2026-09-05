@@ -1,27 +1,50 @@
 "use server"
+
 import { z } from "zod"
 import { getAllActiveProducts, getAllProducts } from "../repositiry/getProduct"
-import type { ProductWithCategory } from "../domain";
+import type { ProductWithCategory } from "../domain"
 
-type ProductProps = {
-  category?: string
-  limit?: number
-  offset?: number
+const LIMIT = 12
+
+function getFirstParam(value: unknown): unknown {
+  return Array.isArray(value) ? value[0] : value
 }
 
-const schemaProduct = z.object({
-  category: z.string().optional(),
-  limit: z.number().optional(),
-  offset: z.number().optional(),
-});
+const searchParamsSchema = z.object({
+  page: z.preprocess(
+    getFirstParam,
+    z.coerce.number().int().min(1).catch(1),
+  ),
+  sort: z.preprocess(
+    getFirstParam,
+    z.enum(["name", "price"]).catch("name"),
+  ),
+  order: z.preprocess(
+    getFirstParam,
+    z.enum(["asc", "desc"]).catch("asc"),
+  ),
+})
 
-export async function getValidatedProducts(props: ProductProps): Promise<ProductWithCategory[]> {
+type SearchParams = z.infer<typeof searchParamsSchema>
+
+export async function getValidatedProducts(
+  category: string | undefined,
+  data: unknown,
+): Promise<ProductWithCategory[]> {
   try {
-    const data = schemaProduct.parse(props)
-    const products = await getAllProducts(data.category, data.limit, data.offset)
-    return products
+    const validatedData: SearchParams = searchParamsSchema.parse(data)
+    console.log("getValidatedProducts - someData:", validatedData);
+    const offset = (validatedData.page - 1) * LIMIT
+
+    return await getAllProducts(
+      category,
+      LIMIT,
+      offset,
+      validatedData.sort,
+      validatedData.order,
+    )
   } catch (error) {
-    console.error(error);
+    console.error(error)
     throw error
   }
 }
@@ -54,7 +77,7 @@ export async function getRandomProducts(): Promise<ProductWithCategory[]> {
       })
       .slice(0, 4)
   } catch (error) {
-    console.error(error);
+    console.error(error)
     throw error
   }
 }

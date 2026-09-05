@@ -2,6 +2,7 @@ import { Suspense } from "react"
 
 import { getAllCategory } from "@/src/entities/category/repository/getCategory"
 import { CatalogFilter } from "@/src/shared/components/catalog-filter"
+import { CatalogTransitionProvider } from "@/src/shared/components/catalog-results-transition"
 import { CatalogFilterSkeleton } from "@/src/shared/components/skeleton/catalog-skeleton"
 
 async function CatalogFilters() {
@@ -22,7 +23,7 @@ export default function CatalogLayout({ children }: { children: React.ReactNode 
       <Suspense fallback={<CatalogFilterSkeleton />}>
         <CatalogFilters />
       </Suspense>
-      {children}
+      <CatalogTransitionProvider>{children}</CatalogTransitionProvider>
     </section>
   )
 }

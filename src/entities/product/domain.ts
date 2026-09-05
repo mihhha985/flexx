@@ -1,5 +1,8 @@
 import type { Category } from "@/src/entities/category/domain"
 
+export type ProductSort = "name" | "price"
+export type ProductOrder = "asc" | "desc"
+
 export type Product = {
   id: number;
   name: string
