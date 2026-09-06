@@ -1,11 +1,9 @@
 import "server-only"
 
-import { connectDatabase, db } from "@/src/prisma/db"
+import { db } from "@/src/prisma/db"
 import { OrderError, type CreateOrderInput } from "../domain"
 
 export async function createOrder(data: CreateOrderInput): Promise<string> {
-  await connectDatabase()
-
   return db.transaction(async (tx) => {
     const products = await tx.orm.public.Product
       .select("id", "name", "price", "stock", "isActive")

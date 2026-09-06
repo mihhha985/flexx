@@ -1,4 +1,4 @@
-const CACHE_NAME = "kontur-v2"
+const CACHE_NAME = "kontur-v3"
 const APP_SHELL = ["/", "/catalog", "/contacts", "/cart", "/manifest.webmanifest", "/icon.svg"]
 
 self.addEventListener("install", (event) => {
@@ -25,6 +25,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url)
   if (request.method !== "GET" || url.origin !== self.location.origin) return
 
+  // Never cache or serve private pages from the offline cache.
+  if (url.pathname === "/auth" || url.pathname.startsWith("/auth/") ||
+      url.pathname === "/panel" || url.pathname.startsWith("/panel/")) return
+
   // Next.js navigation payloads depend on router state and are not HTML pages.
   if (request.headers.has("RSC") || url.searchParams.has("_rsc") ||
       request.headers.has("Next-Router-Prefetch")) return
@@ -37,6 +41,7 @@ self.addEventListener("fetch", (event) => {
     fetch(request)
       .then((response) => {
         if (response.ok && !response.redirected &&
+            !/no-store|private/i.test(response.headers.get("Cache-Control") || "") &&
             (!isDocument || response.headers.get("Content-Type")?.includes("text/html"))) {
           const copy = response.clone()
           event.waitUntil(

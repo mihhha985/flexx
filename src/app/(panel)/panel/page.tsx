@@ -1,25 +1,7 @@
-import { PackageOpenIcon } from "lucide-react"
+import { redirect } from "next/navigation"
+import { requireAdmin } from "@/src/entities/admin/services/sessionService"
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/src/shared/ui/empty"
-
-export default function PanelPage() {
-  return (
-    <Empty className="max-w-3xl min-h-[60vh] border">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <PackageOpenIcon />
-        </EmptyMedia>
-        <EmptyTitle>Панель пока пуста</EmptyTitle>
-        <EmptyDescription>
-          Здесь появится информация для управления магазином.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
-  )
+export default async function PanelPage() {
+  await requireAdmin()
+  redirect("/panel/orders")
 }
