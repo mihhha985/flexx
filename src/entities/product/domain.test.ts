@@ -44,7 +44,6 @@ test("rejects invalid product edits", () => {
   }
 })
 
-
 test("creating a product validates fields without requiring an id or accepting visibility overrides", () => {
   const { id: _id, ...fields } = input
   void _id
@@ -54,7 +53,12 @@ test("creating a product validates fields without requiring an id or accepting v
   assert.equal(result.imageUrl, null)
   assert.equal("id" in result, false)
   assert.equal("isActive" in result, false)
-  for (const changes of [{ categoryId: "" }, { price: "Infinity" }, { stock: "-1" }, { slug: "../product" }]) {
+  for (const changes of [
+    { categoryId: "" },
+    { price: "Infinity" },
+    { stock: "-1" },
+    { slug: "../product" },
+  ]) {
     assert.equal(createProductSchema.safeParse({ ...fields, ...changes }).success, false)
   }
 })

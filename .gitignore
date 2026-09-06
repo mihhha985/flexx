@@ -4,3 +4,7 @@ dist/
 /.alchemy
 /.prisma-composer
 /.next
+
+.env.*
+!.env.example
+*.tsbuildinfo

@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 import { CheckCircle2, Clock3, TrendingUp, XCircle } from "lucide-react"
 
-import type { getOrderStats } from "@/src/entities/order/services/order-status"
+import type { getOrderStats } from "@/src/entities/order/status"
 type BriefStats = ReturnType<typeof getOrderStats>
 import { Badge } from "@/src/shared/ui/badge"
 import {
@@ -66,21 +66,18 @@ export function OrderStatsCards({ stats }: { stats: BriefStats }) {
       icon: XCircle,
     },
     {
-      title: "CTR подтверждений",
+      title: "Доля подтверждений",
       description: "Подтверждённые / все заявки",
-      value: `${percentageFormatter.format(stats.confirmationCtr)}%`,
+      value: `${percentageFormatter.format(stats.confirmationRate)}%`,
       footer: `${stats.confirmed} из ${stats.total} заявок подтверждено`,
-      badge: "CTR",
+      badge: "ДОЛЯ",
       badgeVariant: "outline",
       icon: TrendingUp,
     },
   ]
 
   return (
-    <section
-      aria-label="Статистика заявок"
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-    >
+    <section aria-label="Статистика заявок" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
-import { getOrdersForAdmin } from "@/src/entities/order/services/adminOrderService"
+import { getOrdersForAdmin } from "@/src/entities/order/services/admin-order-service"
 import { OrdersTable } from "./orders-table"
 
-import { getOrderStats } from "@/src/entities/order/services/order-status"
+import { getOrderStats } from "@/src/entities/order/status"
 import { OrderStatsCards } from "./order-stats-cards"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
 
@@ -15,7 +15,9 @@ export default async function Page() {
     <section className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Заявки</h1>
-        <p className="text-sm text-muted-foreground">Главная страница для обработки входящих заявок</p>
+        <p className="text-sm text-muted-foreground">
+          Главная страница для обработки входящих заявок
+        </p>
       </div>
       <OrderStatsCards stats={stats} />
       <Card>
@@ -23,7 +25,9 @@ export default async function Page() {
           <CardTitle>Входящие заявки</CardTitle>
           <CardDescription>Всего заявок: {stats.total}</CardDescription>
         </CardHeader>
-        <CardContent><OrdersTable data={data} /></CardContent>
+        <CardContent>
+          <OrdersTable data={data} />
+        </CardContent>
       </Card>
     </section>
   )

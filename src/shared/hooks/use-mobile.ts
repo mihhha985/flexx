@@ -11,5 +11,9 @@ function subscribe(onChange: () => void) {
 }
 
 export function useIsMobile() {
-  return useSyncExternalStore(subscribe, () => window.matchMedia(MOBILE_QUERY).matches, () => false)
+  return useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(MOBILE_QUERY).matches,
+    () => false,
+  )
 }

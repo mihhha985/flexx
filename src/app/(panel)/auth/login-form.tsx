@@ -1,11 +1,9 @@
 "use client"
 
 import { useActionState } from "react"
-import { loginAdmin } from "@/src/entities/admin/services/authService"
+import { loginAdmin } from "@/src/entities/admin/services/auth-service"
 
-import {
-  Button,
-} from "@/src/shared/ui/button"
+import { Button } from "@/src/shared/ui/button"
 import {
   Card,
   CardContent,
@@ -14,13 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/shared/ui/card"
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/src/shared/ui/field"
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/src/shared/ui/field"
 import { Input } from "@/src/shared/ui/input"
 
 export function LoginForm() {
@@ -29,9 +21,7 @@ export function LoginForm() {
     <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>Вход администратора</CardTitle>
-        <CardDescription>
-          Введите логин и пароль, чтобы войти в панель управления.
-        </CardDescription>
+        <CardDescription>Введите логин и пароль, чтобы войти в панель управления.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={action} className="flex flex-col gap-5" aria-busy={pending}>

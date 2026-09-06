@@ -1,4 +1,4 @@
-import { CartView } from "@/src/shared/components/cart-view"
+import { CartView } from "@/src/features/cart/cart-view"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {

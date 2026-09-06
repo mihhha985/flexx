@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { CartHydration } from "@/src/shared/components/cart-hydration"
-import { PwaRegister } from "@/src/shared/components/pwa-register"
+import { PwaRegister } from "@/src/app/_components/pwa-register"
 import { Toaster } from "@/src/shared/ui/sonner"
 
 import "./globals.css"
@@ -31,12 +30,11 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="ru">
       <body>
-        <CartHydration />
         {children}
         <Toaster theme="light" position="top-center" richColors />
         <PwaRegister />

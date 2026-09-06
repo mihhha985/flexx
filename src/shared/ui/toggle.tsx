@@ -1,10 +1,7 @@
 "use client"
 
 import { cva, type VariantProps } from "class-variance-authority"
-import {
-  ToggleButton as TogglePrimitive,
-  type ToggleButtonProps,
-} from "react-aria-components"
+import { ToggleButton as TogglePrimitive, type ToggleButtonProps } from "react-aria-components"
 
 import { cn } from "@/src/shared/lib/utils"
 
@@ -27,7 +24,7 @@ const toggleVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 )
 
 function Toggle({

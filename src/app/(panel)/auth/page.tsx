@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { getAdminSession } from "@/src/entities/admin/services/sessionService"
+import { getAdminSession } from "@/src/entities/admin/services/session-service"
 import { LoginForm } from "./login-form"
 
 export const metadata: Metadata = { title: "Вход администратора — Контур" }

@@ -1,0 +1,12 @@
+node_modules
+.next
+.agents
+.claude
+.cursor
+.devin
+migrations
+src/prisma/contract.json
+src/prisma/contract.d.ts
+package-lock.json
+next-env.d.ts
+ARCHITECTURE_REVIEW.md

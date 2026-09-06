@@ -3,7 +3,7 @@ import { afterEach, beforeEach, test } from "node:test"
 import { NextRequest } from "next/server"
 import nextTesting from "next/experimental/testing/server"
 import { ADMIN_SESSION_COOKIE } from "./entities/admin/domain"
-import { createAdminToken } from "./entities/admin/lib/sessionToken"
+import { createAdminToken } from "@/src/entities/admin/lib/session-token"
 import { config, proxy } from "./proxy"
 
 const testEnv = {
@@ -11,7 +11,9 @@ const testEnv = {
   ADMIN_PASSWORD: "test-password-1234",
   ADMIN_SESSION_SECRET: "test-session-secret-with-at-least-32-characters",
 }
-const originalEnv = Object.fromEntries(Object.keys(testEnv).map((name) => [name, process.env[name]]))
+const originalEnv = Object.fromEntries(
+  Object.keys(testEnv).map((name) => [name, process.env[name]]),
+)
 beforeEach(() => {
   Object.assign(process.env, testEnv)
 })
@@ -24,15 +26,27 @@ afterEach(() => {
 
 test("matcher covers nested panel routes without intercepting the shop or assets", () => {
   for (const url of ["/panel", "/panel/orders/1", "/auth", "/auth/"]) {
-    assert.equal(nextTesting.unstable_doesMiddlewareMatch({ config, nextConfig: {}, url }), true, url)
+    assert.equal(
+      nextTesting.unstable_doesMiddlewareMatch({ config, nextConfig: {}, url }),
+      true,
+      url,
+    )
   }
   for (const url of ["/", "/catalog", "/cart", "/panel-other", "/_next/static/app.js"]) {
-    assert.equal(nextTesting.unstable_doesMiddlewareMatch({ config, nextConfig: {}, url }), false, url)
+    assert.equal(
+      nextTesting.unstable_doesMiddlewareMatch({ config, nextConfig: {}, url }),
+      false,
+      url,
+    )
   }
 })
 
 test("redirects guests and forged sessions to login, including RSC and POST requests", async () => {
-  for (const options of [undefined, { headers: { cookie: `${ADMIN_SESSION_COOKIE}=forged`, RSC: "1" } }, { method: "POST" }]) {
+  for (const options of [
+    undefined,
+    { headers: { cookie: `${ADMIN_SESSION_COOKIE}=forged`, RSC: "1" } },
+    { method: "POST" },
+  ]) {
     const response = await proxy(new NextRequest("http://localhost/panel/orders/1", options))
     assert.equal(response.status, 303)
     assert.equal(response.headers.get("location"), "http://localhost/auth")

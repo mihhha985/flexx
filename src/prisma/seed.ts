@@ -1,4 +1,4 @@
-import { connectDatabase, db } from "./db.ts";
+import { connectDatabase, db } from "./db.ts"
 
 const categories = [
   { name: "Electronics", slug: "electronics", order: 10 },
@@ -6,51 +6,46 @@ const categories = [
   { name: "Home", slug: "home", order: 30 },
   { name: "Beauty", slug: "beauty", order: 40 },
   { name: "Sports", slug: "sports", order: 50 },
-] as const;
+] as const
 
 async function main(): Promise<void> {
-  await connectDatabase();
+  await connectDatabase()
 
   await db.transaction(async (tx) => {
-    await tx.orm.public.OrderItem.where((item) => item.id.gte(0)).deleteAndCount();
-    await tx.orm.public.Order.where((order) => order.id.gte(0)).deleteAndCount();
-    await tx.orm.public.Product.where((product) => product.id.gte(0)).deleteAndCount();
-    await tx.orm.public.Category.where((category) => category.id.gte(0)).deleteAndCount();
-
-    const seededCategories = [];
+    const seededCategories = []
 
     for (const category of categories) {
-      const seededCategory = await tx.orm.public.Category.create(category);
+      const seededCategory =
+        (await tx.orm.public.Category.where({ slug: category.slug }).first()) ??
+        (await tx.orm.public.Category.create(category))
 
-      seededCategories.push(seededCategory);
+      seededCategories.push(seededCategory)
     }
 
     for (const [categoryIndex, category] of seededCategories.entries()) {
-      await tx.orm.public.Product.createAll(
-        Array.from({ length: 10 }, (_, index) => {
-          const productIndex = index + 1;
-          const productNumber = String(productIndex).padStart(2, "0");
-
-          return {
-            name: `${category.name} Product ${productIndex}`,
-            slug: `${category.slug}-product-${productNumber}`,
-            price: 10 + categoryIndex * 5 + productIndex,
-            description: `${category.name} product ${productIndex} description`,
-            categoryId: category.id,
-            isActive: true,
-            stock: 25 + productIndex,
-          };
-        }),
-      );
+      for (let index = 1; index <= 10; index++) {
+        const slug = `${category.slug}-product-${String(index).padStart(2, "0")}`
+        const existing = await tx.orm.public.Product.where({ slug }).select("id").first()
+        if (existing) continue
+        await tx.orm.public.Product.create({
+          name: `${category.name} Product ${index}`,
+          slug,
+          price: 10 + categoryIndex * 5 + index,
+          description: `${category.name} product ${index} description`,
+          categoryId: category.id,
+          isActive: true,
+          stock: 25 + index,
+        })
+      }
     }
-  });
+  })
 }
 
 try {
-  await main();
+  await main()
 } catch (error: unknown) {
-  console.error(error);
-  process.exitCode = 1;
+  console.error(error)
+  process.exitCode = 1
 } finally {
-  await db.close();
+  await db.close()
 }

@@ -2,13 +2,20 @@ import { Suspense } from "react"
 import { ArrowRightIcon, CheckIcon, PackageCheckIcon, ShoppingBagIcon } from "lucide-react"
 import { Badge } from "@/src/shared/ui/badge"
 import { LinkButton } from "@/src/shared/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/shared/ui/card"
-import { MainCategoryList } from "@/src/shared/components/main-category-list"
-import { RandomProductList } from "@/src/shared/components/random-product-list"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/src/shared/ui/card"
+import { MainCategoryList } from "@/src/app/(site)/_components/main-category-list"
+import { RandomProductList } from "@/src/app/(site)/_components/random-product-list"
 import {
   FeaturedProductsSkeleton,
-  MainCategoryListSkeleton
-} from "@/src/shared/components/skeleton/home-skeleton"
+  MainCategoryListSkeleton,
+} from "@/src/app/(site)/_components/home-skeleton"
 
 export default function Home() {
   return (
@@ -17,7 +24,9 @@ export default function Home() {
         <Card className="py-8 sm:py-12">
           <CardHeader className="max-w-3xl gap-3">
             <Badge variant="secondary">Простой заказ за пару минут</Badge>
-            <CardTitle className="text-3xl tracking-tight sm:text-5xl">Нужные вещи — без лишних шагов</CardTitle>
+            <CardTitle className="text-3xl tracking-tight sm:text-5xl">
+              Нужные вещи — без лишних шагов
+            </CardTitle>
             <CardDescription className="text-base sm:text-lg">
               Выберите товар, добавьте в корзину и оставьте контакты. Регистрация не нужна.
             </CardDescription>
@@ -32,9 +41,15 @@ export default function Home() {
             </LinkButton>
           </CardContent>
           <CardFooter className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5"><CheckIcon className="size-4" /> Без регистрации</span>
-            <span className="flex items-center gap-1.5"><CheckIcon className="size-4" /> Оплата после подтверждения</span>
-            <span className="flex items-center gap-1.5"><CheckIcon className="size-4" /> Доставка 1–2 дня</span>
+            <span className="flex items-center gap-1.5">
+              <CheckIcon className="size-4" /> Без регистрации
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckIcon className="size-4" /> Оплата после подтверждения
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckIcon className="size-4" /> Доставка 1–2 дня
+            </span>
           </CardFooter>
         </Card>
       </section>
@@ -76,9 +91,21 @@ export default function Home() {
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {[
-            { icon: ShoppingBagIcon, title: "1. Выберите", text: "Найдите товар через поиск или категории." },
-            { icon: PackageCheckIcon, title: "2. Проверьте", text: "Измените количество и проверьте итог в корзине." },
-            { icon: CheckIcon, title: "3. Подтвердите", text: "Оставьте контакты — мы уточним детали доставки." },
+            {
+              icon: ShoppingBagIcon,
+              title: "1. Выберите",
+              text: "Найдите товар через поиск или категории.",
+            },
+            {
+              icon: PackageCheckIcon,
+              title: "2. Проверьте",
+              text: "Измените количество и проверьте итог в корзине.",
+            },
+            {
+              icon: CheckIcon,
+              title: "3. Подтвердите",
+              text: "Оставьте контакты — мы уточним детали доставки.",
+            },
           ].map((step) => (
             <Card key={step.title} size="sm">
               <CardHeader>

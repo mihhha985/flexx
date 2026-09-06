@@ -2,13 +2,8 @@ import { z } from "zod"
 
 import type { Category } from "@/src/entities/category/domain"
 
-export const LIMIT = 12;
-
-export type ProductSort = "name" | "price"
-export type ProductOrder = "asc" | "desc"
-
 export type Product = {
-  id: number;
+  id: number
   name: string
   slug: string
   description?: string
@@ -27,14 +22,39 @@ const requiredNumber = (message: string) => z.string().trim().min(1, message).tr
 export const updateProductSchema = z.object({
   id: requiredNumber("Не удалось определить товар").pipe(z.number().int().positive()),
   name: z.string().trim().min(1, "Укажите название").max(200, "Название слишком длинное"),
-  slug: z.string().trim().min(1, "Укажите слаг").max(200, "Слаг слишком длинный").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Слаг может содержать строчные латинские буквы, цифры и дефисы"),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Укажите слаг")
+    .max(200, "Слаг слишком длинный")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Слаг может содержать строчные латинские буквы, цифры и дефисы",
+    ),
   categoryId: requiredNumber("Выберите категорию").pipe(z.number().int().positive()),
-  price: requiredNumber("Укажите цену").pipe(z.number().finite().min(0, "Цена не может быть отрицательной").max(999999999.99, "Цена слишком большая")),
-  stock: requiredNumber("Укажите остаток").pipe(z.number().int("Остаток должен быть целым числом").min(0, "Остаток не может быть отрицательным").max(2147483647, "Остаток слишком большой")),
+  price: requiredNumber("Укажите цену").pipe(
+    z
+      .number()
+      .finite()
+      .min(0, "Цена не может быть отрицательной")
+      .max(999999999.99, "Цена слишком большая"),
+  ),
+  stock: requiredNumber("Укажите остаток").pipe(
+    z
+      .number()
+      .int("Остаток должен быть целым числом")
+      .min(0, "Остаток не может быть отрицательным")
+      .max(2147483647, "Остаток слишком большой"),
+  ),
   description: z.string().trim().min(1, "Добавьте описание").max(10000, "Описание слишком длинное"),
   imageUrl: z.preprocess(
-    (value) => typeof value === "string" && value.trim() === "" ? null : value,
-    z.string().trim().url("Укажите корректную ссылку на изображение").max(2048, "Ссылка слишком длинная").nullable(),
+    (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+    z
+      .string()
+      .trim()
+      .url("Укажите корректную ссылку на изображение")
+      .max(2048, "Ссылка слишком длинная")
+      .nullable(),
   ),
 })
 
@@ -55,5 +75,3 @@ export type UpdateProductState = {
     imageUrl?: string[]
   }
 }
-
-export class ProductUpdateError extends Error {}

@@ -2,16 +2,22 @@ import assert from "node:assert/strict"
 import { afterEach, beforeEach, test } from "node:test"
 import { SignJWT } from "jose"
 import { loginSchema } from "./domain"
-import { getAdminConfig, getAdminSessionVersion, verifyAdminCredentials } from "./repository/adminRepository"
-import { createAdminToken, verifyAdminToken } from "./lib/sessionToken"
-import { clearLoginAttempts, takeLoginAttempt } from "./lib/loginThrottle"
+import {
+  getAdminConfig,
+  getAdminSessionVersion,
+  verifyAdminCredentials,
+} from "@/src/entities/admin/services/credentials-service"
+import { createAdminToken, verifyAdminToken } from "@/src/entities/admin/lib/session-token"
+import { clearLoginAttempts, takeLoginAttempt } from "@/src/entities/admin/lib/login-throttle"
 
 const testEnv = {
   ADMIN_LOGIN: "store-admin",
   ADMIN_PASSWORD: "test-password-1234",
   ADMIN_SESSION_SECRET: "test-session-secret-with-at-least-32-characters",
 }
-const originalEnv = Object.fromEntries(Object.keys(testEnv).map((name) => [name, process.env[name]]))
+const originalEnv = Object.fromEntries(
+  Object.keys(testEnv).map((name) => [name, process.env[name]]),
+)
 beforeEach(() => {
   Object.assign(process.env, testEnv)
   clearLoginAttempts()
@@ -39,7 +45,12 @@ test("accepts a signed admin session and rejects tampered, empty and malformed c
   const token = await createAdminToken()
   assert.deepEqual(await verifyAdminToken(token), { role: "admin", login: "store-admin" })
   const [header, payload, signature] = token.split(".")
-  const modifiedPayload = Buffer.from(JSON.stringify({ ...JSON.parse(Buffer.from(payload, "base64url").toString()), sub: "attacker" })).toString("base64url")
+  const modifiedPayload = Buffer.from(
+    JSON.stringify({
+      ...JSON.parse(Buffer.from(payload, "base64url").toString()),
+      sub: "attacker",
+    }),
+  ).toString("base64url")
   assert.equal(await verifyAdminToken(`${header}.${modifiedPayload}.${signature}`), null)
   assert.equal(await verifyAdminToken(undefined), null)
   assert.equal(await verifyAdminToken("invalid"), null)
@@ -56,7 +67,10 @@ test("uses the configured password as-is and rejects empty configuration", () =>
 test("rejects expired tokens and signed tokens with the wrong role, audience or missing expiry", async () => {
   const config = getAdminConfig()
   for (const variant of ["expired", "role", "audience", "expiry", "algorithm"] as const) {
-    let jwt = new SignJWT({ role: variant === "role" ? "customer" : "admin", version: getAdminSessionVersion(config) })
+    let jwt = new SignJWT({
+      role: variant === "role" ? "customer" : "admin",
+      version: getAdminSessionVersion(config),
+    })
       .setProtectedHeader({ alg: variant === "algorithm" ? "HS384" : "HS256" })
       .setSubject("admin")
       .setIssuer("kontur")

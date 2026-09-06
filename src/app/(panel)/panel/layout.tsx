@@ -1,7 +1,7 @@
 import { cookies } from "next/headers"
-import { requireAdmin } from "@/src/entities/admin/services/sessionService"
-import { AdminSidebar } from "@/src/shared/components/admin/admin-sidebar"
-import { AdminBreadcrumbs } from "@/src/shared/components/admin/admin-breadcrumbs"
+import { requireAdmin } from "@/src/entities/admin/services/session-service"
+import { AdminSidebar } from "@/src/app/(panel)/panel/_components/admin-sidebar"
+import { AdminBreadcrumbs } from "@/src/app/(panel)/panel/_components/admin-breadcrumbs"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/src/shared/ui/sidebar"
 import { Separator } from "@/src/shared/ui/separator"
 

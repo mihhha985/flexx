@@ -1,8 +1,8 @@
-import { module } from "@prisma/composer";
-import { postgres } from "@prisma/composer-prisma-cloud/orm";
+import { module } from "@prisma/composer"
+import { postgres } from "@prisma/composer-prisma-cloud/orm"
 
-import { appContract } from "./src/prisma/composer.ts";
-import app from "./service.ts";
+import { appContract } from "./src/prisma/composer.ts"
+import app from "./service.ts"
 
 export default module("ecommerce", ({ provision }) => {
   const database = provision(
@@ -12,7 +12,7 @@ export default module("ecommerce", ({ provision }) => {
       config: "./prisma.config.ts",
     }),
     { id: "database" },
-  );
+  )
 
-  provision(app, { deps: { database } });
-});
+  provision(app, { deps: { database } })
+})

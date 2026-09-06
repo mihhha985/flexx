@@ -9,12 +9,11 @@ type BoundaryError = Error & { digest?: string }
 type ErrorFallbackProps = {
   error: BoundaryError
   reset?: () => void
-  retry?: () => void
 }
 
 /** Shared generic UI for route and global error boundaries. */
-export function ErrorFallback({ error, reset, retry }: ErrorFallbackProps) {
-  const tryAgain = retry ?? reset
+export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
+  const tryAgain = reset
 
   useEffect(() => {
     // Server-side details are deliberately hidden in production. The digest can
@@ -28,7 +27,10 @@ export function ErrorFallback({ error, reset, retry }: ErrorFallbackProps) {
 
   return (
     <main className="flex min-h-[60vh] items-center justify-center px-4 py-10">
-      <section className="w-full max-w-md rounded-xl border bg-card p-6 text-center shadow-sm" role="alert">
+      <section
+        className="w-full max-w-md rounded-xl border bg-card p-6 text-center shadow-sm"
+        role="alert"
+      >
         <div className="mx-auto flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <TriangleAlertIcon className="size-5" aria-hidden="true" />
         </div>

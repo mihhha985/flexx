@@ -16,7 +16,7 @@
     "deploy": "npm run build && npm run composer:deploy",
     "dev": "next dev",
     "dev:composer": "npm run build && npm run composer:dev",
-    "lint": "eslint",
+    "lint": "eslint --no-warn-ignored src scripts *.ts *.mjs",
     "migrate": "prisma db migrate",
     "migration:plan": "prisma migration plan",
     "migration:show": "prisma migration show",
@@ -24,7 +24,13 @@
     "seed": "node --env-file=.env --import tsx src/prisma/seed.ts",
     "skills:sync": "prisma skills sync || exit 0",
     "start": "next start",
-    "postinstall": "prisma skills sync || exit 0"
+    "postinstall": "prisma skills sync || exit 0",
+    "prebuild": "npm run contract:emit",
+    "format": "prettier --write src scripts *.ts *.mjs *.json *.md",
+    "format:check": "prettier --check src scripts *.ts *.mjs *.json *.md",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "check": "npm run lint && npm run typecheck && npm test"
   },
   "dependencies": {
     "@prisma/composer": "0.16.0",
@@ -32,15 +38,12 @@
     "@prisma/orm-postgres": "8.0.0-rc.8",
     "@tailwindcss/postcss": "^4.3.3",
     "@tanstack/react-table": "^8.21.3",
-    "alchemy": "2.0.0-beta.74",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "cn": "^0.2.5",
     "jose": "^6.2.10",
     "lucide-react": "^1.39.0",
     "motion": "^13.1.1",
     "next": "16.1.6",
-    "next-themes": "^0.4.6",
     "postcss": "^8.5.26",
     "react": "19.2.3",
     "react-aria-components": "^1.21.0",
@@ -61,9 +64,11 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "prisma": "latest",
+    "prisma": "8.0.0-rc.12",
     "tsx": "^4.23.13",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "pg": "8.22.0",
+    "prettier": "3.9.6"
   },
   "overrides": {
     "effect": "4.0.0-rc.112"

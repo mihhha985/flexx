@@ -1,4 +1,4 @@
-import { AdminTableSkeleton } from "@/src/shared/components/admin/admin-table-skeleton"
+import { AdminTableSkeleton } from "@/src/app/(panel)/panel/_components/admin-table-skeleton"
 
 export default function Loading() {
   return <AdminTableSkeleton />

@@ -1,12 +1,11 @@
 import { Suspense } from "react"
 
-import { getAllCategory } from "@/src/entities/category/repository/getCategory"
-import { CatalogFilter } from "@/src/shared/components/catalog-filter"
-import { CatalogTransitionProvider } from "@/src/shared/components/catalog-results-transition"
-import { CatalogFilterSkeleton } from "@/src/shared/components/skeleton/catalog-skeleton"
+import { getCategories } from "@/src/entities/category/services/category-service"
+import { CatalogFilter } from "@/src/app/(site)/catalog/_components/catalog-filter"
+import { CatalogFilterSkeleton } from "@/src/app/(site)/catalog/_components/catalog-skeleton"
 
 async function CatalogFilters() {
-  const categories = await getAllCategory()
+  const categories = await getCategories()
 
   return <CatalogFilter categories={categories} />
 }
@@ -23,7 +22,7 @@ export default function CatalogLayout({ children }: { children: React.ReactNode 
       <Suspense fallback={<CatalogFilterSkeleton />}>
         <CatalogFilters />
       </Suspense>
-      <CatalogTransitionProvider>{children}</CatalogTransitionProvider>
+      {children}
     </section>
   )
 }

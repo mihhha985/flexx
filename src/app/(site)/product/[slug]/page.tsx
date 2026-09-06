@@ -3,9 +3,9 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { PackageCheckIcon, RotateCcwIcon, ShieldCheckIcon, TruckIcon } from "lucide-react"
 
-import { ProductPurchase } from "@/src/shared/components/product-purchase"
-import { ProductVisual } from "@/src/shared/components/product-visual"
-import { getProductBySlug } from "@/src/entities/product/repositiry/getProduct"
+import { ProductPurchase } from "@/src/entities/product/ui/product-purchase"
+import { ProductVisual } from "@/src/entities/product/ui/product-visual"
+import { getProductBySlug } from "@/src/entities/product/services/product-service"
 import { Badge } from "@/src/shared/ui/badge"
 import {
   Breadcrumb,
@@ -16,13 +16,15 @@ import {
 } from "@/src/shared/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug)
-  if (!product) notFound();
+  if (!product) notFound()
 
-  return product
-    ? { title: `${product.name} — Контур`, description: product.description }
-    : { title: "Товар не найден — Контур" }
+  return { title: `${product.name} — Контур`, description: product.description }
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -40,7 +42,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <BreadcrumbLink href="/catalog">Каталог</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/catalog/${product.category.slug}`}>{product.category.name}</BreadcrumbLink>
+            <BreadcrumbLink href={`/catalog/${product.category.slug}`}>
+              {product.category.name}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbItem>
             <BreadcrumbPage>{product.name}</BreadcrumbPage>
@@ -83,11 +87,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <PackageCheckIcon className="text-muted-foreground" />
               <CardTitle>О товаре</CardTitle>
               <CardDescription>
-                Артикул {String(product.id).padStart(5, "0")} · Категория «{product.category.name}». Актуальное наличие показываем перед добавлением в корзину.
+                Артикул {String(product.id).padStart(5, "0")} · Категория «{product.category.name}».
+                Актуальное наличие показываем перед добавлением в корзину.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/contacts" className="text-sm underline underline-offset-4">Задать вопрос о товаре</Link>
+              <Link href="/contacts" className="text-sm underline underline-offset-4">
+                Задать вопрос о товаре
+              </Link>
             </CardContent>
           </Card>
         </div>

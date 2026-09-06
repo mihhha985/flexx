@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { ADMIN_SESSION_COOKIE } from "@/src/entities/admin/domain"
-import { verifyAdminToken } from "@/src/entities/admin/lib/sessionToken"
+import { verifyAdminToken } from "@/src/entities/admin/lib/session-token"
 
 export async function proxy(request: NextRequest) {
   const admin = await verifyAdminToken(request.cookies.get(ADMIN_SESSION_COOKIE)?.value)

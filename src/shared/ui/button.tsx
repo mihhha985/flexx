@@ -1,5 +1,6 @@
 "use client"
 
+import NextLink from "next/link"
 import type * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import {
@@ -45,7 +46,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 )
 
 function Button({
@@ -80,6 +81,7 @@ function LinkButton({
   }) {
   return (
     <LinkPrimitive
+      render={(props) => ("href" in props ? <NextLink {...props} /> : <span {...props} />)}
       data-slot="button"
       data-variant={variant}
       data-size={size}
