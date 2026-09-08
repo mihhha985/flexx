@@ -92,7 +92,7 @@ export function CatalogFilter({ categories }: { categories: Category[] }) {
         </InputGroupAddon>
       </InputGroup>
 
-      <div className="overflow-x-auto pb-1">
+      <div className="-m-1 overflow-x-auto p-1">
         <ToggleGroup
           selectionMode="single"
           disallowEmptySelection

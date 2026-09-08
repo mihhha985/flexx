@@ -10,11 +10,11 @@ export function TransitionWrapper({ children }: { children: React.ReactNode }) {
     <AnimatePresence initial={false} mode="popLayout">
       <motion.div
         key={transitionKey}
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
           type: "tween",
-          duration: 0.22,
+          duration: 0.4,
           ease: "easeOut",
         }}
       >

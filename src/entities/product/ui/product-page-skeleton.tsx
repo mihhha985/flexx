@@ -25,7 +25,7 @@ export function ProductPageSkeleton() {
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)]">
           <div className="flex flex-col gap-5">
             <Card>
-              <Skeleton className="aspect-4/3 w-full rounded-none" />
+              <Skeleton className="aspect-square w-full" />
               <CardHeader>
                 <div className="flex gap-2">
                   <Skeleton className="h-5 w-24" />
@@ -93,7 +93,7 @@ export function ProductPageSkeleton() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-2">
-                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-12 w-full" />
                 <Skeleton className="h-5 w-40" />
               </CardFooter>
             </Card>

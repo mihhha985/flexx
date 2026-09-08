@@ -13,15 +13,21 @@ export function ProductVisual({
   return (
     <div
       className={cn(
-        "overflow-hidden bg-muted",
-        compact ? "aspect-square size-20 shrink-0 rounded-lg" : "aspect-4/3 w-full",
+        "overflow-hidden rounded-lg bg-muted",
+        compact ? "aspect-square size-20 shrink-0" : "aspect-square w-full",
       )}
     >
-      <img
-        src={product.imageUrl !== null ? product.imageUrl : "/images/product-placeholder.png"}
-        alt={`Изображение товара ${product.name}`}
-        className="size-full object-cover"
-      />
+      {product.imageUrl ? (
+        <img
+          src={product.imageUrl}
+          alt={`Изображение товара ${product.name}`}
+          className={cn("size-full object-contain", compact ? "p-2" : "p-[10%]")}
+        />
+      ) : (
+        <div className="flex size-full items-center justify-center p-2 text-center text-xs text-muted-foreground">
+          Фото пока нет
+        </div>
+      )}
     </div>
   )
 }

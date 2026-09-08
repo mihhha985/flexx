@@ -29,14 +29,14 @@ export function CartSkeleton() {
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-5 w-24" />
                     <div className="flex items-center justify-between gap-3">
-                      <Skeleton className="h-7 w-24" />
+                      <Skeleton className="h-11 w-32" />
                       <Skeleton className="h-5 w-16" />
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="justify-between gap-3">
                   <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-11 w-20" />
                 </CardFooter>
               </Card>
             ))}
@@ -55,7 +55,7 @@ export function CartSkeleton() {
                 {Array.from({ length: 5 }, (_, index) => (
                   <div key={index} className="flex flex-col gap-2">
                     <Skeleton className="h-5 w-24" />
-                    <Skeleton className={index === 4 ? "h-16 w-full" : "h-8 w-full"} />
+                    <Skeleton className={index === 4 ? "h-32 w-full" : "h-12 w-full"} />
                   </div>
                 ))}
               </div>
@@ -66,7 +66,7 @@ export function CartSkeleton() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-12 w-full" />
               <Skeleton className="h-4 w-3/4" />
             </CardFooter>
           </Card>

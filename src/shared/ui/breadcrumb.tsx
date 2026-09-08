@@ -16,7 +16,9 @@ import { cn } from "@/src/shared/lib/utils"
 import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
-  return <nav aria-label="breadcrumb" data-slot="breadcrumb" className={cn(className)} {...props} />
+  return (
+    <nav aria-label="Хлебные крошки" data-slot="breadcrumb" className={cn(className)} {...props} />
+  )
 }
 
 function BreadcrumbList<T extends object>({ className, ...props }: BreadcrumbsProps<T>) {
@@ -41,7 +43,7 @@ function BreadcrumbItem({
   return (
     <BreadcrumbPrimitive
       data-slot="breadcrumb-item"
-      className={cn("inline-flex items-center gap-1", className)}
+      className={cn("inline-flex min-w-0 items-center gap-2", className)}
       {...props}
     >
       {composeRenderProps(children, (children, { isCurrent }) => (
@@ -67,7 +69,10 @@ function BreadcrumbLink({ className, render, ...props }: LinkProps) {
   return (
     <LinkPrimitive
       data-slot="breadcrumb-link"
-      className={cn("transition-colors hover:text-foreground", className)}
+      className={cn(
+        "ui-focus inline-flex min-h-11 min-w-11 items-center rounded-sm py-2 text-sm/5 transition-colors duration-150 hover:text-foreground",
+        className,
+      )}
       render={
         render ?? ((props) => ("href" in props ? <NextLink {...props} /> : <span {...props} />))
       }
@@ -99,7 +104,7 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span"
       {...props}
     >
       <MoreHorizontalIcon />
-      <span className="sr-only">More</span>
+      <span className="sr-only">Ещё</span>
     </span>
   )
 }

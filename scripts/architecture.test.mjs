@@ -3,9 +3,11 @@ import { readdirSync, readFileSync } from "node:fs"
 import test from "node:test"
 import ts from "typescript"
 
-const files = readdirSync("src", { recursive: true }).filter(
-  (file) => /\.(ts|tsx)$/.test(file) && !file.endsWith(".d.ts") && !file.endsWith(".test.ts"),
-)
+const files = readdirSync("src", { recursive: true })
+  .map((file) => file.replaceAll("\\", "/"))
+  .filter(
+    (file) => /\.(ts|tsx)$/.test(file) && !file.endsWith(".d.ts") && !file.endsWith(".test.ts"),
+  )
 
 test("UI enters services; database access stays in repositories and Prisma infrastructure", () => {
   for (const file of files) {

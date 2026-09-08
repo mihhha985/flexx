@@ -98,7 +98,7 @@ export function ProductEditDialog({ product, categories, onOpenChange }: Product
               defaultValue={String(product?.categoryId ?? categories[0]?.id ?? "")}
               disabled={pending}
               aria-invalid={Boolean(state.errors?.categoryId)}
-              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50"
+              className="ui-focus h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-base outline-none disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 aria-invalid:border-destructive"
               required
             >
               {categories.map((category) => (

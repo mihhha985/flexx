@@ -47,7 +47,7 @@ function AccordionTrigger({
         slot="trigger"
         data-slot="accordion-trigger"
         className={cn(
-          "group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground",
+          "ui-focus group/accordion-trigger relative flex min-h-12 flex-1 items-center justify-between gap-4 rounded-md py-4 text-left text-base/6 font-medium transition-colors duration-150 outline-none hover:text-muted-foreground disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-5 **:data-[slot=accordion-trigger-icon]:text-muted-foreground",
           className,
         )}
         {...props}
@@ -70,12 +70,12 @@ function AccordionContent({ className, children, ...props }: DisclosurePanelProp
   return (
     <AccordionContentPrimitive
       data-slot="accordion-content"
-      className="h-(--disclosure-panel-height) overflow-clip text-sm transition-[height] data-open:animate-accordion-down data-closed:animate-accordion-up"
+      className="h-(--disclosure-panel-height) overflow-clip text-base/6 transition-[height] duration-200 motion-reduce:animate-none motion-reduce:transition-none data-open:animate-accordion-down data-closed:animate-accordion-up"
       {...props}
     >
       <div
         className={cn(
-          "pt-0 pb-2.5 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4",
+          "pt-0 pr-9 pb-6 text-muted-foreground [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4",
           className,
         )}
       >
