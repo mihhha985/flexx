@@ -8,14 +8,14 @@ export function MainCategoryListSkeleton() {
       <span className="sr-only">Загрузка категорий…</span>
       <div
         aria-hidden="true"
-        className="grid grid-cols-2 gap-3 md:grid-cols-5 [&_[data-slot=skeleton]]:motion-reduce:animate-none"
+        className="grid grid-cols-2 gap-3 max-[359px]:grid-cols-1 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 lg:gap-6 [&_[data-slot=skeleton]]:motion-reduce:animate-none"
       >
         {Array.from({ length: 5 }, (_, index) => (
-          <Card key={index} size="sm" className="h-full">
-            <CardContent className="flex flex-col gap-3 pt-1">
-              <Skeleton className="size-9 rounded-lg" />
-              <Skeleton className="h-5 w-3/4" />
+          <Card key={index} size="sm" variant="plain" className="h-full gap-3">
+            <CardContent>
+              <Skeleton className="aspect-[4/3] w-full rounded-lg" />
             </CardContent>
+            <Skeleton className="h-5 w-3/4" />
           </Card>
         ))}
       </div>

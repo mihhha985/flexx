@@ -94,7 +94,7 @@ export function CartView() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 lg:sticky lg:top-25 lg:self-start">
           {items.map((item) => (
             <CartItemRow key={item.product.id} item={item} isSubmitting={isSubmitting} />
           ))}
