@@ -5,7 +5,7 @@ import { DATABASE_URL } from "./env.ts"
 
 export default definePrismaConfig({
   skills: {
-    agents: ["claude", "cursor", "agents", "devin"],
+    agents: ["agents"],
   },
   orm: ormConfig({
     contract: "./src/prisma/contract.prisma",

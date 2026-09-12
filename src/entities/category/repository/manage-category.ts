@@ -5,6 +5,9 @@ import type { CategoryInput } from "../admin-domain"
 export async function findCategoryBySlug(slug: string) {
   return db.orm.public.Category.where({ slug }).select("id").first()
 }
+export async function findCategoryByIcon(icon: string) {
+  return db.orm.public.Category.where({ icon }).select("id").first()
+}
 export async function createCategory(data: CategoryInput) {
   return db.orm.public.Category.create(data)
 }

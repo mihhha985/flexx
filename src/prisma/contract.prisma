@@ -1,16 +1,17 @@
 // use prisma-next
-
+//TODO why isActive is indexed
 model Product {
-  id          Int       @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
   name        String
-  slug        String    @unique
+  slug        String            @unique
   price       Float
   description String
   imageUrl    String?
-  isActive    Boolean   @default(true)
-  stock       Int       @default(0)
+  isActive    Boolean           @default(true)
+  stock       Int               @default(0)
+  detail      ProductDetail?
   categoryId  Int
-  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  category    Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   orderItems  OrderItem[]
   createdAt   TimestamptzString @default(now())
   updatedAt   temporal.updatedAtString()
@@ -19,11 +20,34 @@ model Product {
   @@index([isActive])
 }
 
+enum Color {
+  @@type("pg/text@1")
+
+  white   = "#FFFFFF"
+  black   = "#000000"
+  red     = "#FF0000"
+  blue    = "#0000FF"
+  green   = "#008000"
+  gray    = "#808080"
+}
+
+model ProductDetail {
+  id        Int       @id @default(autoincrement())
+  color     Color
+  size      Int[]
+  country   String
+  productId Int       @unique
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@map("product_detail")
+}
+
 model Category {
   id       Int       @id @default(autoincrement())
   name     String
   slug     String    @unique
   order    Int
+  icon     String    @unique
   products Product[]
 }
 

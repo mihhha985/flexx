@@ -18,9 +18,14 @@ export async function saveCategoryAction(
   const parsed = categorySchema.safeParse(Object.fromEntries(formData))
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
   try {
-    const duplicate = await repository.findCategoryBySlug(parsed.data.slug)
-    if (duplicate && duplicate.id !== id)
+    const [duplicateSlug, duplicateIcon] = await Promise.all([
+      repository.findCategoryBySlug(parsed.data.slug),
+      repository.findCategoryByIcon(parsed.data.icon),
+    ])
+    if (duplicateSlug && duplicateSlug.id !== id)
       return { errors: { slug: ["Категория с таким слагом уже существует."] } }
+    if (duplicateIcon && duplicateIcon.id !== id)
+      return { errors: { icon: ["Категория с такой иконкой уже существует."] } }
     if (id === undefined) {
       await repository.createCategory(parsed.data)
     } else {

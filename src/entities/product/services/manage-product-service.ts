@@ -11,22 +11,33 @@ export async function createProductAction(
   formData: FormData,
 ): Promise<UpdateProductState> {
   await requireAdmin()
-  const parsed = createProductSchema.safeParse(Object.fromEntries(formData))
+  const parsed = createProductSchema.safeParse({
+    ...Object.fromEntries(formData),
+    size: formData.getAll("size"),
+  })
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
   try {
-    const { category, duplicate } = await repository.getProductCreateContext(
-      parsed.data.categoryId,
-      parsed.data.slug,
-    )
-    if (!category) return { errors: { categoryId: ["Выбранная категория не найдена."] } }
-    if (duplicate) return { errors: { slug: ["Товар с таким слагом уже существует."] } }
-    await repository.createProduct(parsed.data)
+    await repository.withProductTransaction(async (transaction) => {
+      const { category, duplicate } = await transaction.getProductCreateContext(parsed.data)
+      if (!category) throw new ProductFormError({ categoryId: ["Выбранная категория не найдена."] })
+      if (duplicate) throw new ProductFormError({ slug: ["Товар с таким слагом уже существует."] })
+
+      const product = await transaction.createProduct(parsed.data)
+      await transaction.saveProductDetail(product.id, parsed.data, false)
+    })
   } catch (error) {
+    if (error instanceof ProductFormError) return { errors: error.errors }
     console.error("Не удалось создать товар", error)
     return { message: "Не удалось создать товар. Проверьте данные и попробуйте ещё раз." }
   }
   revalidateCatalog()
   return { success: true, message: "Товар создан и доступен в каталоге." }
+}
+
+class ProductFormError extends Error {
+  constructor(readonly errors: NonNullable<UpdateProductState["errors"]>) {
+    super()
+  }
 }
 
 export async function setProductActive(id: number, isActive: boolean) {

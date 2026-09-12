@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'11eda8ca173dbfd33c7ceb40ff47d917eadcf724ab1ebc321e12d1a4c97cc290'>;
+  StorageHashBase<'6890118a91a5388b640b571712efc615f2106fe9536388528b9c98ca98d3afd3'>;
 export type ExecutionHash =
   ExecutionHashBase<'db2a4b2fcbf69eb635558ae43399b655bdd2e4648bd5ac2b2a895afe15990314'>;
 export type ProfileHash =
@@ -246,6 +246,7 @@ export type FieldOutputTypes = {
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly slug: CodecTypes['pg/text@1']['output'];
       readonly order: CodecTypes['pg/int4@1']['output'];
+      readonly icon: CodecTypes['pg/text@1']['output'];
     };
     readonly Order: {
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -281,6 +282,13 @@ export type FieldOutputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
+    readonly ProductDetail: {
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly color: '#FFFFFF' | '#000000' | '#FF0000' | '#0000FF' | '#008000' | '#808080';
+      readonly size: ReadonlyArray<CodecTypes['pg/int4@1']['output']>;
+      readonly country: CodecTypes['pg/text@1']['output'];
+      readonly productId: CodecTypes['pg/int4@1']['output'];
+    };
   };
 };
 export type FieldInputTypes = {
@@ -290,6 +298,7 @@ export type FieldInputTypes = {
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly slug: CodecTypes['pg/text@1']['input'];
       readonly order: CodecTypes['pg/int4@1']['input'];
+      readonly icon: CodecTypes['pg/text@1']['input'];
     };
     readonly Order: {
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -325,11 +334,19 @@ export type FieldInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
+    readonly ProductDetail: {
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly color: '#FFFFFF' | '#000000' | '#FF0000' | '#0000FF' | '#008000' | '#808080';
+      readonly size: ReadonlyArray<CodecTypes['pg/int4@1']['input']>;
+      readonly country: CodecTypes['pg/text@1']['input'];
+      readonly productId: CodecTypes['pg/int4@1']['input'];
+    };
   };
 };
 export type StorageColumnTypes = {
   readonly public: {
     readonly category: {
+      readonly icon: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly order: CodecTypes['pg/int4@1']['output'];
@@ -369,11 +386,19 @@ export type StorageColumnTypes = {
       readonly stock: CodecTypes['pg/int4@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
+    readonly product_detail: {
+      readonly color: '#FFFFFF' | '#000000' | '#FF0000' | '#0000FF' | '#008000' | '#808080';
+      readonly country: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly productId: CodecTypes['pg/int4@1']['output'];
+      readonly size: ReadonlyArray<CodecTypes['pg/int4@1']['output']>;
+    };
   };
 };
 export type StorageColumnInputTypes = {
   readonly public: {
     readonly category: {
+      readonly icon: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly order: CodecTypes['pg/int4@1']['input'];
@@ -412,6 +437,13 @@ export type StorageColumnInputTypes = {
       readonly slug: CodecTypes['pg/text@1']['input'];
       readonly stock: CodecTypes['pg/int4@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    };
+    readonly product_detail: {
+      readonly color: '#FFFFFF' | '#000000' | '#FF0000' | '#0000FF' | '#008000' | '#808080';
+      readonly country: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly productId: CodecTypes['pg/int4@1']['input'];
+      readonly size: ReadonlyArray<CodecTypes['pg/int4@1']['input']>;
     };
   };
 };
@@ -459,9 +491,17 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
                 };
+                readonly icon: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['slug'] }];
+              uniques: readonly [
+                { readonly columns: readonly ['slug'] },
+                { readonly columns: readonly ['icon'] },
+              ];
               indexes: readonly [];
               foreignKeys: readonly [];
             };
@@ -732,8 +772,69 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly product_detail: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly color: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly size: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly country: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly productId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['productId'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'product_detail';
+                    readonly columns: readonly ['productId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'product';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
           };
           readonly valueSet: {
+            readonly Color: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                '#FFFFFF',
+                '#000000',
+                '#FF0000',
+                '#0000FF',
+                '#008000',
+                '#808080',
+              ];
+            };
             readonly order_status: {
               readonly kind: 'valueSet';
               readonly values: readonly [
@@ -757,6 +858,10 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly product: { readonly namespace: 'public' & NamespaceId; readonly model: 'Product' };
+    readonly product_detail: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ProductDetail';
+    };
     readonly category: { readonly namespace: 'public' & NamespaceId; readonly model: 'Category' };
     readonly order: { readonly namespace: 'public' & NamespaceId; readonly model: 'Order' };
     readonly orderItem: { readonly namespace: 'public' & NamespaceId; readonly model: 'OrderItem' };
@@ -783,6 +888,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
+              readonly icon: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
             };
             readonly relations: {
               readonly products: {
@@ -805,6 +914,7 @@ type ContractBase = Omit<
                 readonly name: { readonly column: 'name' };
                 readonly slug: { readonly column: 'slug' };
                 readonly order: { readonly column: 'order' };
+                readonly icon: { readonly column: 'icon' };
               };
             };
           };
@@ -1021,6 +1131,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly detail: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProductDetail';
+                };
+                readonly cardinality: '1:1';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['productId'];
+                };
+              };
               readonly orderItems: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -1051,8 +1172,68 @@ type ContractBase = Omit<
               };
             };
           };
+          readonly ProductDetail: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly color: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly size: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly many: true;
+              };
+              readonly country: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly productId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly product: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Product';
+                };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['productId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'product_detail';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly color: { readonly column: 'color' };
+                readonly size: { readonly column: 'size' };
+                readonly country: { readonly column: 'country' };
+                readonly productId: { readonly column: 'productId' };
+              };
+            };
+          };
         };
         readonly enum: {
+          readonly Color: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'white'; readonly value: '#FFFFFF' },
+              { readonly name: 'black'; readonly value: '#000000' },
+              { readonly name: 'red'; readonly value: '#FF0000' },
+              { readonly name: 'blue'; readonly value: '#0000FF' },
+              { readonly name: 'green'; readonly value: '#008000' },
+              { readonly name: 'gray'; readonly value: '#808080' },
+            ];
+          };
           readonly order_status: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [

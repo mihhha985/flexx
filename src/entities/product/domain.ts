@@ -19,8 +19,49 @@ export type ProductWithCategory = Product & {
 
 const requiredNumber = (message: string) => z.string().trim().min(1, message).transform(Number)
 
-export const updateProductSchema = z.object({
-  id: requiredNumber("Не удалось определить товар").pipe(z.number().int().positive()),
+const productColorValues = [
+  "#FFFFFF",
+  "#000000",
+  "#FF0000",
+  "#0000FF",
+  "#008000",
+  "#808080",
+] as const
+
+export const productColors = [
+  { value: productColorValues[0], label: "Белый" },
+  { value: productColorValues[1], label: "Чёрный" },
+  { value: productColorValues[2], label: "Красный" },
+  { value: productColorValues[3], label: "Синий" },
+  { value: productColorValues[4], label: "Зелёный" },
+  { value: productColorValues[5], label: "Серый" },
+] as const
+
+export const productSizes = Array.from({ length: 14 }, (_, index) => index + 35)
+
+const productColorSchema = z.enum(productColorValues, "Выберите цвет из списка")
+
+const productSizeSchema = requiredNumber("Выберите размер").pipe(
+  z
+    .number()
+    .int("Размер должен быть целым числом")
+    .min(35, "Размер должен быть не меньше 35")
+    .max(48, "Размер должен быть не больше 48"),
+)
+
+export const productDetailSchema = z.object({
+  color: productColorSchema,
+  size: z.preprocess(
+    (value) => (Array.isArray(value) ? value : [value]),
+    z
+      .array(productSizeSchema)
+      .min(1, "Выберите хотя бы один размер")
+      .refine((sizes) => new Set(sizes).size === sizes.length, "Размеры не должны повторяться"),
+  ),
+  country: z.string().trim().min(1, "Укажите страну").max(200, "Название страны слишком длинное"),
+})
+
+const productFieldsSchema = z.object({
   name: z.string().trim().min(1, "Укажите название").max(200, "Название слишком длинное"),
   slug: z
     .string()
@@ -58,9 +99,15 @@ export const updateProductSchema = z.object({
   ),
 })
 
-export const createProductSchema = updateProductSchema.omit({ id: true })
+export const createProductSchema = productFieldsSchema.merge(productDetailSchema)
+
+export const updateProductSchema = createProductSchema.extend({
+  id: requiredNumber("Не удалось определить товар").pipe(z.number().int().positive()),
+})
 
 export type UpdateProductInput = z.infer<typeof updateProductSchema>
+export type CreateProductInput = z.infer<typeof createProductSchema>
+export type ProductDetailInput = z.infer<typeof productDetailSchema>
 
 export type UpdateProductState = {
   success?: boolean
@@ -73,5 +120,8 @@ export type UpdateProductState = {
     stock?: string[]
     description?: string[]
     imageUrl?: string[]
+    color?: string[]
+    size?: string[]
+    country?: string[]
   }
 }

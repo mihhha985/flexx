@@ -19,6 +19,9 @@ export async function updateProductAction(
     stock: formData.get("stock"),
     description: formData.get("description"),
     imageUrl: formData.get("imageUrl"),
+    color: formData.get("color"),
+    size: formData.getAll("size"),
+    country: formData.get("country"),
   })
 
   if (!result.success) {
@@ -26,18 +29,21 @@ export async function updateProductAction(
   }
 
   try {
-    const { product, category, duplicate } = await repository.getProductEditContext(
-      result.data.id,
-      result.data.categoryId,
-      result.data.slug,
-    )
-    if (!product) return { message: "Товар не найден." }
-    if (!category) return { errors: { categoryId: ["Категория не найдена."] } }
-    if (duplicate && duplicate.id !== result.data.id)
-      return { errors: { slug: ["Товар с таким слагом уже существует."] } }
-    const updated = await repository.updateProduct(result.data)
-    if (!updated) return { message: "Товар не найден. Обновите страницу." }
+    await repository.withProductTransaction(async (transaction) => {
+      const { product, category, duplicate, detail } = await transaction.getProductEditContext(
+        result.data,
+      )
+      if (!product) throw new ProductFormError({ message: "Товар не найден. Обновите страницу." })
+      if (!category)
+        throw new ProductFormError({ errors: { categoryId: ["Категория не найдена."] } })
+      if (duplicate && duplicate.id !== result.data.id)
+        throw new ProductFormError({ errors: { slug: ["Товар с таким слагом уже существует."] } })
+      const updated = await transaction.updateProduct(result.data)
+      if (!updated) throw new ProductFormError({ message: "Товар не найден. Обновите страницу." })
+      await transaction.saveProductDetail(result.data.id, result.data, Boolean(detail))
+    })
   } catch (error) {
+    if (error instanceof ProductFormError) return error.state
     console.error("Не удалось обновить товар", error)
     return { message: "Не удалось сохранить изменения. Попробуйте ещё раз позже." }
   }
@@ -45,4 +51,10 @@ export async function updateProductAction(
   revalidateCatalog()
 
   return { success: true, message: "Изменения сохранены." }
+}
+
+class ProductFormError extends Error {
+  constructor(readonly state: UpdateProductState) {
+    super()
+  }
 }

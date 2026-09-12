@@ -1,0 +1,248 @@
+[
+  {
+    "id": "dropConstraint.product_detail.product_detail_color_key",
+    "label": "Drop constraint \"product_detail_color_key\" on \"product_detail\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "product_detail_color_key",
+        "table": "product_detail"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"product_detail_color_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_detail_color_key",
+          "public",
+          "\"public\".\"product_detail\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"product_detail_color_key\"",
+        "sql": "ALTER TABLE \"public\".\"product_detail\" DROP CONSTRAINT \"product_detail_color_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"product_detail_color_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_detail_color_key",
+          "public",
+          "\"public\".\"product_detail\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.product_detail.product_detail_country_key",
+    "label": "Drop constraint \"product_detail_country_key\" on \"product_detail\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "product_detail_country_key",
+        "table": "product_detail"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"product_detail_country_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_detail_country_key",
+          "public",
+          "\"public\".\"product_detail\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"product_detail_country_key\"",
+        "sql": "ALTER TABLE \"public\".\"product_detail\" DROP CONSTRAINT \"product_detail_country_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"product_detail_country_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_detail_country_key",
+          "public",
+          "\"public\".\"product_detail\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterType.product_detail.size",
+    "label": "Alter type of \"product_detail\".\"size\" to int4[]",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "size",
+        "table": "product_detail"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"size\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "product_detail",
+          "size"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"size\"",
+        "sql": "ALTER TABLE \"public\".\"product_detail\" ALTER COLUMN \"size\" TYPE int4[] USING ARRAY[\"size\"]"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"size\" has type \"integer[]\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "product_detail",
+          "size",
+          "integer[]"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "dataTransform.product_detail.normalize_color",
+    "label": "Normalize product detail colors for the Color enum",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "color",
+        "table": "product_detail"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure every product detail color can be converted to the Color enum",
+        "sql": "SELECT NOT EXISTS (\n              SELECT 1\n              FROM \"public\".\"product_detail\"\n              WHERE lower(trim(\"color\")) NOT IN (\n                'белый', 'чёрный', 'черный', 'красный', 'синий', 'зелёный', 'зеленый', 'серый',\n                '#ffffff', '#000000', '#ff0000', '#0000ff', '#008000', '#808080'\n              )\n            ) AS \"result\""
+      }
+    ],
+    "execute": [
+      {
+        "description": "convert product detail colors to Color enum values",
+        "sql": "UPDATE \"public\".\"product_detail\"\n              SET \"color\" = CASE lower(trim(\"color\"))\n                WHEN 'белый' THEN '#FFFFFF'\n                WHEN 'чёрный' THEN '#000000'\n                WHEN 'черный' THEN '#000000'\n                WHEN 'красный' THEN '#FF0000'\n                WHEN 'синий' THEN '#0000FF'\n                WHEN 'зелёный' THEN '#008000'\n                WHEN 'зеленый' THEN '#008000'\n                WHEN 'серый' THEN '#808080'\n                WHEN '#ffffff' THEN '#FFFFFF'\n                WHEN '#000000' THEN '#000000'\n                WHEN '#ff0000' THEN '#FF0000'\n                WHEN '#0000ff' THEN '#0000FF'\n                WHEN '#008000' THEN '#008000'\n                WHEN '#808080' THEN '#808080'\n              END"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify every product detail color is a Color enum value",
+        "sql": "SELECT NOT EXISTS (\n              SELECT 1\n              FROM \"public\".\"product_detail\"\n              WHERE \"color\" NOT IN ('#FFFFFF', '#000000', '#FF0000', '#0000FF', '#008000', '#808080')\n            ) AS \"result\""
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.product_detail.product_detail_color_check_4fe16565",
+    "label": "Add check constraint \"product_detail_color_check_4fe16565\" on \"product_detail\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "product_detail_color_check_4fe16565",
+        "table": "product_detail"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"product_detail_color_check_4fe16565\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_detail_color_check_4fe16565",
+          "public",
+          "\"public\".\"product_detail\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"product_detail_color_check_4fe16565\"",
+        "sql": "ALTER TABLE \"public\".\"product_detail\" ADD CONSTRAINT \"product_detail_color_check_4fe16565\" CHECK (\"color\" IN ('#FFFFFF', '#000000', '#FF0000', '#0000FF', '#008000', '#808080'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"product_detail_color_check_4fe16565\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_detail_color_check_4fe16565",
+          "public",
+          "\"public\".\"product_detail\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.product_detail.product_detail_size_elem_not_null_a8715850",
+    "label": "Add check constraint \"product_detail_size_elem_not_null_a8715850\" on \"product_detail\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "product_detail_size_elem_not_null_a8715850",
+        "table": "product_detail"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"product_detail_size_elem_not_null_a8715850\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_detail_size_elem_not_null_a8715850",
+          "public",
+          "\"public\".\"product_detail\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"product_detail_size_elem_not_null_a8715850\"",
+        "sql": "ALTER TABLE \"public\".\"product_detail\" ADD CONSTRAINT \"product_detail_size_elem_not_null_a8715850\" CHECK (array_position(\"size\", NULL) IS NULL)"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"product_detail_size_elem_not_null_a8715850\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_detail_size_elem_not_null_a8715850",
+          "public",
+          "\"public\".\"product_detail\""
+        ]
+      }
+    ]
+  }
+]

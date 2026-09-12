@@ -8,6 +8,7 @@ export const categorySchema = z.object({
     .min(1, "Укажите слаг")
     .max(200, "Слаг слишком длинный")
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Используйте строчные латинские буквы, цифры и дефисы"),
+  icon: z.string().trim().min(1, "Укажите идентификатор иконки").max(100, "Иконка слишком длинная"),
   order: z
     .string()
     .trim()
@@ -25,7 +26,7 @@ export const categorySchema = z.object({
 export type CategoryFormState = {
   success?: boolean
   message?: string
-  errors?: Partial<Record<"name" | "slug" | "order", string[]>>
+  errors?: Partial<Record<"name" | "slug" | "icon" | "order", string[]>>
 }
 
 export type CategoryInput = z.infer<typeof categorySchema>

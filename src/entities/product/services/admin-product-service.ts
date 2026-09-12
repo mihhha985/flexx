@@ -6,8 +6,7 @@ import { getAdminProducts } from "@/src/entities/product/repository/get-admin-pr
 export async function getProductsForAdmin() {
   await requireAdmin()
   try {
-    const products = await getAdminProducts()
-    return products.map(({ category, ...product }) => ({ ...product, categoryName: category.name }))
+    return await getAdminProducts()
   } catch (error) {
     console.error("Не удалось загрузить список product", error)
     throw error

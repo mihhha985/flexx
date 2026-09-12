@@ -2,8 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { PlusIcon } from "lucide-react"
-import Link from "next/link"
+import { FolderPlusIcon, PackagePlusIcon, PlusIcon } from "lucide-react"
 import type { AdminCategory } from "@/src/entities/category/services/admin-category-service"
 import type { AdminProduct } from "@/src/entities/product/services/admin-product-service"
 import {
@@ -13,24 +12,49 @@ import {
 import { DataTable } from "@/src/app/(panel)/panel/_components/data-table"
 import { CatalogRowActions } from "@/src/app/(site)/catalog/_components/catalog-row-actions"
 import { Badge } from "@/src/shared/ui/badge"
-import { Button } from "@/src/shared/ui/button"
+import { Button, LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/ui/empty"
 import { formatPrice } from "@/src/shared/lib/format-price"
 import { ProductEditDialog } from "./product-edit-dialog"
 
-function getColumns(onEdit: (product: AdminProduct) => void): ColumnDef<AdminProduct>[] {
+function shortenName(name: string) {
+  const characters = Array.from(name)
+  return characters.length > 20 ? `${characters.slice(0, 20).join("")}...` : name
+}
+
+function getColumns(
+  onEdit: (product: AdminProduct) => void,
+  categoryNames: Map<number, string>,
+): ColumnDef<AdminProduct>[] {
   return [
+    { accessorKey: "id", header: "№" },
     {
       accessorKey: "name",
       header: "Название",
       cell: ({ getValue }) => (
-        <span className="block min-w-40 max-w-72 whitespace-normal font-medium">
-          {getValue<string>()}
+        <span
+          className="block min-w-40 max-w-72 whitespace-normal font-medium"
+          title={getValue<string>()}
+          aria-label={getValue<string>()}
+        >
+          {shortenName(getValue<string>())}
         </span>
       ),
     },
     { accessorKey: "slug", header: "Слаг" },
-    { accessorKey: "categoryName", header: "Категория" },
+    {
+      id: "category",
+      accessorFn: (row) => categoryNames.get(row.categoryId) ?? "—",
+      header: "Категория",
+    },
     { accessorKey: "price", header: "Цена", cell: ({ row }) => formatPrice(row.original.price) },
     { accessorKey: "stock", header: "Остаток" },
     {
@@ -72,10 +96,64 @@ export function ProductsTable({
   categories: AdminCategory[]
 }) {
   const [editor, setEditor] = useState<AdminProduct | "create" | null>(null)
-  const columns = useMemo(() => getColumns(setEditor), [])
+  const columns = useMemo(
+    () =>
+      getColumns(setEditor, new Map(categories.map((category) => [category.id, category.name]))),
+    [categories],
+  )
   const onOpenChange = useCallback((open: boolean) => {
     if (!open) setEditor(null)
   }, [])
+
+  if (!categories.length) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FolderPlusIcon />
+          </EmptyMedia>
+          <EmptyTitle>Сначала создайте категорию</EmptyTitle>
+          <EmptyDescription>
+            Товару нужна категория. Создайте её, а затем вернитесь сюда, чтобы добавить первый
+            товар.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <LinkButton href="/panel/categories">
+            <PlusIcon data-icon="inline-start" />
+            Создать категорию
+          </LinkButton>
+        </EmptyContent>
+      </Empty>
+    )
+  }
+
+  if (!data.length) {
+    return (
+      <>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <PackagePlusIcon />
+            </EmptyMedia>
+            <EmptyTitle>Товаров пока нет</EmptyTitle>
+            <EmptyDescription>
+              Добавьте первый товар — после сохранения он появится в каталоге.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onPress={() => setEditor("create")}>
+              <PlusIcon data-icon="inline-start" />
+              Создать товар
+            </Button>
+          </EmptyContent>
+        </Empty>
+        {editor !== null && (
+          <ProductEditDialog key="create" categories={categories} onOpenChange={onOpenChange} />
+        )}
+      </>
+    )
+  }
 
   return (
     <>
@@ -91,15 +169,6 @@ export function ProductsTable({
               Создать товар
             </Button>
           </div>
-          {!categories.length && (
-            <CardDescription>
-              Для создания товара сначала{" "}
-              <Link href="/panel/categories" className="underline underline-offset-4">
-                создайте категорию
-              </Link>
-              .
-            </CardDescription>
-          )}
         </CardHeader>
         <CardContent>
           <DataTable
@@ -108,7 +177,7 @@ export function ProductsTable({
             label="Список товаров"
             searchLabel="Поиск по товарам"
             searchPlaceholder="Название, слаг, категория или статус…"
-            globalFilterColumns={["name", "slug", "categoryName", "isActive"]}
+            globalFilterColumns={["id", "name", "slug", "category", "isActive"]}
             emptyDescription="Создайте первый товар, чтобы наполнить каталог."
           />
         </CardContent>

@@ -14,7 +14,7 @@ export async function getAdminProducts() {
     "isActive",
     "categoryId",
   )
-    .include("category", (category) => category.select("name"))
+    .include("detail", (detail) => detail.select("color", "size", "country"))
     .orderBy([(product) => product.name.asc(), (product) => product.id.asc()])
     .all()
 }

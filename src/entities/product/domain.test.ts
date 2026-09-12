@@ -12,6 +12,9 @@ const input = {
   stock: "12",
   description: "  Электрический чайник.  ",
   imageUrl: "",
+  color: "#FFFFFF",
+  size: ["42", "43"],
+  country: "  Россия  ",
 }
 
 test("normalizes product edits and turns an empty image URL into null", () => {
@@ -26,6 +29,9 @@ test("normalizes product edits and turns an empty image URL into null", () => {
     stock: 12,
     description: "Электрический чайник.",
     imageUrl: null,
+    color: "#FFFFFF",
+    size: [42, 43],
+    country: "Россия",
   })
 })
 
@@ -39,6 +45,12 @@ test("rejects invalid product edits", () => {
     { stock: "1.5" },
     { description: "" },
     { imageUrl: "not-a-url" },
+    { color: "#123456" },
+    { size: [] },
+    { size: ["34"] },
+    { size: ["49"] },
+    { size: ["42", "42"] },
+    { country: "" },
   ]) {
     assert.equal(updateProductSchema.safeParse({ ...input, ...changes }).success, false)
   }

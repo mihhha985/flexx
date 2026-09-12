@@ -1,11 +1,11 @@
 import { connectDatabase, db } from "./db.ts"
 
 const categories = [
-  { name: "Electronics", slug: "electronics", order: 10 },
-  { name: "Clothing", slug: "clothing", order: 20 },
-  { name: "Home", slug: "home", order: 30 },
-  { name: "Beauty", slug: "beauty", order: 40 },
-  { name: "Sports", slug: "sports", order: 50 },
+  { name: "Electronics", slug: "electronics", icon: "electronics", order: 10 },
+  { name: "Clothing", slug: "clothing", icon: "clothing", order: 20 },
+  { name: "Home", slug: "home", icon: "home", order: 30 },
+  { name: "Beauty", slug: "beauty", icon: "beauty", order: 40 },
+  { name: "Sports", slug: "sports", icon: "sports", order: 50 },
 ] as const
 
 async function main(): Promise<void> {

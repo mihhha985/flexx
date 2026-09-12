@@ -1,4 +1,6 @@
 import { spawnSync } from "node:child_process"
+import { existsSync } from "node:fs"
+import path from "node:path"
 import process from "node:process"
 import readline from "node:readline/promises"
 import { Client } from "pg"
@@ -6,10 +8,12 @@ import { Client } from "pg"
 const args = new Set(process.argv.slice(2))
 const yes = args.has("--yes") || args.has("-y")
 const skipSeed = args.has("--skip-seed")
+const isWindows = process.platform === "win32"
 
-function run(command, args) {
+function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     env: process.env,
+    shell: options.shell ?? false,
     stdio: "inherit",
   })
 
@@ -20,6 +24,18 @@ function run(command, args) {
   if (result.status !== 0) {
     process.exit(result.status ?? 1)
   }
+}
+
+function runNpmScript(script) {
+  const bundledNpmCli = path.join(path.dirname(process.execPath), "node_modules/npm/bin/npm-cli.js")
+  const npmCliPath = process.env.npm_execpath || (existsSync(bundledNpmCli) ? bundledNpmCli : null)
+
+  if (npmCliPath) {
+    run(process.execPath, [npmCliPath, "run", script])
+    return
+  }
+
+  run(isWindows ? "npm.cmd" : "npm", ["run", script], { shell: isWindows })
 }
 
 function databaseLabel(url) {
@@ -83,7 +99,7 @@ async function main() {
     process.exit(1)
   }
 
-  run("npm", ["run", "contract:emit"])
+  runNpmScript("contract:emit")
   await confirmReset(databaseUrl)
 
   console.log("")
@@ -92,13 +108,13 @@ async function main() {
   console.log("Database schemas reset.")
   console.log("")
 
-  run("npm", ["run", "db:init"])
+  runNpmScript("db:init")
 
   if (!skipSeed) {
-    run("npm", ["run", "seed"])
+    runNpmScript("seed")
   }
 
-  run("npm", ["run", "db:verify"])
+  runNpmScript("db:verify")
 }
 
 await main().catch((error) => {

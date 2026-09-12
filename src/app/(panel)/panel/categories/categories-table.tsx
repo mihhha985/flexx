@@ -2,13 +2,21 @@
 
 import { useCallback, useMemo, useState } from "react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { PlusIcon } from "lucide-react"
+import { FolderPlusIcon, PlusIcon } from "lucide-react"
 import type { AdminCategory } from "@/src/entities/category/services/admin-category-service"
 import { deleteCategoryAction } from "@/src/entities/category/services/manage-category-service"
 import { DataTable } from "@/src/app/(panel)/panel/_components/data-table"
 import { CatalogRowActions } from "@/src/app/(site)/catalog/_components/catalog-row-actions"
 import { Button } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/ui/empty"
 import { CategoryEditDialog } from "./category-edit-dialog"
 
 function getColumns(onEdit: (category: AdminCategory) => void): ColumnDef<AdminCategory>[] {
@@ -21,6 +29,7 @@ function getColumns(onEdit: (category: AdminCategory) => void): ColumnDef<AdminC
       ),
     },
     { accessorKey: "slug", header: "Слаг" },
+    { accessorKey: "icon", header: "Иконка" },
     { accessorKey: "order", header: "Порядок" },
     { accessorKey: "productCount", header: "Товаров" },
     {
@@ -46,6 +55,31 @@ export function CategoriesTable({ data }: { data: AdminCategory[] }) {
   const onOpenChange = useCallback((open: boolean) => {
     if (!open) setEditor(null)
   }, [])
+
+  if (!data.length) {
+    return (
+      <>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FolderPlusIcon />
+            </EmptyMedia>
+            <EmptyTitle>Категорий пока нет</EmptyTitle>
+            <EmptyDescription>
+              Создайте первую категорию, чтобы добавлять в неё товары.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onPress={() => setEditor("create")}>
+              <PlusIcon data-icon="inline-start" />
+              Создать категорию
+            </Button>
+          </EmptyContent>
+        </Empty>
+        {editor !== null && <CategoryEditDialog key="create" onOpenChange={onOpenChange} />}
+      </>
+    )
+  }
 
   return (
     <>

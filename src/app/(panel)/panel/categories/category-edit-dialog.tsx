@@ -84,6 +84,24 @@ export function CategoryEditDialog({
             </FieldDescription>
             <FieldError>{state.errors?.slug}</FieldError>
           </Field>
+          <Field data-invalid={Boolean(state.errors?.icon)}>
+            <FieldLabel htmlFor="category-icon">Идентификатор иконки</FieldLabel>
+            <Input
+              id="category-icon"
+              name="icon"
+              defaultValue={category?.icon ?? ""}
+              maxLength={100}
+              placeholder="electronics"
+              required
+              disabled={pending}
+              aria-invalid={Boolean(state.errors?.icon)}
+              aria-describedby="category-icon-help"
+            />
+            <FieldDescription id="category-icon-help">
+              Уникальное название иконки для категории.
+            </FieldDescription>
+            <FieldError>{state.errors?.icon}</FieldError>
+          </Field>
           <Field data-invalid={Boolean(state.errors?.order)}>
             <FieldLabel htmlFor="category-order">Порядок отображения</FieldLabel>
             <Input
