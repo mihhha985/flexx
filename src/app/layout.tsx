@@ -5,14 +5,14 @@ import { Toaster } from "@/src/shared/ui/sonner"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Контур — простой интернет-магазин",
+  title: "Flexx — интернет-магазин",
   description: "Быстрый заказ товаров без регистрации.",
   applicationName: "Контур",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Контур",
+    title: "Flexx",
   },
   icons: {
     icon: "/icon.svg",

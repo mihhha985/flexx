@@ -2,7 +2,7 @@ import {
   ContactIcon,
   HouseIcon,
   LayoutGridIcon,
-  ShoppingBagIcon,
+  //ShoppingBagIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -16,7 +16,7 @@ export const navigation: NavigationItem[] = [
   { href: "/", label: "Главная", icon: HouseIcon },
   { href: "/catalog", label: "Каталог", icon: LayoutGridIcon },
   { href: "/contacts", label: "Контакты", icon: ContactIcon },
-  { href: "/cart", label: "Корзина", icon: ShoppingBagIcon },
+  //{ href: "/cart", label: "Корзина", icon: ShoppingBagIcon },
 ]
 
 export function isNavigationActive(pathname: string, href: string) {

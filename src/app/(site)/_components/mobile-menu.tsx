@@ -17,7 +17,7 @@ export default function MobileMenu() {
       className="fixed inset-x-0 bottom-0 border-t bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden"
       aria-label="Мобильная навигация"
     >
-      <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
+      <div className="mx-auto flex items-center justify-between">
         {navigation.map((item) => {
           const active = isNavigationActive(pathname, item.href)
           const Icon = item.icon

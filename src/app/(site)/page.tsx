@@ -16,6 +16,9 @@ import { MainCategoryList } from "@/src/app/(site)/_components/main-category-lis
 import { RandomProductList } from "@/src/app/(site)/_components/random-product-list"
 import { LinkButton } from "@/src/shared/ui/button"
 
+export const dynamic = "force-dynamic"
+
+
 const purchaseBenefits = [
   {
     icon: ShoppingBagIcon,
@@ -100,7 +103,9 @@ export default function Home() {
             Все товары <ArrowRightIcon data-icon="inline-end" />
           </LinkButton>
         </div>
-        <MainCategoryListSkeleton />
+        <Suspense fallback={<MainCategoryListSkeleton />}>
+          <MainCategoryList />
+        </Suspense>
       </section>
 
       <section className="flex flex-col gap-4 sm:gap-6" aria-labelledby="home-products">
@@ -115,28 +120,43 @@ export default function Home() {
             Смотреть всё <ArrowRightIcon data-icon="inline-end" />
           </LinkButton>
         </div>
-        <FeaturedProductsSkeleton />
+        <Suspense fallback={<FeaturedProductsSkeleton />}>
+          <RandomProductList />
+        </Suspense>
       </section>
 
-      <section className="relative overflow-hidden rounded-xl bg-primary px-6 py-10 text-primary-foreground sm:px-10 sm:py-12 lg:px-16 lg:py-16">
+      <section
+        className="relative isolate overflow-hidden rounded-xl bg-primary px-6 py-10 text-primary-foreground sm:px-10 sm:py-12 lg:px-16 lg:py-16"
+        aria-labelledby="home-sale"
+      >
         <div
-          className="pointer-events-none absolute -bottom-8 right-4 select-none text-[5rem] font-bold leading-none tracking-tighter text-primary-foreground/5 sm:text-[9rem] lg:right-10 lg:text-[13rem]"
+          className="pointer-events-none absolute right-10 bottom-0 -z-10 select-none text-[7rem]/[0.8] font-bold tracking-tighter text-primary-foreground/5 sm:right-4 sm:text-[11rem]/[0.8] lg:left-30 lg:text-[15rem]/[0.8]"
           aria-hidden="true"
         >
-          КОНТУР
+          FLEXX
         </div>
-        <div className="relative z-10 flex max-w-xl flex-col items-start gap-5">
+        <Image
+          width={500}
+          height={300}
+          src="/images/baner.png"
+          alt="Чёрно-белый высокий кроссовок на каменной подставке"
+          className="absolute right-0 -top-10 opacity-60 mix-blend-exclusion"
+        />
+        <div className="flex max-w-xl flex-col items-start gap-5">
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground/70">
-            Всё необходимое в одном месте
+            Специальное предложение
           </p>
-          <h2 className="text-3xl/[2.375rem] text-primary-foreground lg:text-[2.5rem]/[2.75rem]">
-            Найдите свою следующую пару
+          <h2
+            id="home-sale"
+            className="text-3xl/[2.375rem] font-semibold tracking-tight text-primary-foreground lg:text-[2.5rem]/[2.75rem]"
+          >
+            Скидка 50% на обувь
           </h2>
-          <p className="text-primary-foreground/75">
-            Каталог собран так, чтобы быстро перейти от выбора к оформлению заказа.
+          <p className="max-w-lg text-primary-foreground/75">
+            Выберите новую пару по специальной цене и оформите заказ без регистрации.
           </p>
-          <LinkButton href="/catalog" variant="inverse" size="lg">
-            Перейти в каталог
+          <LinkButton href="/catalog" variant="inverse" size="lg" className="w-full sm:w-auto">
+            Выбрать со скидкой
             <ArrowRightIcon data-icon="inline-end" />
           </LinkButton>
         </div>

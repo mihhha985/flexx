@@ -5,11 +5,13 @@ import Menu from "@/src/app/(site)/_components/menu"
 import MobileMenu from "@/src/app/(site)/_components/mobile-menu"
 import { TransitionWrapper } from "@/src/app/(site)/_components/transition-wrapper"
 import { CartHydration } from "@/src/features/cart/cart-hydration"
+import { FavoritesHydration } from "@/src/features/favorites/favorites-hydration"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-background">
       <CartHydration />
+      <FavoritesHydration />
 
       <div className="bg-primary px-4 py-2 text-center text-xs text-primary-foreground">
         Заказ без регистрации · детали доставки подтвердим перед отправкой
@@ -25,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <PackageIcon className="size-4" aria-hidden="true" />
             </span>
-            <span>КОНТУР</span>
+            <span>Flexx</span>
           </Link>
 
           <Menu />
@@ -47,7 +49,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               aria-label="Контур — на главную"
             >
               <PackageIcon className="size-5" aria-hidden="true" />
-              КОНТУР
+              Flexx
             </Link>
             <p className="mt-4 text-sm/6 text-primary-foreground/70">
               Обувь для повседневного ритма. Выбор и оформление заказа без лишних шагов.
