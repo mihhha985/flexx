@@ -18,14 +18,16 @@ export const orderSchema = z.object({
     .array(
       z.object({
         productId: z.number().int().positive().max(2147483647),
+        size: z.number().int().min(35).max(48),
         quantity: z.number().int().positive().max(2147483647),
       }),
     )
     .min(1, "Корзина пуста")
     .max(100)
     .refine(
-      (items) => new Set(items.map((item) => item.productId)).size === items.length,
-      "Товар не должен повторяться в заказе",
+      (items) =>
+        new Set(items.map((item) => `${item.productId}-${item.size}`)).size === items.length,
+      "Товар одного размера не должен повторяться в заказе",
     ),
 })
 

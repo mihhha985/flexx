@@ -5,6 +5,7 @@ import type { CreateOrderInput } from "../domain"
 type OrderItemInput = {
   productId: number
   productName: string
+  size: number
   unitPrice: number
   quantity: number
 }
@@ -15,6 +16,7 @@ function transactionRepository(tx: Parameters<Parameters<typeof db.transaction>[
     getProducts: async (ids: number[]) =>
       tx.orm.public.Product.select("id", "name", "price", "stock", "isActive")
         .where((product) => product.id.in(ids))
+        .include("detail", (detail) => detail.select("size"))
         .all(),
     reserveProduct: (product: ProductSnapshot, quantity: number) =>
       tx.orm.public.Product.where({

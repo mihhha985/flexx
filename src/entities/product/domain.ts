@@ -15,8 +15,14 @@ export type Product = {
 
 export type ProductWithCategory = Product & {
   category: Category
+  detail: ProductDetail | null
 }
 
+export type ProductDetail = {
+  color: (typeof productColorValues)[number]
+  size: readonly number[]
+  country: string
+}
 const requiredNumber = (message: string) => z.string().trim().min(1, message).transform(Number)
 
 const productColorValues = [

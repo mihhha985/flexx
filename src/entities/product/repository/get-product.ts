@@ -69,6 +69,7 @@ export async function getProductBySlug(slug: string) {
     "isActive",
   )
     .include("category", (category) => category.select("name", "slug", "order"))
+    .include("detail", (detail) => detail.select("color", "size", "country"))
     .where({ isActive: true, slug })
     .first()
 }

@@ -160,6 +160,7 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
                   <p className="font-medium break-words">{item.productName}</p>
                 )}
                 <p className="text-muted-foreground">
+                  {item.size ? `Размер ${item.size} · ` : ""}
                   {item.quantity} шт. × {formatPrice(item.unitPrice)}
                 </p>
                 {!item.product?.isActive && (

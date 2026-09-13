@@ -40,7 +40,11 @@ export function CartView() {
     try {
       const result = await createValidatedOrder({
         ...draft,
-        items: items.map(({ product, quantity }) => ({ productId: product.id, quantity })),
+        items: items.map(({ product, size, quantity }) => ({
+          productId: product.id,
+          size,
+          quantity,
+        })),
       })
       if (!result.success) {
         toast.error(result.error)
@@ -96,7 +100,11 @@ export function CartView() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="flex flex-col gap-3 lg:sticky lg:top-25 lg:self-start">
           {items.map((item) => (
-            <CartItemRow key={item.product.id} item={item} isSubmitting={isSubmitting} />
+            <CartItemRow
+              key={`${item.product.id}-${item.size}`}
+              item={item}
+              isSubmitting={isSubmitting}
+            />
           ))}
         </div>
 

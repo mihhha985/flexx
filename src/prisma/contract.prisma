@@ -85,6 +85,7 @@ model OrderItem {
   orderId         Int
   productId       Int
   productName     String
+  size            Int?
   unitPrice       Float
   quantity        Int
   order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)

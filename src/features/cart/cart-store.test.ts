@@ -1,11 +1,11 @@
 import assert from "node:assert/strict"
 import { beforeEach, test } from "node:test"
 
-import type { ProductWithCategory } from "@/src/entities/product/domain"
+import type { Product, ProductWithCategory } from "@/src/entities/product/domain"
 import { selectCartItemCount, selectCartTotal, useCartStore } from "@/src/features/cart/cart-store"
 
 const storage = new Map<string, string>()
-const product: ProductWithCategory = {
+const product: Product & Pick<ProductWithCategory, "category"> = {
   id: 1,
   name: "Товар",
   slug: "product",
@@ -31,34 +31,49 @@ beforeEach(() => {
 
 test("combines repeated products, caps stock and derives cart totals", () => {
   const { addItem, updateQuantity } = useCartStore.getState()
-  addItem(product, 2)
-  addItem(product, 10)
-  addItem({ ...product, id: 2, price: 200 }, 2)
+  addItem(product, 42, 2)
+  addItem(product, 42, 10)
+  addItem({ ...product, id: 2, price: 200 }, 43, 2)
   assert.equal(useCartStore.getState().items.length, 2)
   assert.equal(selectCartItemCount(useCartStore.getState()), 7)
   assert.equal(selectCartTotal(useCartStore.getState()), 1150)
 
-  updateQuantity(1, 0)
+  updateQuantity(1, 42, 0)
   assert.equal(useCartStore.getState().items[0].quantity, 1)
-  updateQuantity(1, 100)
+  updateQuantity(1, 42, 100)
   assert.equal(useCartStore.getState().items[0].quantity, 5)
+})
+
+test("keeps sizes in separate lines and never exceeds the shared product stock", () => {
+  const { addItem, updateQuantity } = useCartStore.getState()
+  addItem(product, 42, 3)
+  addItem(product, 43, 3)
+  assert.deepEqual(
+    useCartStore.getState().items.map((item) => ({ size: item.size, quantity: item.quantity })),
+    [
+      { size: 42, quantity: 3 },
+      { size: 43, quantity: 2 },
+    ],
+  )
+  updateQuantity(product.id, 42, 5)
+  assert.equal(useCartStore.getState().items[0].quantity, 3)
 })
 
 test("rejects unavailable products and invalid quantities", () => {
   const { addItem, updateQuantity } = useCartStore.getState()
-  addItem({ ...product, stock: 0 })
-  for (const quantity of [0, -1, 1.5, NaN, Infinity]) addItem(product, quantity)
+  addItem({ ...product, stock: 0 }, 42)
+  for (const quantity of [0, -1, 1.5, NaN, Infinity]) addItem(product, 42, quantity)
   assert.deepEqual(useCartStore.getState().items, [])
-  addItem(product)
-  updateQuantity(product.id, NaN)
+  addItem(product, 42)
+  updateQuantity(product.id, 42, NaN)
   assert.equal(useCartStore.getState().items[0].quantity, 1)
 })
 
 test("removes a product and persists an empty cart after checkout", () => {
   const { addItem, removeItem, clearCart } = useCartStore.getState()
-  addItem(product)
-  addItem({ ...product, id: 2 })
-  removeItem(product.id)
+  addItem(product, 42)
+  addItem({ ...product, id: 2 }, 43)
+  removeItem(product.id, 42)
   assert.deepEqual(
     useCartStore.getState().items.map((item) => item.product.id),
     [2],
@@ -71,7 +86,7 @@ test("removes a product and persists an empty cart after checkout", () => {
 })
 
 test("hydrates legacy carts only when requested and rewrites the persist format", async () => {
-  const items = [{ product, quantity: 3 }]
+  const items = [{ product, size: 42, quantity: 3 }]
   storage.set("kontur-cart", JSON.stringify(items))
   assert.equal(useCartStore.getState().ready, false)
   assert.deepEqual(useCartStore.getState().items, [])
@@ -91,7 +106,7 @@ test("restores the new format and limits quantities to saved stock", async () =>
   storage.set(
     "kontur-cart",
     JSON.stringify({
-      state: { items: [{ product, quantity: 10 }], ready: true },
+      state: { items: [{ product, size: 42, quantity: 10 }], ready: true },
       version: 0,
     }),
   )
@@ -115,13 +130,13 @@ test("finishes hydration for missing, malformed and invalid saved data", async (
 test("restores catalog products without category data", async () => {
   const catalogProduct = { ...product }
   Reflect.deleteProperty(catalogProduct, "category")
-  useCartStore.getState().addItem(catalogProduct, 2)
+  useCartStore.getState().addItem(catalogProduct, 42, 2)
   useCartStore.setState({ items: [], ready: false })
   // setState persists too, so restore the saved checkout cart before hydration.
   storage.set(
     "kontur-cart",
     JSON.stringify({
-      state: { items: [{ product: catalogProduct, quantity: 2 }] },
+      state: { items: [{ product: catalogProduct, size: 42, quantity: 2 }] },
       version: 0,
     }),
   )
@@ -140,7 +155,7 @@ test("keeps cart actions working when browser storage is unavailable", async (co
   })
   await useCartStore.persist.rehydrate()
   assert.equal(useCartStore.getState().ready, true)
-  useCartStore.getState().addItem(product)
+  useCartStore.getState().addItem(product, 42)
   assert.equal(selectCartItemCount(useCartStore.getState()), 1)
   useCartStore.getState().clearCart()
   assert.equal(selectCartItemCount(useCartStore.getState()), 0)

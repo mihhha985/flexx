@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter } from "@/src/shared/ui/card"
 import { useCartStore, type CartItem } from "./cart-store"
 
 export function CartItemRow({
-  item: { product, quantity },
+  item: { product, size, quantity },
   isSubmitting,
 }: {
   item: CartItem
@@ -28,6 +28,7 @@ export function CartItemRow({
             {product.category && (
               <p className="text-sm text-muted-foreground">{product.category.name}</p>
             )}
+            <p className="text-sm text-muted-foreground">Размер: {size}</p>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div
@@ -39,7 +40,7 @@ export function CartItemRow({
                 size="icon-sm"
                 aria-label="Уменьшить"
                 isDisabled={isSubmitting || quantity <= 1}
-                onPress={() => updateQuantity(product.id, quantity - 1)}
+                onPress={() => updateQuantity(product.id, size, quantity - 1)}
               >
                 <MinusIcon />
               </Button>
@@ -49,7 +50,7 @@ export function CartItemRow({
                 size="icon-sm"
                 aria-label="Увеличить"
                 isDisabled={isSubmitting || quantity >= product.stock}
-                onPress={() => updateQuantity(product.id, quantity + 1)}
+                onPress={() => updateQuantity(product.id, size, quantity + 1)}
               >
                 <PlusIcon />
               </Button>
@@ -64,7 +65,7 @@ export function CartItemRow({
           variant="ghost"
           size="xs"
           isDisabled={isSubmitting}
-          onPress={() => removeItem(product.id)}
+          onPress={() => removeItem(product.id, size)}
         >
           <Trash2Icon data-icon="inline-start" /> Удалить
         </Button>

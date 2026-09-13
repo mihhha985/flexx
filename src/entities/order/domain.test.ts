@@ -9,7 +9,7 @@ const input = {
   customerPhone: "+7 (999) 123-45-67",
   shippingAddress: " Москва, ул. Примерная, 1 ",
   comment: " Позвоните заранее ",
-  items: [{ productId: 1, quantity: 2 }],
+  items: [{ productId: 1, size: 42, quantity: 2 }],
 }
 
 test("normalizes contact details and strips client-supplied totals, prices and status", () => {
@@ -25,13 +25,15 @@ test("normalizes contact details and strips client-supplied totals, prices and s
   assert.equal(result.comment, "Позвоните заранее")
   assert.equal("total" in result, false)
   assert.equal("status" in result, false)
-  assert.deepEqual(result.items, [{ productId: 1, quantity: 2 }])
+  assert.deepEqual(result.items, [{ productId: 1, size: 42, quantity: 2 }])
 })
 
 test("rejects empty carts, duplicate products and invalid quantities or IDs", () => {
   for (const items of [
     [],
     [input.items[0], input.items[0]],
+    [{ productId: 1, size: 34, quantity: 1 }],
+    [{ productId: 1, size: 49, quantity: 1 }],
     [{ productId: 1, quantity: 0 }],
     [{ productId: 1, quantity: -1 }],
     [{ productId: 1, quantity: 1.5 }],
@@ -42,6 +44,16 @@ test("rejects empty carts, duplicate products and invalid quantities or IDs", ()
   ]) {
     assert.equal(orderSchema.safeParse({ ...input, items }).success, false)
   }
+})
+
+test("allows one product in different sizes", () => {
+  assert.equal(
+    orderSchema.safeParse({
+      ...input,
+      items: [input.items[0], { productId: 1, size: 43, quantity: 1 }],
+    }).success,
+    true,
+  )
 })
 
 test("rejects missing contacts, invalid email and phone, and oversized requests", () => {

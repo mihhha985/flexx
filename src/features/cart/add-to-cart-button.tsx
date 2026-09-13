@@ -1,24 +1,18 @@
 "use client"
+import Link from "next/link"
 import { ShoppingBagIcon } from "lucide-react"
-import { toast } from "sonner"
-import { Button } from "@/src/shared/ui/button"
+import { buttonVariants } from "@/src/shared/ui/button"
 import type { Product } from "@/src/entities/product/domain"
-import { useCartStore } from "./cart-store"
+import { cn } from "@/src/shared/lib/utils"
 
 export function AddToCartButton({ product }: { product: Product }) {
-  const addItem = useCartStore((state) => state.addItem)
-  const ready = useCartStore((state) => state.ready)
   return (
-    <Button
-      size="sm"
-      className="w-full"
-      isDisabled={!ready || product.stock < 1}
-      onPress={() => {
-        addItem(product)
-        toast.success("Товар добавлен в корзину", { description: product.name })
-      }}
+    <Link
+      href={`/product/${product.slug}`}
+      className={cn(buttonVariants({ size: "sm" }), "w-full")}
     >
-      <ShoppingBagIcon data-icon="inline-start" />В корзину
-    </Button>
+      <ShoppingBagIcon data-icon="inline-start" />
+      Выбрать размер
+    </Link>
   )
 }

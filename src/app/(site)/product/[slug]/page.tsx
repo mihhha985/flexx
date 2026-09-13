@@ -87,7 +87,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <PackageCheckIcon className="text-muted-foreground" />
               <CardTitle>О товаре</CardTitle>
               <CardDescription>
-                Артикул {String(product.id).padStart(5, "0")} · Категория «{product.category.name}».
+                Страна производитель: {product.detail?.country} · Категория «{product.category.name}».
                 Актуальное наличие показываем перед добавлением в корзину.
               </CardDescription>
             </CardHeader>
