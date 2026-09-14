@@ -13,11 +13,10 @@ export function FavoriteButton({ product, className }: { product: Product; class
 
   return (
     <Button
-      variant={isFavorite ? "default" : "outline"}
+      variant="ghost"
       size="icon-sm"
       className={cn(
-        "bg-background/95 data-pressed:[&_svg]:-rotate-6 data-pressed:[&_svg]:scale-75",
-        isFavorite && "bg-primary text-primary-foreground",
+        "data-pressed:[&_svg]:-rotate-6 data-pressed:[&_svg]:scale-75",
         className,
       )}
       aria-label={

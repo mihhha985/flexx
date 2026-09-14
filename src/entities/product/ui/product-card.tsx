@@ -14,7 +14,6 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative">
         <Link
           href={`/product/${product.slug}`}
-          className="ui-focus block rounded-lg"
           aria-label={`Открыть товар ${product.name}`}
         >
           <ProductVisual product={product} />
@@ -23,9 +22,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <CardHeader>
         <CardTitle className="text-sm/5 font-medium sm:text-base/6">
-          <Link href={`/product/${product.slug}`} className="hover:underline">
-            {product.name}
-          </Link>
+          {product.name}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex items-center justify-between">

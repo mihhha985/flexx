@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { PackageIcon } from "lucide-react"
-
+import Image from "next/image"
 import Menu from "@/src/app/(site)/_components/menu"
 import MobileMenu from "@/src/app/(site)/_components/mobile-menu"
 import { TransitionWrapper } from "@/src/app/(site)/_components/transition-wrapper"
@@ -21,13 +21,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:min-h-20 lg:px-8">
           <Link
             href="/"
-            className="ui-focus flex items-center gap-2 rounded-md text-xl font-bold tracking-tight"
-            aria-label="Контур — на главную"
+            className="ui-focus flex items-center rounded-md text-xl font-bold tracking-tight"
+            aria-label="FLEXX — на главную"
           >
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <PackageIcon className="size-4" aria-hidden="true" />
-            </span>
-            <span>Flexx</span>
+            <Image
+              src="/images/logo.png"
+              alt="FLEXX"
+              width={32}
+              height={32}
+              className="size-8"
+            />
+            <span className="font-bold">FLEXX</span>
           </Link>
 
           <Menu />

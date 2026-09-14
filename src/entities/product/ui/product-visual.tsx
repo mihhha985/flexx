@@ -1,27 +1,27 @@
 /* eslint-disable @next/next/no-img-element -- Product image URLs may use arbitrary CMS domains. */
-
+//import Image from "next/image"
+"use client"
 import type { Product } from "@/src/entities/product/domain"
 import { cn } from "@/src/shared/lib/utils"
-
+import { motion } from "motion/react";
 export function ProductVisual({
   product,
-  compact = false,
 }: {
   product: Pick<Product, "name" | "imageUrl">
-  compact?: boolean
 }) {
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-lg bg-muted",
-        compact ? "aspect-square size-20 shrink-0" : "aspect-square w-full",
+        "overflow-hidden rounded-lg relative aspect-square size-full",
       )}
     >
       {product.imageUrl ? (
-        <img
+        <motion.img
+          whileHover={{ scale: 1.1 }}
+          whileDrag={{ scale: 0.9 }}
           src={product.imageUrl}
           alt={`Изображение товара ${product.name}`}
-          className={cn("size-full object-contain", compact ? "p-2" : "p-[10%]")}
+          className={"object-contain absolute inset-0"}
         />
       ) : (
         <div className="flex size-full items-center justify-center p-2 text-center text-xs text-muted-foreground">

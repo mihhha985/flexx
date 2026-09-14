@@ -130,7 +130,7 @@ export default function Home() {
         aria-labelledby="home-sale"
       >
         <div
-          className="pointer-events-none absolute right-10 bottom-0 -z-10 select-none text-[7rem]/[0.8] font-bold tracking-tighter text-primary-foreground/5 sm:right-4 sm:text-[11rem]/[0.8] lg:left-30 lg:text-[15rem]/[0.8]"
+          className="pointer-events-none absolute left-6 sm:left-10 lg:left-1/5 bottom-0 -z-10 select-none text-[7rem]/[0.8] font-bold tracking-tighter text-primary-foreground/5 sm:text-[11rem]/[0.8] lg:text-[15rem]/[0.8]"
           aria-hidden="true"
         >
           FLEXX
@@ -140,7 +140,7 @@ export default function Home() {
           height={300}
           src="/images/baner.png"
           alt="Чёрно-белый высокий кроссовок на каменной подставке"
-          className="absolute right-0 -top-10 opacity-60 mix-blend-exclusion"
+          className="absolute right-0 -top-10 opacity-60 mix-blend-exclusion -z-10"
         />
         <div className="flex max-w-xl flex-col items-start gap-5">
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground/70">

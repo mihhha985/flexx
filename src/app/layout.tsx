@@ -15,8 +15,8 @@ export const metadata: Metadata = {
     title: "Flexx",
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/images/logo.png",
+    apple: "/images/logo.png",
   },
 }
 
