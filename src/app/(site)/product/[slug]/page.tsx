@@ -4,7 +4,6 @@ import type { Metadata } from "next"
 import { PackageCheckIcon, RotateCcwIcon, ShieldCheckIcon, TruckIcon } from "lucide-react"
 
 import { ProductPurchase } from "@/src/entities/product/ui/product-purchase"
-import { ProductVisual } from "@/src/entities/product/ui/product-visual"
 import { getProductBySlug } from "@/src/entities/product/services/product-service"
 import { Badge } from "@/src/shared/ui/badge"
 import {
@@ -15,6 +14,7 @@ import {
   BreadcrumbPage,
 } from "@/src/shared/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
+import { ProductGallery } from "./product-gallery"
 
 export async function generateMetadata({
   params,
@@ -54,8 +54,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)]">
         <div className="flex flex-col gap-5">
-          <Card>
-            <ProductVisual product={product} />
+          <Card className="py-0">
+            <ProductGallery product={product} />
             <CardHeader>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{product.category.name}</Badge>
@@ -87,8 +87,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <PackageCheckIcon className="text-muted-foreground" />
               <CardTitle>О товаре</CardTitle>
               <CardDescription>
-                Страна производитель: {product.detail?.country} · Категория «{product.category.name}».
-                Актуальное наличие показываем перед добавлением в корзину.
+                Страна производитель: {product.detail?.country} · Категория «{product.category.name}
+                ». Актуальное наличие показываем перед добавлением в корзину.
               </CardDescription>
             </CardHeader>
             <CardContent>

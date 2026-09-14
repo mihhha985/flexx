@@ -4,7 +4,8 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     serverActions: {
-      bodySizeLimit: "6mb",
+      // One avatar plus several gallery images can be submitted in a single product form.
+      bodySizeLimit: "60mb",
     },
   },
   turbopack: {

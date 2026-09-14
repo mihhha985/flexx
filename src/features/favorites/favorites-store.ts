@@ -14,19 +14,29 @@ type FavoritesState = {
   setReady: () => void
 }
 
+const savedFavoriteProductFieldsSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().optional(),
+  price: z.number().nonnegative(),
+  stock: z.number().int().nonnegative(),
+  isActive: z.boolean(),
+})
+
+const savedFavoriteProductSchema = z.union([
+  savedFavoriteProductFieldsSchema.extend({ avatar: z.string(), images: z.array(z.string()) }),
+  savedFavoriteProductFieldsSchema
+    .extend({ imageUrl: z.string().nullable() })
+    .transform(({ imageUrl, ...product }) => ({
+      ...product,
+      avatar: imageUrl ?? "",
+      images: [],
+    })),
+])
+
 const savedFavoritesSchema = z.object({
-  items: z.array(
-    z.object({
-      id: z.number().int().positive(),
-      name: z.string(),
-      slug: z.string(),
-      description: z.string().optional(),
-      price: z.number().nonnegative(),
-      imageUrl: z.string().nullable(),
-      stock: z.number().int().nonnegative(),
-      isActive: z.boolean(),
-    }),
-  ),
+  items: z.array(savedFavoriteProductSchema),
 })
 
 // Keep favorites usable when browser storage is blocked or full.

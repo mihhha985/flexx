@@ -10,10 +10,11 @@ const product: Product & Pick<ProductWithCategory, "category"> = {
   name: "Товар",
   slug: "product",
   price: 150,
-  imageUrl: null,
+  avatar: "https://cdn.example.com/products/product.jpg",
+  images: [],
   stock: 5,
   isActive: true,
-  category: { name: "Категория", slug: "category", order: 1 },
+  category: { name: "Категория", slug: "category", order: 1, icon: "folder" },
 }
 
 beforeEach(() => {
@@ -100,6 +101,34 @@ test("hydrates legacy carts only when requested and rewrites the persist format"
   })
   assert.equal(useCartStore.getInitialState().ready, false)
   assert.deepEqual(useCartStore.getInitialState().items, [])
+})
+
+test("migrates saved cart products from imageUrl to avatar", async () => {
+  const { avatar: _avatar, images: _images, ...legacyProduct } = product
+  void _avatar
+  void _images
+  storage.set(
+    "kontur-cart",
+    JSON.stringify({
+      state: {
+        items: [
+          {
+            product: { ...legacyProduct, imageUrl: "https://cdn.example.com/products/legacy.jpg" },
+            size: 42,
+            quantity: 1,
+          },
+        ],
+      },
+      version: 0,
+    }),
+  )
+
+  await useCartStore.persist.rehydrate()
+  assert.equal(
+    useCartStore.getState().items[0].product.avatar,
+    "https://cdn.example.com/products/legacy.jpg",
+  )
+  assert.deepEqual(useCartStore.getState().items[0].product.images, [])
 })
 
 test("restores the new format and limits quantities to saved stock", async () => {

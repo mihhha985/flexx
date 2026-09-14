@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
-import { createProductSchema, updateProductSchema } from "./domain"
+import { createProductSchema, MAX_PRODUCT_IMAGES, updateProductSchema } from "./domain"
 
 const input = {
   id: "1",
@@ -11,13 +11,17 @@ const input = {
   price: "1499.50",
   stock: "12",
   description: "  Электрический чайник.  ",
-  imageUrl: "",
+  avatar: "https://cdn.example.com/products/kettle.jpg",
+  images: [
+    "https://cdn.example.com/products/kettle-side.jpg",
+    "https://cdn.example.com/products/kettle-back.jpg",
+  ],
   color: "#FFFFFF",
   size: ["42", "43"],
   country: "  Россия  ",
 }
 
-test("normalizes product edits and turns an empty image URL into null", () => {
+test("normalizes product edits and validates the product gallery", () => {
   const result = updateProductSchema.parse(input)
 
   assert.deepEqual(result, {
@@ -28,7 +32,11 @@ test("normalizes product edits and turns an empty image URL into null", () => {
     price: 1499.5,
     stock: 12,
     description: "Электрический чайник.",
-    imageUrl: null,
+    avatar: "https://cdn.example.com/products/kettle.jpg",
+    images: [
+      "https://cdn.example.com/products/kettle-side.jpg",
+      "https://cdn.example.com/products/kettle-back.jpg",
+    ],
     color: "#FFFFFF",
     size: [42, 43],
     country: "Россия",
@@ -44,7 +52,15 @@ test("rejects invalid product edits", () => {
     { price: "-1" },
     { stock: "1.5" },
     { description: "" },
-    { imageUrl: "not-a-url" },
+    { avatar: "not-a-url" },
+    { images: ["not-a-url"] },
+    { images: [input.avatar, input.avatar] },
+    {
+      images: Array.from(
+        { length: MAX_PRODUCT_IMAGES + 1 },
+        (_, index) => `https://cdn.example.com/products/gallery-${index}.jpg`,
+      ),
+    },
     { color: "#123456" },
     { size: [] },
     { size: ["34"] },
@@ -62,7 +78,8 @@ test("creating a product validates fields without requiring an id or accepting v
   const result = createProductSchema.parse({ ...fields, id: "999", isActive: false })
   assert.equal(result.name, "Чайник")
   assert.equal(result.price, 1499.5)
-  assert.equal(result.imageUrl, null)
+  assert.equal(result.avatar, input.avatar)
+  assert.deepEqual(result.images, input.images)
   assert.equal("id" in result, false)
   assert.equal("isActive" in result, false)
   for (const changes of [

@@ -12,7 +12,7 @@ export default async function Page() {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Товары</h1>
         <p className="text-sm text-muted-foreground">
-          Управление товарами: цены, остатки и видимость в каталоге.
+          Управление товарами: изображения, цены, остатки и видимость в каталоге.
         </p>
       </div>
       <ProductsTable data={data} categories={categories} />

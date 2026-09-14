@@ -24,20 +24,34 @@ type CartState = {
   setReady: () => void
 }
 
+const savedCartProductFieldsSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().optional(),
+  price: z.number().nonnegative(),
+  stock: z.number().int().positive(),
+  isActive: z.boolean(),
+  category: z
+    .object({ name: z.string(), slug: z.string(), order: z.number(), icon: z.string() })
+    .optional(),
+})
+
+const savedCartProductSchema = z.union([
+  savedCartProductFieldsSchema.extend({ avatar: z.string(), images: z.array(z.string()) }),
+  savedCartProductFieldsSchema
+    .extend({ imageUrl: z.string().nullable() })
+    .transform(({ imageUrl, ...product }) => ({
+      ...product,
+      avatar: imageUrl ?? "",
+      images: [],
+    })),
+])
+
 const savedCartSchema = z.object({
   items: z.array(
     z.object({
-      product: z.object({
-        id: z.number().int(),
-        name: z.string(),
-        slug: z.string(),
-        description: z.string().optional(),
-        price: z.number().nonnegative(),
-        imageUrl: z.string().nullable(),
-        stock: z.number().int().positive(),
-        isActive: z.boolean(),
-        category: z.object({ name: z.string(), slug: z.string(), order: z.number() }).optional(),
-      }),
+      product: savedCartProductSchema,
       size: z.number().int().min(35).max(48),
       quantity: z.number().int().positive(),
     }),

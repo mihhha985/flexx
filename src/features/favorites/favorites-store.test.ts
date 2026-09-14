@@ -14,7 +14,8 @@ const product: Product = {
   name: "Товар",
   slug: "product",
   price: 150,
-  imageUrl: null,
+  avatar: "https://cdn.example.com/products/product.jpg",
+  images: [],
   stock: 5,
   isActive: true,
 }
@@ -70,6 +71,28 @@ test("hydrates valid unique favorites only when requested", async () => {
 
   assert.equal(useFavoritesStore.getState().ready, true)
   assert.deepEqual(useFavoritesStore.getState().items, [product])
+})
+
+test("migrates saved favorites from imageUrl to avatar", async () => {
+  const { avatar: _avatar, images: _images, ...legacyProduct } = product
+  void _avatar
+  void _images
+  storage.set(
+    "kontur-favorites",
+    JSON.stringify({
+      state: {
+        items: [{ ...legacyProduct, imageUrl: "https://cdn.example.com/products/legacy.jpg" }],
+      },
+      version: 0,
+    }),
+  )
+
+  await useFavoritesStore.persist.rehydrate()
+  assert.equal(
+    useFavoritesStore.getState().items[0].avatar,
+    "https://cdn.example.com/products/legacy.jpg",
+  )
+  assert.deepEqual(useFavoritesStore.getState().items[0].images, [])
 })
 
 test("finishes hydration for missing and invalid saved data", async () => {

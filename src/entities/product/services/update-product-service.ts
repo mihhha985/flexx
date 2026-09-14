@@ -2,12 +2,18 @@
 
 import { requireAdmin } from "@/src/entities/admin/services/session-service"
 import { revalidateCatalog } from "@/src/shared/lib/revalidate-catalog"
-import { updateProductSchema, type UpdateProductState } from "@/src/entities/product/domain"
+import {
+  MAX_PRODUCT_IMAGES,
+  productImagesSchema,
+  updateProductFormSchema,
+  type UpdateProductState,
+} from "@/src/entities/product/domain"
 import * as repository from "../repository/manage-product"
 import {
   deleteProductImage,
-  deleteProductImageByKey,
+  deleteUploadedProductImages,
   getProductImageFile,
+  getProductImageFiles,
   ProductImageStorageError,
   uploadProductImage,
   type UploadedProductImage,
@@ -18,9 +24,19 @@ export async function updateProductAction(
   formData: FormData,
 ): Promise<UpdateProductState> {
   await requireAdmin()
-  const { file: imageFile, error: imageError } = getProductImageFile(formData.get("image"))
-  if (imageError) return { errors: { image: [imageError] } }
-  const result = updateProductSchema.safeParse({
+  const { file: avatarFile, error: avatarError } = getProductImageFile(formData.get("avatar"))
+  if (avatarError) return { errors: { avatar: [avatarError] } }
+
+  const { files: imageFiles, error: imagesError } = getProductImageFiles(formData.getAll("images"))
+  if (imagesError) return { errors: { images: [imagesError] } }
+
+  const retainedImagesResult = productImagesSchema.safeParse(formData.getAll("retainedImage"))
+  if (!retainedImagesResult.success)
+    return { errors: { images: retainedImagesResult.error.issues.map((issue) => issue.message) } }
+  if (retainedImagesResult.data.length + imageFiles.length > MAX_PRODUCT_IMAGES)
+    return { errors: { images: [`Можно добавить не больше ${MAX_PRODUCT_IMAGES} изображений.`] } }
+
+  const result = updateProductFormSchema.safeParse({
     id: formData.get("id"),
     name: formData.get("name"),
     slug: formData.get("slug"),
@@ -28,7 +44,6 @@ export async function updateProductAction(
     price: formData.get("price"),
     stock: formData.get("stock"),
     description: formData.get("description"),
-    imageUrl: "",
     color: formData.get("color"),
     size: formData.getAll("size"),
     country: formData.get("country"),
@@ -38,8 +53,10 @@ export async function updateProductAction(
     return { errors: result.error.flatten().fieldErrors }
   }
 
-  const imageUpload: { image: UploadedProductImage | null } = { image: null }
-  let previousImageUrl: string | null = null
+  const uploads: UploadedProductImage[] = []
+  let previousAvatar: string | null = null
+  let removedImages: string[] = []
+  let mediaErrorField: "avatar" | "images" = "avatar"
   try {
     await repository.withProductTransaction(async (transaction) => {
       const { product, category, duplicate, detail } = await transaction.getProductEditContext(
@@ -50,32 +67,43 @@ export async function updateProductAction(
         throw new ProductFormError({ errors: { categoryId: ["Категория не найдена."] } })
       if (duplicate && duplicate.id !== result.data.id)
         throw new ProductFormError({ errors: { slug: ["Товар с таким слагом уже существует."] } })
-      if (imageFile) imageUpload.image = await uploadProductImage(imageFile)
-      previousImageUrl = product.imageUrl
+
+      const retainedImageSet = new Set(retainedImagesResult.data)
+      if (retainedImagesResult.data.some((image) => !product.images.includes(image)))
+        throw new ProductFormError({
+          errors: { images: ["Список изображений устарел. Обновите страницу и попробуйте снова."] },
+        })
+
+      if (avatarFile) uploads.push(await uploadProductImage(avatarFile))
+      mediaErrorField = "images"
+      for (const imageFile of imageFiles) uploads.push(await uploadProductImage(imageFile))
+
+      const retainedImages = product.images.filter((image) => retainedImageSet.has(image))
+      const uploadedImages = uploads.slice(avatarFile ? 1 : 0).map((image) => image.url)
+      previousAvatar = avatarFile ? product.avatar : null
+      removedImages = product.images.filter((image) => !retainedImageSet.has(image))
+
       const updated = await transaction.updateProduct({
         ...result.data,
-        imageUrl: imageUpload.image?.url ?? product.imageUrl,
+        avatar: avatarFile ? uploads[0].url : product.avatar,
+        images: [...retainedImages, ...uploadedImages],
       })
       if (!updated) throw new ProductFormError({ message: "Товар не найден. Обновите страницу." })
       await transaction.saveProductDetail(result.data.id, result.data, Boolean(detail))
     })
   } catch (error) {
-    if (imageUpload.image) {
-      try {
-        await deleteProductImageByKey(imageUpload.image.key)
-      } catch (cleanupError) {
-        console.error("Не удалось удалить изображение товара после ошибки обновления", cleanupError)
-      }
-    }
+    await cleanupUploadedImages(uploads)
     if (error instanceof ProductFormError) return error.state
-    if (error instanceof ProductImageStorageError) return { errors: { image: [error.message] } }
+    if (error instanceof ProductImageStorageError)
+      return { errors: { [mediaErrorField]: [error.message] } }
     console.error("Не удалось обновить товар", error)
     return { message: "Не удалось сохранить изменения. Попробуйте ещё раз позже." }
   }
 
-  if (imageUpload.image && previousImageUrl) {
+  for (const imageUrl of [previousAvatar, ...removedImages]) {
+    if (!imageUrl) continue
     try {
-      await deleteProductImage(previousImageUrl)
+      await deleteProductImage(imageUrl)
     } catch (error) {
       console.error("Не удалось удалить прежнее изображение товара", error)
     }
@@ -89,5 +117,14 @@ export async function updateProductAction(
 class ProductFormError extends Error {
   constructor(readonly state: UpdateProductState) {
     super()
+  }
+}
+
+async function cleanupUploadedImages(images: UploadedProductImage[]) {
+  if (!images.length) return
+  try {
+    await deleteUploadedProductImages(images)
+  } catch (cleanupError) {
+    console.error("Не удалось удалить изображения товара после ошибки обновления", cleanupError)
   }
 }

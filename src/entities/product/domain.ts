@@ -8,7 +8,8 @@ export type Product = {
   slug: string
   description?: string
   price: number
-  imageUrl: string | null
+  avatar: string
+  images: readonly string[]
   stock: number
   isActive: boolean
 }
@@ -44,6 +45,7 @@ export const productColors = [
 ] as const
 
 export const productSizes = Array.from({ length: 14 }, (_, index) => index + 35)
+export const MAX_PRODUCT_IMAGES = 10
 
 const productColorSchema = z.enum(productColorValues, "Выберите цвет из списка")
 
@@ -94,18 +96,31 @@ const productFieldsSchema = z.object({
       .max(2147483647, "Остаток слишком большой"),
   ),
   description: z.string().trim().min(1, "Добавьте описание").max(10000, "Описание слишком длинное"),
-  imageUrl: z.preprocess(
-    (value) => (typeof value === "string" && value.trim() === "" ? null : value),
-    z
-      .string()
-      .trim()
-      .url("Укажите корректную ссылку на изображение")
-      .max(2048, "Ссылка слишком длинная")
-      .nullable(),
-  ),
 })
 
-export const createProductSchema = productFieldsSchema.merge(productDetailSchema)
+const productImageUrlSchema = z
+  .string()
+  .trim()
+  .url("Укажите корректную ссылку на изображение")
+  .max(2048, "Ссылка на изображение слишком длинная")
+
+export const productImagesSchema = z
+  .array(productImageUrlSchema)
+  .max(MAX_PRODUCT_IMAGES, `Можно добавить не больше ${MAX_PRODUCT_IMAGES} изображений`)
+  .refine((images) => new Set(images).size === images.length, "Изображения не должны повторяться")
+
+const productMediaSchema = z.object({
+  avatar: productImageUrlSchema,
+  images: productImagesSchema,
+})
+
+export const createProductFormSchema = productFieldsSchema.merge(productDetailSchema)
+
+export const updateProductFormSchema = createProductFormSchema.extend({
+  id: requiredNumber("Не удалось определить товар").pipe(z.number().int().positive()),
+})
+
+export const createProductSchema = createProductFormSchema.merge(productMediaSchema)
 
 export const updateProductSchema = createProductSchema.extend({
   id: requiredNumber("Не удалось определить товар").pipe(z.number().int().positive()),
@@ -125,8 +140,8 @@ export type UpdateProductState = {
     price?: string[]
     stock?: string[]
     description?: string[]
-    imageUrl?: string[]
-    image?: string[]
+    avatar?: string[]
+    images?: string[]
     color?: string[]
     size?: string[]
     country?: string[]

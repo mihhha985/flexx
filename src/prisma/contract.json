@@ -423,6 +423,13 @@
           },
           "Product": {
             "fields": {
+              "avatar": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "categoryId": {
                 "nullable": false,
                 "type": {
@@ -451,8 +458,9 @@
                   "kind": "scalar"
                 }
               },
-              "imageUrl": {
-                "nullable": true,
+              "images": {
+                "many": true,
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -550,6 +558,9 @@
             },
             "storage": {
               "fields": {
+                "avatar": {
+                  "column": "avatar"
+                },
                 "categoryId": {
                   "column": "categoryId"
                 },
@@ -562,8 +573,8 @@
                 "id": {
                   "column": "id"
                 },
-                "imageUrl": {
-                  "column": "imageUrl"
+                "images": {
+                  "column": "images"
                 },
                 "isActive": {
                   "column": "isActive"
@@ -952,7 +963,19 @@
               "uniques": []
             },
             "product": {
+              "checks": [
+                {
+                  "expression": "array_position(\"images\", NULL) IS NULL",
+                  "name": "product_images_elem_not_null_2f12556f",
+                  "prefix": "product_images_elem_not_null"
+                }
+              ],
               "columns": {
+                "avatar": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "categoryId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -981,10 +1004,11 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "imageUrl": {
+                "images": {
                   "codecId": "pg/text@1",
+                  "many": true,
                   "nativeType": "text",
-                  "nullable": true
+                  "nullable": false
                 },
                 "isActive": {
                   "codecId": "pg/bool@1",
@@ -1188,7 +1212,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "871a0000a4525508b60c3fa4e6090440d118be887853d0a034f3203c12ba7514"
+    "storageHash": "e50f96053bcbca3fa511e37cc374157268dda8801d0dd4db0645b5014f803112"
   },
   "execution": {
     "executionHash": "db2a4b2fcbf69eb635558ae43399b655bdd2e4648bd5ac2b2a895afe15990314",

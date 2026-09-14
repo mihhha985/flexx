@@ -4,16 +4,16 @@ import type { CreateProductInput, ProductDetailInput, UpdateProductInput } from 
 
 function transactionRepository(tx: Parameters<Parameters<typeof db.transaction>[0]>[0]) {
   return {
-    getProductCreateContext: async (data: CreateProductInput) => {
+    getProductCreateContext: async (data: Pick<CreateProductInput, "categoryId" | "slug">) => {
       const [category, duplicate] = await Promise.all([
         tx.orm.public.Category.select("id").where({ id: data.categoryId }).first(),
         tx.orm.public.Product.select("id").where({ slug: data.slug }).first(),
       ])
       return { category, duplicate }
     },
-    getProductEditContext: async (data: UpdateProductInput) => {
+    getProductEditContext: async (data: Pick<UpdateProductInput, "id" | "categoryId" | "slug">) => {
       const [product, category, duplicate, detail] = await Promise.all([
-        tx.orm.public.Product.select("id", "imageUrl").where({ id: data.id }).first(),
+        tx.orm.public.Product.select("id", "avatar", "images").where({ id: data.id }).first(),
         tx.orm.public.Category.select("id").where({ id: data.categoryId }).first(),
         tx.orm.public.Product.select("id").where({ slug: data.slug }).first(),
         tx.orm.public.ProductDetail.select("id").where({ productId: data.id }).first(),
@@ -28,7 +28,8 @@ function transactionRepository(tx: Parameters<Parameters<typeof db.transaction>[
         price: data.price,
         stock: data.stock,
         description: data.description,
-        imageUrl: data.imageUrl,
+        avatar: data.avatar,
+        images: data.images,
         isActive: true,
       }),
     updateProduct: (data: UpdateProductInput) =>
@@ -39,7 +40,8 @@ function transactionRepository(tx: Parameters<Parameters<typeof db.transaction>[
         price: data.price,
         stock: data.stock,
         description: data.description,
-        imageUrl: data.imageUrl,
+        avatar: data.avatar,
+        images: data.images,
       }),
     saveProductDetail: (productId: number, data: ProductDetailInput, exists: boolean) => {
       const detail = { color: data.color, size: data.size, country: data.country }
@@ -63,6 +65,9 @@ export async function setProductActive(id: number, isActive: boolean) {
 }
 export async function getProductOrderItem(productId: number) {
   return db.orm.public.OrderItem.where({ productId }).select("id").first()
+}
+export async function getProductMedia(id: number) {
+  return db.orm.public.Product.where({ id }).select("avatar", "images").first()
 }
 export async function deleteProduct(id: number) {
   return db.orm.public.Product.where({ id }).delete()

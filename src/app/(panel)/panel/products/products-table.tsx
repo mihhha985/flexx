@@ -1,6 +1,7 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useMemo } from "react"
+import { useRouter } from "next/navigation"
 import type { ColumnDef } from "@tanstack/react-table"
 import { FolderPlusIcon, PackagePlusIcon, PlusIcon } from "lucide-react"
 import type { AdminCategory } from "@/src/entities/category/services/admin-category-service"
@@ -12,7 +13,7 @@ import {
 import { DataTable } from "@/src/app/(panel)/panel/_components/data-table"
 import { CatalogRowActions } from "@/src/app/(site)/catalog/_components/catalog-row-actions"
 import { Badge } from "@/src/shared/ui/badge"
-import { Button, LinkButton } from "@/src/shared/ui/button"
+import { LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
 import {
   Empty,
@@ -23,7 +24,6 @@ import {
   EmptyTitle,
 } from "@/src/shared/ui/empty"
 import { formatPrice } from "@/src/shared/lib/format-price"
-import { ProductEditDialog } from "./product-edit-dialog"
 
 function shortenName(name: string) {
   const characters = Array.from(name)
@@ -95,15 +95,15 @@ export function ProductsTable({
   data: AdminProduct[]
   categories: AdminCategory[]
 }) {
-  const [editor, setEditor] = useState<AdminProduct | "create" | null>(null)
+  const router = useRouter()
   const columns = useMemo(
     () =>
-      getColumns(setEditor, new Map(categories.map((category) => [category.id, category.name]))),
-    [categories],
+      getColumns(
+        (product) => router.push(`/panel/products/${product.id}/edit`),
+        new Map(categories.map((category) => [category.id, category.name])),
+      ),
+    [categories, router],
   )
-  const onOpenChange = useCallback((open: boolean) => {
-    if (!open) setEditor(null)
-  }, [])
 
   if (!categories.length) {
     return (
@@ -130,66 +130,51 @@ export function ProductsTable({
 
   if (!data.length) {
     return (
-      <>
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <PackagePlusIcon />
-            </EmptyMedia>
-            <EmptyTitle>Товаров пока нет</EmptyTitle>
-            <EmptyDescription>
-              Добавьте первый товар — после сохранения он появится в каталоге.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button onPress={() => setEditor("create")}>
-              <PlusIcon data-icon="inline-start" />
-              Создать товар
-            </Button>
-          </EmptyContent>
-        </Empty>
-        {editor !== null && (
-          <ProductEditDialog key="create" categories={categories} onOpenChange={onOpenChange} />
-        )}
-      </>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <PackagePlusIcon />
+          </EmptyMedia>
+          <EmptyTitle>Товаров пока нет</EmptyTitle>
+          <EmptyDescription>
+            Добавьте первый товар — после сохранения он появится в каталоге.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <LinkButton href="/panel/products/new">
+            <PlusIcon data-icon="inline-start" />
+            Создать товар
+          </LinkButton>
+        </EmptyContent>
+      </Empty>
     )
   }
 
   return (
-    <>
-      <Card>
-        <CardHeader className="border-b">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <CardTitle>Товары каталога</CardTitle>
-              <CardDescription>Всего товаров: {data.length}</CardDescription>
-            </div>
-            <Button onPress={() => setEditor("create")} isDisabled={!categories.length}>
-              <PlusIcon data-icon="inline-start" />
-              Создать товар
-            </Button>
+    <Card>
+      <CardHeader className="border-b">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <CardTitle>Товары каталога</CardTitle>
+            <CardDescription>Всего товаров: {data.length}</CardDescription>
           </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={data}
-            label="Список товаров"
-            searchLabel="Поиск по товарам"
-            searchPlaceholder="Название, слаг, категория или статус…"
-            globalFilterColumns={["id", "name", "slug", "category", "isActive"]}
-            emptyDescription="Создайте первый товар, чтобы наполнить каталог."
-          />
-        </CardContent>
-      </Card>
-      {editor !== null && (
-        <ProductEditDialog
-          key={editor === "create" ? "create" : editor.id}
-          product={editor === "create" ? undefined : editor}
-          categories={categories}
-          onOpenChange={onOpenChange}
+          <LinkButton href="/panel/products/new">
+            <PlusIcon data-icon="inline-start" />
+            Создать товар
+          </LinkButton>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <DataTable
+          columns={columns}
+          data={data}
+          label="Список товаров"
+          searchLabel="Поиск по товарам"
+          searchPlaceholder="Название, слаг, категория или статус…"
+          globalFilterColumns={["id", "name", "slug", "category", "isActive"]}
+          emptyDescription="Создайте первый товар, чтобы наполнить каталог."
         />
-      )}
-    </>
+      </CardContent>
+    </Card>
   )
 }

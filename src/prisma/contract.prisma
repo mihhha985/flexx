@@ -6,7 +6,8 @@ model Product {
   slug        String            @unique
   price       Float
   description String
-  imageUrl    String?
+  avatar      String
+  images      String[]
   isActive    Boolean           @default(true)
   stock       Int               @default(0)
   detail      ProductDetail?

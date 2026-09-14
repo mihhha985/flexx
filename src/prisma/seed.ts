@@ -1,42 +1,24 @@
 import { connectDatabase, db } from "./db.ts"
 
 const categories = [
-  { name: "Electronics", slug: "electronics", icon: "electronics", order: 10 },
-  { name: "Clothing", slug: "clothing", icon: "clothing", order: 20 },
-  { name: "Home", slug: "home", icon: "home", order: 30 },
-  { name: "Beauty", slug: "beauty", icon: "beauty", order: 40 },
-  { name: "Sports", slug: "sports", icon: "sports", order: 50 },
+  { name: "Puma", slug: "puma", icon: "/category/puma.png", order: 10 },
+  { name: "Adidas", slug: "adidas", icon: "/category/adidas.webp", order: 20 },
+  { name: "Nike", slug: "nike", icon: "/category/nike.png", order: 30 },
+  { name: "Jordan", slug: "jordan", icon: "/category/jordan.webp", order: 40 },
+  { name: "New Balance", slug: "new-balance", icon: "/category/newbalance.webp", order: 50 },
 ] as const
 
 async function main(): Promise<void> {
   await connectDatabase()
 
   await db.transaction(async (tx) => {
-    const seededCategories = []
-
     for (const category of categories) {
-      const seededCategory =
-        (await tx.orm.public.Category.where({ slug: category.slug }).first()) ??
-        (await tx.orm.public.Category.create(category))
+      const existing = await tx.orm.public.Category.where({ slug: category.slug })
+        .select("id")
+        .first()
+      if (existing) continue
 
-      seededCategories.push(seededCategory)
-    }
-
-    for (const [categoryIndex, category] of seededCategories.entries()) {
-      for (let index = 1; index <= 10; index++) {
-        const slug = `${category.slug}-product-${String(index).padStart(2, "0")}`
-        const existing = await tx.orm.public.Product.where({ slug }).select("id").first()
-        if (existing) continue
-        await tx.orm.public.Product.create({
-          name: `${category.name} Product ${index}`,
-          slug,
-          price: 10 + categoryIndex * 5 + index,
-          description: `${category.name} product ${index} description`,
-          categoryId: category.id,
-          isActive: true,
-          stock: 25 + index,
-        })
-      }
+      await tx.orm.public.Category.create(category)
     }
   })
 }

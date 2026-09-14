@@ -99,9 +99,11 @@ export function getProductImageFile(value: FormDataEntryValue | null) {
   if (!(value instanceof File)) return { file: null }
 
   if (value.size === 0) {
-    return value.name
-      ? { file: null, error: "Файл изображения не должен быть пустым." }
-      : { file: null }
+    const isEmptyInputPlaceholder =
+      !value.name || value.name === "undefined" || value.type === "application/octet-stream"
+    return isEmptyInputPlaceholder
+      ? { file: null }
+      : { file: null, error: "Файл изображения не должен быть пустым." }
   }
   if (value.size > maxProductImageBytes) {
     return { file: null, error: "Размер изображения не должен превышать 5 МБ." }
@@ -111,6 +113,18 @@ export function getProductImageFile(value: FormDataEntryValue | null) {
   }
 
   return { file: value }
+}
+
+export function getProductImageFiles(values: FormDataEntryValue[]) {
+  const files: File[] = []
+
+  for (const [index, value] of values.entries()) {
+    const result = getProductImageFile(value)
+    if (result.error) return { files: [], error: `Изображение ${index + 1}: ${result.error}` }
+    if (result.file) files.push(result.file)
+  }
+
+  return { files }
 }
 
 export async function uploadProductImage(file: File): Promise<UploadedProductImage> {
@@ -142,6 +156,14 @@ export async function uploadProductImage(file: File): Promise<UploadedProductIma
 export async function deleteProductImageByKey(key: string) {
   const config = getStorageConfig()
   await createS3Client(config).send(new DeleteObjectCommand({ Bucket: config.bucket, Key: key }))
+}
+
+export async function deleteUploadedProductImages(images: UploadedProductImage[]) {
+  const results = await Promise.allSettled(
+    images.map((image) => deleteProductImageByKey(image.key)),
+  )
+  const errors = results.flatMap((result) => (result.status === "rejected" ? [result.reason] : []))
+  if (errors.length) throw new AggregateError(errors, "Не удалось удалить загруженные изображения")
 }
 
 export async function deleteProductImage(imageUrl: string | null) {

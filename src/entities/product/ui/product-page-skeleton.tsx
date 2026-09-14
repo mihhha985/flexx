@@ -26,6 +26,11 @@ export function ProductPageSkeleton() {
           <div className="flex flex-col gap-5">
             <Card>
               <Skeleton className="aspect-square w-full" />
+              <div className="grid grid-cols-4 gap-2 px-6 sm:grid-cols-5 md:grid-cols-6">
+                {Array.from({ length: 5 }, (_, index) => (
+                  <Skeleton key={index} className="aspect-square w-full rounded-lg" />
+                ))}
+              </div>
               <CardHeader>
                 <div className="flex gap-2">
                   <Skeleton className="h-5 w-24" />

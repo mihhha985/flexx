@@ -16,7 +16,7 @@ function filteredProducts(category: string | undefined, search: string | undefin
 
 export async function getCatalogProducts(category: string | undefined, params: CatalogParams) {
   const products = filteredProducts(category, params.search)
-    .select("id", "name", "slug", "stock", "price", "imageUrl", "isActive")
+    .select("id", "name", "slug", "stock", "price", "avatar", "images", "isActive")
     .orderBy([
       (product) =>
         params.sort === "price"
@@ -48,11 +48,12 @@ export async function getAllActiveProducts() {
     "slug",
     "stock",
     "price",
-    "imageUrl",
+    "avatar",
+    "images",
     "description",
     "isActive",
   )
-    .include("category", (category) => category.select("name", "slug", "order"))
+    .include("category", (category) => category.select("name", "slug", "order", "icon"))
     .where({ isActive: true })
     .all()
 }
@@ -64,11 +65,12 @@ export async function getProductBySlug(slug: string) {
     "slug",
     "stock",
     "price",
-    "imageUrl",
+    "avatar",
+    "images",
     "description",
     "isActive",
   )
-    .include("category", (category) => category.select("name", "slug", "order"))
+    .include("category", (category) => category.select("name", "slug", "order", "icon"))
     .include("detail", (detail) => detail.select("color", "size", "country"))
     .where({ isActive: true, slug })
     .first()
