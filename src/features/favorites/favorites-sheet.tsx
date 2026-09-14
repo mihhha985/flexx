@@ -115,7 +115,7 @@ export function FavoritesSheet() {
                         <ProductVisual product={product} />
                       </Link>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon-sm"
                         className="absolute right-2 top-2 bg-background/95"
                         aria-label={`Убрать ${product.name} из избранного`}

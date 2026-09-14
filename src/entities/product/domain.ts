@@ -126,6 +126,7 @@ export type UpdateProductState = {
     stock?: string[]
     description?: string[]
     imageUrl?: string[]
+    image?: string[]
     color?: string[]
     size?: string[]
     country?: string[]

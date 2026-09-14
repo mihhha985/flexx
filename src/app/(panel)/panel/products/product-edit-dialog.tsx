@@ -71,7 +71,7 @@ export function ProductEditDialog({ product, categories, onOpenChange }: Product
       className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl"
       showCloseButton={!pending}
     >
-      <form action={action} className="contents" aria-busy={pending}>
+      <form action={action} encType="multipart/form-data" className="contents" aria-busy={pending}>
         {product && <input type="hidden" name="id" value={product.id} />}
         <DialogHeader>
           <DialogTitle>{product ? "Редактировать товар" : "Создать товар"}</DialogTitle>
@@ -160,19 +160,27 @@ export function ProductEditDialog({ product, categories, onOpenChange }: Product
             />
             <FieldError>{state.errors?.stock?.[0]}</FieldError>
           </Field>
-          <Field data-invalid={Boolean(state.errors?.imageUrl)}>
-            <FieldLabel htmlFor="product-image-url">Ссылка на изображение</FieldLabel>
+          <Field data-invalid={Boolean(state.errors?.image)}>
+            <FieldLabel htmlFor="product-image">Фотография товара</FieldLabel>
             <Input
-              id="product-image-url"
-              name="imageUrl"
-              type="url"
-              defaultValue={product?.imageUrl ?? ""}
-              maxLength={2048}
+              id="product-image"
+              name="image"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
               disabled={pending}
-              aria-invalid={Boolean(state.errors?.imageUrl)}
-              placeholder="https://example.com/image.jpg"
+              aria-invalid={Boolean(state.errors?.image)}
             />
-            <FieldError>{state.errors?.imageUrl?.[0]}</FieldError>
+            <p className="text-sm text-muted-foreground">JPG, PNG или WebP, до 5 МБ.</p>
+            {product?.imageUrl && (
+              // The configured Jino public URL is not known until runtime, so Next Image cannot be configured safely.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={product.imageUrl}
+                alt={`Текущая фотография ${product.name}`}
+                className="aspect-square w-24 rounded-md border border-border bg-muted object-contain p-2"
+              />
+            )}
+            <FieldError>{state.errors?.image?.[0]}</FieldError>
           </Field>
           <Field data-invalid={Boolean(state.errors?.color)}>
             <FieldLabel>Цвет</FieldLabel>

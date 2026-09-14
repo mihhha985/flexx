@@ -33,6 +33,7 @@
     "check": "npm run lint && npm run typecheck && npm test"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1131.0",
     "@prisma/composer": "0.16.0",
     "@prisma/composer-prisma-cloud": "0.16.0",
     "@prisma/orm-postgres": "8.0.0-rc.8",
@@ -64,11 +65,11 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pg": "8.22.0",
+    "prettier": "3.9.6",
     "prisma": "8.0.0-rc.12",
     "tsx": "^4.23.13",
-    "typescript": "^5.9.3",
-    "pg": "8.22.0",
-    "prettier": "3.9.6"
+    "typescript": "^5.9.3"
   },
   "overrides": {
     "effect": "4.0.0-rc.112"

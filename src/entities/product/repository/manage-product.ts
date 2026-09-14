@@ -13,7 +13,7 @@ function transactionRepository(tx: Parameters<Parameters<typeof db.transaction>[
     },
     getProductEditContext: async (data: UpdateProductInput) => {
       const [product, category, duplicate, detail] = await Promise.all([
-        tx.orm.public.Product.select("id").where({ id: data.id }).first(),
+        tx.orm.public.Product.select("id", "imageUrl").where({ id: data.id }).first(),
         tx.orm.public.Category.select("id").where({ id: data.categoryId }).first(),
         tx.orm.public.Product.select("id").where({ slug: data.slug }).first(),
         tx.orm.public.ProductDetail.select("id").where({ productId: data.id }).first(),
@@ -49,6 +49,7 @@ function transactionRepository(tx: Parameters<Parameters<typeof db.transaction>[
     },
   }
 }
+
 export type ProductTransactionRepository = ReturnType<typeof transactionRepository>
 
 export async function withProductTransaction<T>(

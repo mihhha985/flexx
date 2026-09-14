@@ -49,11 +49,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="max-w-sm">
             <Link
               href="/"
-              className="ui-focus inline-flex items-center gap-2 rounded-md text-xl font-bold tracking-tight"
-              aria-label="Контур — на главную"
+              className="ui-focus flex items-center rounded-md text-xl font-bold tracking-tight"
+              aria-label="FLEXX — на главную"
             >
-              <PackageIcon className="size-5" aria-hidden="true" />
-              Flexx
+              <Image
+                src="/images/logo.png"
+                alt="FLEXX"
+                width={32}
+                height={32}
+                className="size-8"
+              />
+              <span className="font-bold">FLEXX</span>
             </Link>
             <p className="mt-4 text-sm/6 text-primary-foreground/70">
               Обувь для повседневного ритма. Выбор и оформление заказа без лишних шагов.
@@ -101,7 +107,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 className="ui-focus rounded-sm hover:text-primary-foreground"
                 href="mailto:hello@kontur.store"
               >
-                hello@kontur.store
+                hello@flexx.store
               </a>
             </div>
           </div>
@@ -109,7 +115,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         <div className="border-t border-primary-foreground/15">
           <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-primary-foreground/60 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-            <p>© 2026 Контур</p>
+            <p>© 2026 FLEXX Все права защещины</p>
             <p>Оформление заказа без регистрации</p>
           </div>
         </div>
