@@ -1,14 +1,18 @@
-import { cp, mkdir, rm } from "node:fs/promises"
+import { cpSync, existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 
-const standaloneDir = ".next/standalone"
-const assets = [
-  { source: "public", target: `${standaloneDir}/public` },
-  { source: ".next/static", target: `${standaloneDir}/.next/static` },
-]
+const standaloneDir = join(".next", "standalone");
 
-await mkdir(`${standaloneDir}/.next`, { recursive: true })
+if (!existsSync(standaloneDir)) {
+  throw new Error("Standalone output is missing. Check output: 'standalone' in next.config.ts.");
+}
 
-for (const { source, target } of assets) {
-  await rm(target, { recursive: true, force: true })
-  await cp(source, target, { recursive: true })
+const staticSource = join(".next", "static");
+const staticTarget = join(standaloneDir, ".next", "static");
+
+mkdirSync(join(standaloneDir, ".next"), { recursive: true });
+cpSync(staticSource, staticTarget, { recursive: true, force: true });
+
+if (existsSync("public")) {
+  cpSync("public", join(standaloneDir, "public"), { recursive: true, force: true });
 }
