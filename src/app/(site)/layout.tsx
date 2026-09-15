@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { PackageIcon } from "lucide-react"
 import Image from "next/image"
 import Menu from "@/src/app/(site)/_components/menu"
 import MobileMenu from "@/src/app/(site)/_components/mobile-menu"
@@ -8,6 +7,8 @@ import { CartHydration } from "@/src/features/cart/cart-hydration"
 import { FavoritesHydration } from "@/src/features/favorites/favorites-hydration"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const currentYear = new Date().getFullYear()
+
   return (
     <div className="min-h-dvh bg-background">
       <CartHydration />
@@ -24,13 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="ui-focus flex items-center rounded-md text-xl font-bold tracking-tight"
             aria-label="FLEXX — на главную"
           >
-            <Image
-              src="/images/logo.png"
-              alt="FLEXX"
-              width={32}
-              height={32}
-              className="size-8"
-            />
+            <Image src="/images/logo.png" alt="" width={32} height={32} className="size-8" />
             <span className="font-bold">FLEXX</span>
           </Link>
 
@@ -52,13 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               className="ui-focus flex items-center rounded-md text-xl font-bold tracking-tight"
               aria-label="FLEXX — на главную"
             >
-              <Image
-                src="/images/logo.png"
-                alt="FLEXX"
-                width={32}
-                height={32}
-                className="size-8"
-              />
+              <Image src="/images/logo.png" alt="" width={32} height={32} className="size-8" />
               <span className="font-bold">FLEXX</span>
             </Link>
             <p className="mt-4 text-sm/6 text-primary-foreground/70">
@@ -105,7 +94,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </a>
               <a
                 className="ui-focus rounded-sm hover:text-primary-foreground"
-                href="mailto:hello@kontur.store"
+                href="mailto:hello@flexx.store"
               >
                 hello@flexx.store
               </a>
@@ -115,7 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         <div className="border-t border-primary-foreground/15">
           <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-primary-foreground/60 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-            <p>© 2026 FLEXX Все права защещины</p>
+            <p>© {currentYear} FLEXX. Все права защищены.</p>
             <p>Оформление заказа без регистрации</p>
           </div>
         </div>

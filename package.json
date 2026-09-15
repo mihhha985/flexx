@@ -2,6 +2,9 @@
   "name": "ecommerce",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "packageManager": "npm@10.9.0",
   "type": "module",
   "scripts": {
@@ -21,9 +24,10 @@
     "migration:plan": "prisma migration plan",
     "migration:show": "prisma migration show",
     "migration:status": "prisma migration status",
+    "postbuild": "node scripts/prepare-standalone.mjs",
     "seed": "node --env-file=.env --import tsx src/prisma/seed.ts",
     "skills:sync": "prisma skills sync || exit 0",
-    "start": "next start",
+    "start": "node .next/standalone/server.js",
     "postinstall": "prisma skills sync || exit 0",
     "prebuild": "npm run contract:emit",
     "format": "prettier --write src scripts *.ts *.mjs *.json *.md",
@@ -44,7 +48,7 @@
     "jose": "^6.2.10",
     "lucide-react": "^1.39.0",
     "motion": "^13.1.1",
-    "next": "16.1.6",
+    "next": "16.3.5",
     "postcss": "^8.5.26",
     "react": "19.2.3",
     "react-aria-components": "^1.21.0",
@@ -64,7 +68,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.3.5",
     "pg": "8.22.0",
     "prettier": "3.9.6",
     "prisma": "8.0.0-rc.12",
@@ -72,6 +76,10 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-    "effect": "4.0.0-rc.112"
+    "@hono/node-server": "1.19.17",
+    "effect": "4.0.0-rc.112",
+    "hono": "4.13.7",
+    "lodash": "4.18.1",
+    "valibot": "1.5.0"
   }
 }

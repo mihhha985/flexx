@@ -28,3 +28,16 @@ function getEnv(name: string): string | undefined {
 }
 
 export const DATABASE_URL = getEnv("DATABASE_URL")
+
+function getSiteUrl(): string {
+  const value = getEnv("SITE_URL")?.trim() || "http://localhost:3000"
+  const url = new URL(value)
+
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error("SITE_URL must use http or https")
+  }
+
+  return url.origin
+}
+
+export const SITE_URL = getSiteUrl()

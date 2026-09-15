@@ -6,7 +6,7 @@ import { FolderPlusIcon, PlusIcon } from "lucide-react"
 import type { AdminCategory } from "@/src/entities/category/services/admin-category-service"
 import { deleteCategoryAction } from "@/src/entities/category/services/manage-category-service"
 import { DataTable } from "@/src/app/(panel)/panel/_components/data-table"
-import { CatalogRowActions } from "@/src/app/(site)/catalog/_components/catalog-row-actions"
+import { AdminRowActions } from "@/src/app/(panel)/panel/_components/admin-row-actions"
 import { Button } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
 import {
@@ -29,7 +29,7 @@ function getColumns(onEdit: (category: AdminCategory) => void): ColumnDef<AdminC
       ),
     },
     { accessorKey: "slug", header: "Слаг" },
-    { accessorKey: "icon", header: "Иконка" },
+    { accessorKey: "icon", header: "Изображение" },
     { accessorKey: "order", header: "Порядок" },
     { accessorKey: "productCount", header: "Товаров" },
     {
@@ -38,7 +38,7 @@ function getColumns(onEdit: (category: AdminCategory) => void): ColumnDef<AdminC
       enableSorting: false,
       enableHiding: false,
       cell: ({ row }) => (
-        <CatalogRowActions
+        <AdminRowActions
           kind="category"
           name={row.original.name}
           onEdit={() => onEdit(row.original)}

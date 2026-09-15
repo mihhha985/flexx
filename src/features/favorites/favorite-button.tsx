@@ -15,10 +15,7 @@ export function FavoriteButton({ product, className }: { product: Product; class
     <Button
       variant="ghost"
       size="icon-sm"
-      className={cn(
-        "data-pressed:[&_svg]:-rotate-6 data-pressed:[&_svg]:scale-75",
-        className,
-      )}
+      className={cn("data-pressed:[&_svg]:-rotate-6 data-pressed:[&_svg]:scale-75", className)}
       aria-label={
         isFavorite ? `Убрать ${product.name} из избранного` : `Добавить ${product.name} в избранное`
       }

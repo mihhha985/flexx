@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { getAdminSession } from "@/src/entities/admin/services/session-service"
 import { LoginForm } from "./login-form"
 
-export const metadata: Metadata = { title: "Вход администратора — Контур" }
+export const metadata: Metadata = { title: "Вход администратора" }
 
 export default async function AuthPage() {
   if (await getAdminSession()) redirect("/panel")

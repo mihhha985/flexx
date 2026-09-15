@@ -25,7 +25,7 @@ export async function saveCategoryAction(
     if (duplicateSlug && duplicateSlug.id !== id)
       return { errors: { slug: ["Категория с таким слагом уже существует."] } }
     if (duplicateIcon && duplicateIcon.id !== id)
-      return { errors: { icon: ["Категория с такой иконкой уже существует."] } }
+      return { errors: { icon: ["Категория с таким изображением уже существует."] } }
     if (id === undefined) {
       await repository.createCategory(parsed.data)
     } else {

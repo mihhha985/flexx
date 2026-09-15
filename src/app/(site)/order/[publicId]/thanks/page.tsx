@@ -14,7 +14,7 @@ import {
 } from "@/src/shared/ui/empty"
 
 export const metadata: Metadata = {
-  title: "Спасибо за ваш заказ — Контур",
+  title: "Спасибо за ваш заказ",
   robots: { index: false, follow: false },
 }
 

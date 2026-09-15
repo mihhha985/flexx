@@ -39,11 +39,11 @@ function getPercentage(value: number, total: number) {
 export function OrderStatsCards({ stats }: { stats: BriefStats }) {
   const cards: StatsCard[] = [
     {
-      title: "Новые заявки",
+      title: "Новые заказы",
       description: "Ожидают обработки",
       value: String(stats.pending),
-      footer: `${getPercentage(stats.pending, stats.total)}% от всех заявок`,
-      badge: "PENDING",
+      footer: `${getPercentage(stats.pending, stats.total)}% от всех заказов`,
+      badge: "НОВЫЕ",
       badgeVariant: "secondary",
       icon: Clock3,
     },
@@ -51,25 +51,25 @@ export function OrderStatsCards({ stats }: { stats: BriefStats }) {
       title: "Подтверждённые",
       description: "Включая оплаченные, отправленные и завершённые",
       value: String(stats.confirmed),
-      footer: `${getPercentage(stats.confirmed, stats.total)}% от всех заявок`,
-      badge: "CONFIRMED",
+      footer: `${getPercentage(stats.confirmed, stats.total)}% от всех заказов`,
+      badge: "ПОДТВЕРЖДЕНЫ",
       badgeVariant: "default",
       icon: CheckCircle2,
     },
     {
       title: "Отменённые",
-      description: "Закрыты без подтверждения",
+      description: "Заказы с отменённым статусом",
       value: String(stats.cancelled),
-      footer: `${getPercentage(stats.cancelled, stats.total)}% от всех заявок`,
-      badge: "CANCELED",
+      footer: `${getPercentage(stats.cancelled, stats.total)}% от всех заказов`,
+      badge: "ОТМЕНЕНЫ",
       badgeVariant: "destructive",
       icon: XCircle,
     },
     {
       title: "Доля подтверждений",
-      description: "Подтверждённые / все заявки",
+      description: "Подтверждённые / все заказы",
       value: `${percentageFormatter.format(stats.confirmationRate)}%`,
-      footer: `${stats.confirmed} из ${stats.total} заявок подтверждено`,
+      footer: `Подтверждено заказов: ${stats.confirmed} из ${stats.total}`,
       badge: "ДОЛЯ",
       badgeVariant: "outline",
       icon: TrendingUp,
@@ -77,7 +77,7 @@ export function OrderStatsCards({ stats }: { stats: BriefStats }) {
   ]
 
   return (
-    <section aria-label="Статистика заявок" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section aria-label="Статистика заказов" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon
 

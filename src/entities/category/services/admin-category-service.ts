@@ -9,7 +9,7 @@ export async function getCategoriesForAdmin() {
     const categories = await getAdminCategories()
     return categories.map(({ products, ...category }) => ({ ...category, productCount: products }))
   } catch (error) {
-    console.error("Не удалось загрузить список category", error)
+    console.error("Не удалось загрузить список категорий", error)
     throw error
   }
 }

@@ -35,8 +35,8 @@ export function AdminSidebar() {
               href="/panel"
               render={(props) => ("href" in props ? <Link {...props} /> : <span {...props} />)}
               size="lg"
-              aria-label="Контур — админ-панель"
-              tooltip="Контур — админ-панель"
+              aria-label="FLEXX — админ-панель"
+              tooltip="FLEXX — админ-панель"
               onPress={() => setOpenMobile(false)}
             >
               <div
@@ -46,7 +46,7 @@ export function AdminSidebar() {
                 <StoreIcon />
               </div>
               <span className="flex min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-semibold">Контур</span>
+                <span className="truncate font-semibold">FLEXX</span>
                 <span className="truncate text-xs text-muted-foreground">Управление магазином</span>
               </span>
             </SidebarMenuButton>

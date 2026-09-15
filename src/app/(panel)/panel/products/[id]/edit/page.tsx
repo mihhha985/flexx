@@ -7,7 +7,7 @@ import { getProductForAdmin } from "@/src/entities/product/services/admin-produc
 import { LinkButton } from "@/src/shared/ui/button"
 import { ProductForm } from "../../product-form"
 
-export const metadata: Metadata = { title: "Редактирование товара — Контур" }
+export const metadata: Metadata = { title: "Редактирование товара" }
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const id = Number((await params).id)

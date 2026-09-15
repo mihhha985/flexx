@@ -11,7 +11,7 @@ export async function getProductsForAdmin() {
   try {
     return await getAdminProducts()
   } catch (error) {
-    console.error("Не удалось загрузить список product", error)
+    console.error("Не удалось загрузить список товаров", error)
     throw error
   }
 }

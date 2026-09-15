@@ -1,5 +1,5 @@
 // use prisma-next
-//TODO why isActive is indexed
+// Storefront product queries filter by visibility, so isActive is indexed.
 model Product {
   id          Int               @id @default(autoincrement())
   name        String

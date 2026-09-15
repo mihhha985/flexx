@@ -2,13 +2,18 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { categorySchema } from "./admin-domain"
 
-const input = { name: "  Техника  ", slug: "home-tech", icon: "home", order: "2" }
+const input = {
+  name: "  Nike  ",
+  slug: "nike",
+  icon: "/category/nike.png",
+  order: "2",
+}
 
 test("normalizes category fields and excludes client supplied identifiers", () => {
   assert.deepEqual(categorySchema.parse({ ...input, id: "9", productCount: 100 }), {
-    name: "Техника",
-    slug: "home-tech",
-    icon: "home",
+    name: "Nike",
+    slug: "nike",
+    icon: "/category/nike.png",
     order: 2,
   })
 })
@@ -21,6 +26,8 @@ test("rejects invalid category names, addresses and sort positions", () => {
     { slug: "Новая категория" },
     { slug: "../catalog" },
     { icon: " " },
+    { icon: "electronics" },
+    { icon: "../category/nike.png" },
     { icon: "x".repeat(101) },
     { order: "" },
     { order: "-1" },

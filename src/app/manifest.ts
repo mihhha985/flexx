@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Контур — интернет-магазин",
-    short_name: "Контур",
-    description: "Быстрый заказ товаров без регистрации",
+    name: "FLEXX — интернет-магазин обуви",
+    short_name: "FLEXX",
+    description: "Каталог обуви с оформлением заказа без регистрации",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

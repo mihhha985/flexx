@@ -8,7 +8,7 @@ export async function getOrdersForAdmin() {
   try {
     return getAdminOrders()
   } catch (error) {
-    console.error("Не удалось загрузить список order", error)
+    console.error("Не удалось загрузить список заказов", error)
     throw error
   }
 }

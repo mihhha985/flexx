@@ -112,7 +112,7 @@ export async function deleteProductAction(id: number) {
     if (orderItem)
       return {
         success: false,
-        error: "Товар используется в заявках и не может быть удалён. Его можно скрыть из каталога.",
+        error: "Товар используется в заказах и не может быть удалён. Его можно скрыть из каталога.",
       }
     const media = await repository.getProductMedia(id)
     if (!media) return { success: false, error: "Товар не найден. Обновите страницу." }
@@ -131,7 +131,7 @@ export async function deleteProductAction(id: number) {
     return {
       success: false,
       error:
-        "Не удалось удалить товар. Возможно, он уже используется в заявке. Попробуйте скрыть его из каталога.",
+        "Не удалось удалить товар. Возможно, он уже используется в заказе. Попробуйте скрыть его из каталога.",
     }
   }
   revalidateCatalog()

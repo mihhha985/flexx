@@ -73,7 +73,7 @@ export function CategoryEditDialog({
               name="slug"
               defaultValue={category?.slug ?? ""}
               maxLength={200}
-              placeholder="bytovaya-tehnika"
+              placeholder="nike"
               required
               disabled={pending}
               aria-invalid={Boolean(state.errors?.slug)}
@@ -85,20 +85,20 @@ export function CategoryEditDialog({
             <FieldError>{state.errors?.slug}</FieldError>
           </Field>
           <Field data-invalid={Boolean(state.errors?.icon)}>
-            <FieldLabel htmlFor="category-icon">Идентификатор иконки</FieldLabel>
+            <FieldLabel htmlFor="category-icon">Путь к изображению</FieldLabel>
             <Input
               id="category-icon"
               name="icon"
               defaultValue={category?.icon ?? ""}
               maxLength={100}
-              placeholder="electronics"
+              placeholder="/category/nike.png"
               required
               disabled={pending}
               aria-invalid={Boolean(state.errors?.icon)}
               aria-describedby="category-icon-help"
             />
             <FieldDescription id="category-icon-help">
-              Уникальное название иконки для категории.
+              Путь к файлу изображения из папки public.
             </FieldDescription>
             <FieldError>{state.errors?.icon}</FieldError>
           </Field>

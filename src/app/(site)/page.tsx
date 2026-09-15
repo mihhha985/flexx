@@ -1,4 +1,5 @@
 import Image from "next/image"
+import type { Metadata } from "next"
 import { Suspense } from "react"
 import {
   ArrowRightIcon,
@@ -17,7 +18,7 @@ import { RandomProductList } from "@/src/app/(site)/_components/random-product-l
 import { LinkButton } from "@/src/shared/ui/button"
 
 export const dynamic = "force-dynamic"
-
+export const metadata: Metadata = { alternates: { canonical: "/" } }
 
 const purchaseBenefits = [
   {
@@ -32,8 +33,8 @@ const purchaseBenefits = [
   },
   {
     icon: ShieldCheckIcon,
-    title: "Понятная оплата",
-    text: "Оплата после подтверждения заказа.",
+    title: "Проверка данных",
+    text: "Цена и наличие проверяются при оформлении.",
   },
   {
     icon: HeadphonesIcon,
@@ -45,7 +46,7 @@ const purchaseBenefits = [
 export default function Home() {
   return (
     <div className="flex flex-col gap-12 sm:gap-16 lg:gap-20">
-      <section className="relative isolate overflow-hidden rounded-xl bg-muted md:min-h-136" >
+      <section className="relative isolate overflow-hidden rounded-xl bg-muted md:min-h-136">
         <Image
           src="/images/home-hero-sneaker.png"
           alt="Чёрно-белый высокий кроссовок на каменной подставке"
@@ -112,7 +113,7 @@ export default function Home() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              Можно заказать сейчас
+              Подборка из каталога
             </p>
             <h2 id="home-products">Подборка товаров</h2>
           </div>
@@ -127,7 +128,7 @@ export default function Home() {
 
       <section
         className="relative isolate overflow-hidden rounded-xl bg-primary px-6 py-10 text-primary-foreground sm:px-10 sm:py-12 lg:px-16 lg:py-16"
-        aria-labelledby="home-sale"
+        aria-labelledby="home-highlight"
       >
         <div
           className="pointer-events-none absolute left-6 sm:left-10 lg:left-1/5 bottom-0 -z-10 select-none text-[7rem]/[0.8] font-bold tracking-tighter text-primary-foreground/5 sm:text-[11rem]/[0.8] lg:text-[15rem]/[0.8]"
@@ -144,19 +145,19 @@ export default function Home() {
         />
         <div className="flex max-w-xl flex-col items-start gap-5">
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground/70">
-            Специальное предложение
+            Весь каталог
           </p>
           <h2
-            id="home-sale"
+            id="home-highlight"
             className="text-3xl/[2.375rem] font-semibold tracking-tight text-primary-foreground lg:text-[2.5rem]/[2.75rem]"
           >
-            Скидка 50% на обувь
+            Найдите свою пару
           </h2>
           <p className="max-w-lg text-primary-foreground/75">
-            Выберите новую пару по специальной цене и оформите заказ без регистрации.
+            Сравните модели, выберите размер и оформите заказ без регистрации.
           </p>
           <LinkButton href="/catalog" variant="inverse" size="lg" className="w-full sm:w-auto">
-            Выбрать со скидкой
+            Перейти в каталог
             <ArrowRightIcon data-icon="inline-end" />
           </LinkButton>
         </div>

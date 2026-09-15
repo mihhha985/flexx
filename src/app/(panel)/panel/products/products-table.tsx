@@ -11,7 +11,7 @@ import {
   setProductActive,
 } from "@/src/entities/product/services/manage-product-service"
 import { DataTable } from "@/src/app/(panel)/panel/_components/data-table"
-import { CatalogRowActions } from "@/src/app/(site)/catalog/_components/catalog-row-actions"
+import { AdminRowActions } from "@/src/app/(panel)/panel/_components/admin-row-actions"
 import { Badge } from "@/src/shared/ui/badge"
 import { LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
@@ -73,7 +73,7 @@ function getColumns(
       enableSorting: false,
       enableHiding: false,
       cell: ({ row }) => (
-        <CatalogRowActions
+        <AdminRowActions
           kind="product"
           name={row.original.name}
           onEdit={() => onEdit(row.original)}

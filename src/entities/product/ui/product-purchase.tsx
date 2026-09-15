@@ -25,6 +25,16 @@ export function ProductPurchase({ product }: { product: ProductWithCategory }) {
   const colorLabel = detail
     ? (productColors.find((option) => option.value === detail.color)?.label ?? detail.color)
     : null
+  const buttonLabel =
+    product.stock < 1
+      ? "Нет в наличии"
+      : !detail
+        ? "Размеры не указаны"
+        : added
+          ? "Добавлено"
+          : selectedSize === null
+            ? "Выберите размер"
+            : "Добавить в корзину"
 
   function handleAdd() {
     if (selectedSize === null) {
@@ -139,7 +149,7 @@ export function ProductPurchase({ product }: { product: ProductWithCategory }) {
           ) : (
             <ShoppingBagIcon data-icon="inline-start" />
           )}
-          {added ? "Добавлено" : selectedSize === null ? "Выберите размер" : "Добавить в корзину"}
+          {buttonLabel}
         </Button>
         {added ? (
           <Link

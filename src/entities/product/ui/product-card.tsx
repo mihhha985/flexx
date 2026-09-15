@@ -12,24 +12,23 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Card size="sm" variant="plain" className="h-full">
       <div className="relative">
-        <Link
-          href={`/product/${product.slug}`}
-          aria-label={`Открыть товар ${product.name}`}
-        >
+        <Link href={`/product/${product.slug}`} aria-label={`Открыть товар ${product.name}`}>
           <ProductVisual product={product} />
         </Link>
         <FavoriteButton product={product} className="absolute right-2 top-2" />
       </div>
       <CardHeader>
-        <CardTitle className="text-sm/5 font-medium sm:text-base/6">
-          {product.name}
-        </CardTitle>
+        <CardTitle className="text-sm/5 font-medium sm:text-base/6">{product.name}</CardTitle>
       </CardHeader>
       <CardContent className="flex items-center justify-between">
         <p className="text-base font-semibold tabular-nums">{formatPrice(product.price)}</p>
         <div>
           <Badge variant={product.stock > 5 ? "secondary" : "outline"}>
-            {product.stock > 5 ? "В наличии" : `Осталось ${product.stock}`}
+            {product.stock > 5
+              ? "В наличии"
+              : product.stock > 0
+                ? `Осталось ${product.stock}`
+                : "Нет в наличии"}
           </Badge>
         </div>
       </CardContent>

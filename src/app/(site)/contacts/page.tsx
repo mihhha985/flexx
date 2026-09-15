@@ -9,17 +9,28 @@ import {
 import { Badge } from "@/src/shared/ui/badge"
 import { LinkButton } from "@/src/shared/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
+import { defaultSocialImage } from "@/src/shared/lib/seo"
 import type { Metadata } from "next"
 export const metadata: Metadata = {
-  title: "Контакты — Контур",
-  description: "Контакты магазина, график работы, доставка и ответы на вопросы.",
+  title: "Контакты магазина",
+  description: "Контакты FLEXX, график работы и ответы на вопросы о кроссовках и заказах.",
+  alternates: { canonical: "/contacts" },
+  openGraph: {
+    title: "Контакты магазина | FLEXX",
+    description: "Контакты FLEXX и ответы на вопросы о кроссовках и заказах.",
+    url: "/contacts",
+    siteName: "FLEXX",
+    locale: "ru_RU",
+    type: "website",
+    images: [defaultSocialImage],
+  },
 }
 
 export default function ContactsPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <Badge variant="secondary">Отвечаем каждый день</Badge>
+        <Badge variant="secondary">Связь с магазином</Badge>
         <h1 className="text-3xl font-medium tracking-tight sm:text-4xl">Контакты</h1>
         <p className="max-w-2xl text-muted-foreground">
           Поможем с выбором, доставкой и вопросами по уже оформленному заказу.
@@ -38,9 +49,9 @@ export default function ContactsPage() {
           {
             icon: MailIcon,
             title: "Почта",
-            text: "hello@kontur.store",
-            hint: "Ответим в течение дня",
-            href: "mailto:hello@kontur.store",
+            text: "hello@flexx.store",
+            hint: "Для вопросов о товарах и заказах",
+            href: "mailto:hello@flexx.store",
           },
           {
             icon: MapPinIcon,
@@ -105,20 +116,20 @@ export default function ContactsPage() {
               <AccordionItem id="delivery">
                 <AccordionTrigger>Когда привезут заказ?</AccordionTrigger>
                 <AccordionContent>
-                  Обычно доставка занимает 1–2 рабочих дня. Точный интервал согласуем по телефону.
+                  После оформления мы свяжемся с вами и согласуем способ, стоимость и срок доставки.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem id="payment">
                 <AccordionTrigger>Как оплатить?</AccordionTrigger>
                 <AccordionContent>
-                  После подтверждения заказа отправим безопасную ссылку на оплату или предложим
-                  оплату при получении.
+                  Способ и порядок оплаты согласуем при подтверждении заказа.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem id="return">
                 <AccordionTrigger>Можно ли вернуть товар?</AccordionTrigger>
                 <AccordionContent>
-                  Да, в течение 14 дней, если сохранены товарный вид и комплектность.
+                  Условия возврата зависят от товара и способа покупки. Уточните их до оплаты по
+                  телефону или почте.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

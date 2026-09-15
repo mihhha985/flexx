@@ -14,7 +14,7 @@ export default function GlobalError({
   return (
     <html lang="ru">
       <body>
-        <title>Ошибка — Контур</title>
+        <title>Ошибка | FLEXX</title>
         <ErrorFallback error={error} reset={reset} />
       </body>
     </html>

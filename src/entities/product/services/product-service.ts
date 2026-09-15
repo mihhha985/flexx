@@ -57,3 +57,12 @@ export async function getRandomProducts() {
     throw error
   }
 }
+
+export async function getActiveProductSlugs() {
+  try {
+    return await repository.getActiveProductSlugs()
+  } catch (error) {
+    console.error("Не удалось загрузить адреса товаров для карты сайта", error)
+    throw error
+  }
+}

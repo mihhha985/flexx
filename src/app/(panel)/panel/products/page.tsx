@@ -3,7 +3,7 @@ import { getCategoriesForAdmin } from "@/src/entities/category/services/admin-ca
 import { getProductsForAdmin } from "@/src/entities/product/services/admin-product-service"
 import { ProductsTable } from "./products-table"
 
-export const metadata: Metadata = { title: "Товары — Контур" }
+export const metadata: Metadata = { title: "Товары" }
 
 export default async function Page() {
   const [data, categories] = await Promise.all([getProductsForAdmin(), getCategoriesForAdmin()])

@@ -1,10 +1,12 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import { PackageCheckIcon, RotateCcwIcon, ShieldCheckIcon, TruckIcon } from "lucide-react"
+import { MessageCircleIcon, PackageCheckIcon, ShieldCheckIcon } from "lucide-react"
 
+import { SITE_URL } from "@/env"
 import { ProductPurchase } from "@/src/entities/product/ui/product-purchase"
 import { getProductBySlug } from "@/src/entities/product/services/product-service"
+import { toMetaDescription } from "@/src/shared/lib/seo"
 import { Badge } from "@/src/shared/ui/badge"
 import {
   Breadcrumb,
@@ -24,15 +26,60 @@ export async function generateMetadata({
   const product = await getProductBySlug((await params).slug)
   if (!product) notFound()
 
-  return { title: `${product.name} — Контур`, description: product.description }
+  const description = toMetaDescription(product.description)
+  const url = `/product/${product.slug}`
+
+  return {
+    title: product.name,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${product.name} | FLEXX`,
+      description,
+      url,
+      siteName: "FLEXX",
+      locale: "ru_RU",
+      type: "website",
+      images: [{ url: product.avatar, alt: product.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | FLEXX`,
+      description,
+      images: [product.avatar],
+    },
+  }
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const product = await getProductBySlug((await params).slug)
   if (!product) notFound()
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: [product.avatar, ...product.images],
+    sku: String(product.id),
+    category: product.category.name,
+    offers: {
+      "@type": "Offer",
+      url: new URL(`/product/${product.slug}`, SITE_URL).toString(),
+      priceCurrency: "RUB",
+      price: product.price.toFixed(2),
+      availability:
+        product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c") }}
+      />
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -59,7 +106,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <CardHeader>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{product.category.name}</Badge>
-                <Badge variant="outline">В наличии: {product.stock}</Badge>
+                <Badge variant="outline">
+                  {product.stock > 0 ? `В наличии: ${product.stock}` : "Нет в наличии"}
+                </Badge>
               </div>
               <CardTitle className="text-2xl sm:text-3xl">{product.name}</CardTitle>
               <CardDescription className="text-base">{product.description}</CardDescription>
@@ -68,9 +117,21 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { icon: TruckIcon, title: "Быстрая доставка", text: "По городу за 1–2 дня" },
-              { icon: ShieldCheckIcon, title: "Проверка заказа", text: "Подтвердим по телефону" },
-              { icon: RotateCcwIcon, title: "Простой возврат", text: "14 дней на решение" },
+              {
+                icon: PackageCheckIcon,
+                title: "Подтверждение заказа",
+                text: "Свяжемся перед отправкой",
+              },
+              {
+                icon: ShieldCheckIcon,
+                title: "Проверка данных",
+                text: "Цена и наличие уточняются при оформлении",
+              },
+              {
+                icon: MessageCircleIcon,
+                title: "Помощь с выбором",
+                text: "Ответим на вопросы о товаре",
+              },
             ].map((benefit) => (
               <Card key={benefit.title} size="sm">
                 <CardHeader>
@@ -87,7 +148,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <PackageCheckIcon className="text-muted-foreground" />
               <CardTitle>О товаре</CardTitle>
               <CardDescription>
-                Страна производитель: {product.detail?.country} · Категория «{product.category.name}
+                Страна-производитель: {product.detail?.country} · Категория «{product.category.name}
                 ». Актуальное наличие показываем перед добавлением в корзину.
               </CardDescription>
             </CardHeader>

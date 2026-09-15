@@ -1,10 +1,10 @@
 export const orderStatuses = {
-  pending: "Новая",
-  confirmed: "Подтверждена",
-  paid: "Оплачена",
-  shipped: "Отправлена",
-  completed: "Завершена",
-  cancelled: "Отменена",
+  pending: "Новый",
+  confirmed: "Подтверждён",
+  paid: "Оплачен",
+  shipped: "Отправлен",
+  completed: "Завершён",
+  cancelled: "Отменён",
 } as const
 
 export type OrderStatus = keyof typeof orderStatuses

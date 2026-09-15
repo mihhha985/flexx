@@ -8,16 +8,14 @@ import { OrderStatsCards } from "./order-stats-cards"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/src/shared/ui/empty"
 
-export const metadata: Metadata = { title: "Заявки — Контур" }
+export const metadata: Metadata = { title: "Заказы" }
 
 export default async function Page() {
   const data = await getOrdersForAdmin()
   const heading = (
     <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold tracking-tight">Заявки</h1>
-      <p className="text-sm text-muted-foreground">
-        Главная страница для обработки входящих заявок
-      </p>
+      <h1 className="text-2xl font-semibold tracking-tight">Заказы</h1>
+      <p className="text-sm text-muted-foreground">Обработка заказов, оформленных в магазине.</p>
     </div>
   )
 
@@ -30,10 +28,8 @@ export default async function Page() {
             <EmptyMedia variant="icon">
               <ClipboardListIcon />
             </EmptyMedia>
-            <EmptyTitle>Заявок пока нет</EmptyTitle>
-            <EmptyDescription>
-              Они появятся здесь после оформления заказов в магазине.
-            </EmptyDescription>
+            <EmptyTitle>Заказов пока нет</EmptyTitle>
+            <EmptyDescription>Они появятся здесь после оформления в магазине.</EmptyDescription>
           </EmptyHeader>
         </Empty>
       </section>
@@ -47,8 +43,8 @@ export default async function Page() {
       <OrderStatsCards stats={stats} />
       <Card>
         <CardHeader className="border-b">
-          <CardTitle>Входящие заявки</CardTitle>
-          <CardDescription>Всего заявок: {stats.total}</CardDescription>
+          <CardTitle>Заказы магазина</CardTitle>
+          <CardDescription>Всего заказов: {stats.total}</CardDescription>
         </CardHeader>
         <CardContent>
           <OrdersTable data={data} />

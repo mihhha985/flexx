@@ -1,4 +1,4 @@
-# Контур — интернет-магазин
+# FLEXX — интернет-магазин обуви
 
 Next.js 16 (App Router), React 19, Prisma 8 RC / PostgreSQL, React Aria / shadcn, Zustand.
 
@@ -12,6 +12,24 @@ Next.js 16 (App Router), React 19, Prisma 8 RC / PostgreSQL, React Aria / shadcn
 Альтернативный запуск через Prisma Composer: `npm run dev:composer`. Конфигурация находится в `module.ts`, `service.ts` и `src/prisma/composer.ts`. Ошибки Composer не маскируются переключением на другое подключение: fallback допускается только при отсутствии привязки в прямом режиме.
 
 `npm run build` автоматически обновляет контракт перед сборкой. `npm start` запускает готовую сборку. `npm run deploy` собирает и развёртывает приложение через Composer.
+
+## Подготовка к production
+
+1. Используйте Node.js 20.9 или новее и устанавливайте зависимости через `npm ci`.
+2. Задайте все переменные из `.env.example`. Для рабочего окружения обязательны надёжные
+   `ADMIN_PASSWORD` и `ADMIN_SESSION_SECRET`, а для загрузки изображений — действующие параметры
+   S3-совместимого хранилища. Укажите публичный адрес магазина в `SITE_URL`, иначе canonical,
+   Open Graph, `robots.txt` и `sitemap.xml` будут ссылаться на localhost. Для PostgreSQL через TLS явно используйте
+   `sslmode=verify-full` в `DATABASE_URL`, если провайдер не требует иной режим.
+3. Проверьте миграции на отдельной базе и просмотрите план перед применением. Не запускайте
+   `db:reset` на рабочей базе.
+4. Выполните `npm run check`, `npm run format:check` и `npm run build`.
+5. Для Composer задайте `PRISMA_SERVICE_TOKEN` и `PRISMA_WORKSPACE_ID`, затем выполните
+   `npm run composer:deploy`. Команда `npm run deploy` предварительно запускает production-сборку.
+
+Перед публикацией замените демонстрационные контактные данные на реальные и проверьте условия
+доставки, оплаты и возврата. Приложение не применяет миграции к рабочей базе во время обычной
+проверки кода.
 
 ## Как устроен код
 

@@ -68,11 +68,11 @@ export function OrdersTable({ data }: { data: AdminOrder[] }) {
     <DataTable
       columns={columns}
       data={data}
-      label="Список заявок"
-      searchLabel="Поиск по заявкам"
+      label="Список заказов"
+      searchLabel="Поиск по заказам"
       searchPlaceholder="Номер, покупатель, контакт или статус…"
       globalFilterColumns={["id", "customerName", "customerPhone", "customerEmail", "status"]}
-      emptyDescription="Заявки появятся здесь после оформления заказов в магазине."
+      emptyDescription="Заказы появятся здесь после оформления в магазине."
     />
   )
 }

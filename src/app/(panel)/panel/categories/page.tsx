@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { getCategoriesForAdmin } from "@/src/entities/category/services/admin-category-service"
 import { CategoriesTable } from "./categories-table"
 
-export const metadata: Metadata = { title: "Категории — Контур" }
+export const metadata: Metadata = { title: "Категории" }
 
 export default async function Page() {
   const data = await getCategoriesForAdmin()

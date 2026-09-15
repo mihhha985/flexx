@@ -1,16 +1,13 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { selectCartItemCount, useCartStore } from "@/src/features/cart/cart-store"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge } from "@/src/shared/ui/badge"
 import { buttonVariants } from "@/src/shared/ui/button"
 
 import { navigation, isNavigationActive } from "@/src/app/(site)/_components/navigation"
 
 export default function MobileMenu() {
   const pathname = usePathname()
-  const itemCount = useCartStore(selectCartItemCount)
 
   return (
     <nav
@@ -36,11 +33,6 @@ export default function MobileMenu() {
                 <Icon />
                 {item.label}
               </span>
-              {item.href === "/cart" && itemCount > 0 ? (
-                <Badge className="absolute right-1 top-0" variant="default">
-                  {itemCount}
-                </Badge>
-              ) : null}
             </Link>
           )
         })}

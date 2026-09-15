@@ -58,6 +58,10 @@ export async function getAllActiveProducts() {
     .all()
 }
 
+export async function getActiveProductSlugs() {
+  return db.orm.public.Product.select("slug").where({ isActive: true }).all()
+}
+
 export async function getProductBySlug(slug: string) {
   return db.orm.public.Product.select(
     "id",

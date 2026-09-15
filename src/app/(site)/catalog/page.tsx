@@ -3,12 +3,29 @@ import { Badge } from "@/src/shared/ui/badge"
 import { CatalogView } from "@/src/app/(site)/catalog/_components/catalog-view"
 import { ProductPagination } from "@/src/app/(site)/catalog/_components/product-pagination"
 import { getCatalog } from "@/src/entities/product/services/product-service"
+import { defaultSocialImage } from "@/src/shared/lib/seo"
 
 export const metadata: Metadata = {
-  title: "Каталог товаров — Контур",
-  description: "Каталог товаров с быстрым поиском и фильтрацией по категориям.",
+  title: "Каталог кроссовок и обуви",
+  description:
+    "Каталог кроссовок и повседневной обуви FLEXX: поиск моделей, фильтрация по брендам, актуальные цены и наличие.",
   alternates: {
     canonical: "/catalog",
+  },
+  openGraph: {
+    title: "Каталог кроссовок и обуви | FLEXX",
+    description: "Выбирайте кроссовки и обувь по брендам в каталоге FLEXX.",
+    url: "/catalog",
+    siteName: "FLEXX",
+    locale: "ru_RU",
+    type: "website",
+    images: [defaultSocialImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Каталог кроссовок и обуви | FLEXX",
+    description: "Выбирайте кроссовки и обувь по брендам в каталоге FLEXX.",
+    images: [defaultSocialImage.url],
   },
 }
 

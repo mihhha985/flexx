@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { EyeIcon, EyeOffIcon, MoreHorizontalIcon, PencilIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
+
 import { Button } from "@/src/shared/ui/button"
 import {
   Dialog,
@@ -23,7 +24,7 @@ import {
 
 type MutationResult = { success: boolean; error?: string }
 
-type CatalogRowActionsProps = {
+type AdminRowActionsProps = {
   name: string
   kind: "product" | "category"
   onEdit: () => void
@@ -31,13 +32,13 @@ type CatalogRowActionsProps = {
   visibility?: { isActive: boolean; onChange: () => Promise<MutationResult> }
 }
 
-export function CatalogRowActions({
+export function AdminRowActions({
   name,
   kind,
   onEdit,
   onDelete,
   visibility,
-}: CatalogRowActionsProps) {
+}: AdminRowActionsProps) {
   const router = useRouter()
   const [isDeleteOpen, setDeleteOpen] = useState(false)
   const [error, setError] = useState<string>()
@@ -136,7 +137,7 @@ export function CatalogRowActions({
           </DialogTitle>
           <DialogDescription>
             {kind === "product"
-              ? "Товар будет удалён без возможности восстановления. Если он используется в заявках, удаление будет недоступно — такой товар можно скрыть из каталога."
+              ? "Товар будет удалён без возможности восстановления. Если он используется в заказах, удаление будет недоступно — такой товар можно скрыть из каталога."
               : "Категория будет удалена без возможности восстановления. Если в ней есть товары, сначала перенесите их в другую категорию."}
           </DialogDescription>
         </DialogHeader>

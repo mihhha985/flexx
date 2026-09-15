@@ -13,7 +13,7 @@ import {
 } from "@/src/shared/ui/empty"
 import { ProductForm } from "../product-form"
 
-export const metadata: Metadata = { title: "Новый товар — Контур" }
+export const metadata: Metadata = { title: "Новый товар" }
 
 export default async function NewProductPage() {
   const categories = await getCategoriesForAdmin()

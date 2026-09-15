@@ -56,7 +56,7 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
   function mutate(status?: OrderStatus) {
     if (pending || status === order.status) return
     startTransition(async () => {
-      const toastId = toast.loading(status ? "Изменяем статус…" : "Удаляем заявку…")
+      const toastId = toast.loading(status ? "Изменяем статус…" : "Удаляем заказ…")
       try {
         const result = status
           ? await updateOrderStatus(order.id, status)
@@ -65,7 +65,7 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
           toast.error(result.error, { id: toastId })
           return
         }
-        toast.success(status ? "Статус изменён" : "Заявка удалена", { id: toastId })
+        toast.success(status ? "Статус изменён" : "Заказ удалён", { id: toastId })
         setDialog(null)
         router.refresh()
       } catch {
@@ -81,14 +81,14 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
           <Button
             variant="ghost"
             size="icon-xs"
-            aria-label={`Действия заявки #${order.id}`}
+            aria-label={`Действия заказа #${order.id}`}
             isDisabled={pending}
           >
             <MoreHorizontal />
           </Button>
           <DropdownMenu placement="bottom end" className="w-56">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Заявка #{order.id}</DropdownMenuLabel>
+              <DropdownMenuLabel>Заказ #{order.id}</DropdownMenuLabel>
               <DropdownMenuItem onAction={() => setDialog("products")}>
                 <Eye />
                 Просмотреть товары
@@ -128,7 +128,7 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
                 isDisabled={pending}
               >
                 <Trash2 />
-                Удалить заявку
+                Удалить заказ
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenu>
@@ -142,7 +142,7 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
         className="sm:max-w-lg"
       >
         <DialogHeader>
-          <DialogTitle>Товары заявки #{order.id}</DialogTitle>
+          <DialogTitle>Товары заказа #{order.id}</DialogTitle>
           <DialogDescription>Состав заказа и стоимость на момент оформления.</DialogDescription>
         </DialogHeader>
         <ul className="flex max-h-80 flex-col gap-4 overflow-y-auto">
@@ -173,7 +173,7 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
             </li>
           ))}
         </ul>
-        {!order.items.length && <p className="text-muted-foreground">В заявке нет товаров.</p>}
+        {!order.items.length && <p className="text-muted-foreground">В заказе нет товаров.</p>}
         <DialogFooter>
           <span className="font-medium">Итого: {formatPrice(order.total)}</span>
         </DialogFooter>
@@ -188,9 +188,9 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
         showCloseButton={false}
       >
         <DialogHeader>
-          <DialogTitle>Удалить заявку #{order.id}?</DialogTitle>
+          <DialogTitle>Удалить заказ #{order.id}?</DialogTitle>
           <DialogDescription>
-            Заявка и её состав будут удалены без возможности восстановления. Товары останутся в
+            Заказ и его состав будут удалены без возможности восстановления. Товары останутся в
             каталоге.
           </DialogDescription>
         </DialogHeader>

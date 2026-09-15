@@ -143,7 +143,7 @@ export function CheckoutForm({
           <Separator className="my-5" />
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Товары, {itemCount} шт.</span>
+              <span>Товаров: {itemCount} шт.</span>
               <span>{formatPrice(total)}</span>
             </div>
             <div className="flex items-center justify-between">
