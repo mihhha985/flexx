@@ -8,7 +8,7 @@ import { cn } from "@/src/shared/lib/utils"
 import { Button } from "@/src/shared/ui/button"
 
 export function FavoriteButton({ product, className }: { product: Product; className?: string }) {
-  const isFavorite = useFavoritesStore(selectIsFavorite(product.id))
+  const isFavorite = useFavoritesStore(selectIsFavorite(product.variantId))
   const toggleItem = useFavoritesStore((state) => state.toggleItem)
 
   return (

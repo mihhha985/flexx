@@ -17,7 +17,7 @@ export const orderSchema = z.object({
   items: z
     .array(
       z.object({
-        productId: z.number().int().positive().max(2147483647),
+        variantId: z.number().int().positive().max(2147483647),
         size: z.number().int().min(35).max(48),
         quantity: z.number().int().positive().max(2147483647),
       }),
@@ -26,7 +26,7 @@ export const orderSchema = z.object({
     .max(100)
     .refine(
       (items) =>
-        new Set(items.map((item) => `${item.productId}-${item.size}`)).size === items.length,
+        new Set(items.map((item) => `${item.variantId}-${item.size}`)).size === items.length,
       "Товар одного размера не должен повторяться в заказе",
     ),
 })

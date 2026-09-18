@@ -22,12 +22,16 @@ export function CartItemRow({
         <ProductVisual product={product} compact />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div>
-            <Link href={`/product/${product.slug}`} className="font-medium hover:underline">
+            <Link
+              href={`/product/${product.slug}?color=${product.colorSlug}`}
+              className="font-medium hover:underline"
+            >
               {product.name}
             </Link>
             {product.category && (
               <p className="text-sm text-muted-foreground">{product.category.name}</p>
             )}
+            <p className="text-sm text-muted-foreground">Цвет: {product.colorName}</p>
             <p className="text-sm text-muted-foreground">Размер: {size}</p>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -40,7 +44,7 @@ export function CartItemRow({
                 size="icon-sm"
                 aria-label="Уменьшить"
                 isDisabled={isSubmitting || quantity <= 1}
-                onPress={() => updateQuantity(product.id, size, quantity - 1)}
+                onPress={() => updateQuantity(product.variantId, size, quantity - 1)}
               >
                 <MinusIcon />
               </Button>
@@ -50,7 +54,7 @@ export function CartItemRow({
                 size="icon-sm"
                 aria-label="Увеличить"
                 isDisabled={isSubmitting || quantity >= product.stock}
-                onPress={() => updateQuantity(product.id, size, quantity + 1)}
+                onPress={() => updateQuantity(product.variantId, size, quantity + 1)}
               >
                 <PlusIcon />
               </Button>
@@ -65,7 +69,7 @@ export function CartItemRow({
           variant="ghost"
           size="xs"
           isDisabled={isSubmitting}
-          onPress={() => removeItem(product.id, size)}
+          onPress={() => removeItem(product.variantId, size)}
         >
           <Trash2Icon data-icon="inline-start" /> Удалить
         </Button>

@@ -8,13 +8,27 @@ function adminProducts() {
     "name",
     "slug",
     "description",
-    "avatar",
-    "images",
-    "price",
-    "stock",
+    "country",
     "isActive",
     "categoryId",
-  ).include("detail", (detail) => detail.select("color", "size", "country"))
+  ).include("variants", (variants) =>
+    variants
+      .select(
+        "id",
+        "colorName",
+        "colorSlug",
+        "colorHex",
+        "price",
+        "avatar",
+        "images",
+        "isActive",
+        "order",
+      )
+      .include("sizes", (sizes) =>
+        sizes.select("id", "size", "stock").orderBy((item) => item.size.asc()),
+      )
+      .orderBy((variant) => variant.order.asc()),
+  )
 }
 
 export async function getAdminProducts() {

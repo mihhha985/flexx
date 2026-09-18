@@ -102,13 +102,13 @@ export function FavoritesSheet() {
             >
               {items.map((product) => (
                 <li
-                  key={product.id}
+                  key={product.variantId}
                   className="w-[min(76vw,17rem)] shrink-0 snap-start sm:w-64 lg:w-72"
                 >
                   <article className="flex h-full flex-col gap-3">
                     <div className="relative">
                       <Link
-                        href={`/product/${product.slug}`}
+                        href={`/product/${product.slug}?color=${product.colorSlug}`}
                         onClick={closeSheet}
                         className="ui-focus block rounded-lg"
                       >
@@ -119,19 +119,20 @@ export function FavoritesSheet() {
                         size="icon-sm"
                         className="absolute right-2 top-2 bg-background/95"
                         aria-label={`Убрать ${product.name} из избранного`}
-                        onPress={() => removeItem(product.id)}
+                        onPress={() => removeItem(product.variantId)}
                       >
                         <Trash2Icon />
                       </Button>
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
                       <Link
-                        href={`/product/${product.slug}`}
+                        href={`/product/${product.slug}?color=${product.colorSlug}`}
                         onClick={closeSheet}
                         className="ui-focus rounded-sm text-sm/5 font-medium hover:underline sm:text-base/6"
                       >
                         {product.name}
                       </Link>
+                      <p className="text-sm text-muted-foreground">{product.colorName}</p>
                       <div className="mt-auto flex flex-wrap items-center justify-between gap-2">
                         <p className="font-semibold tabular-nums">{formatPrice(product.price)}</p>
                         <Badge variant={product.stock > 0 ? "secondary" : "outline"}>

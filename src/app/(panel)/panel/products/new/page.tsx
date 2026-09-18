@@ -27,7 +27,7 @@ export default async function NewProductPage() {
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">Создать товар</h1>
           <p className="text-sm text-muted-foreground">
-            Добавьте данные, главное изображение и до 10 фотографий галереи.
+            Добавьте цвета, цены, изображения и размерные остатки товара.
           </p>
         </div>
       </div>

@@ -152,7 +152,7 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
                 {item.product?.isActive ? (
                   <Link
                     className="font-medium break-words underline underline-offset-4"
-                    href={`/product/${item.product.slug}`}
+                    href={`/product/${item.product.slug}?color=${item.colorSlug}`}
                   >
                     {item.productName}
                   </Link>
@@ -160,8 +160,8 @@ export function OrderRowActions({ order }: { order: AdminOrder }) {
                   <p className="font-medium break-words">{item.productName}</p>
                 )}
                 <p className="text-muted-foreground">
-                  {item.size ? `Размер ${item.size} · ` : ""}
-                  {item.quantity} шт. × {formatPrice(item.unitPrice)}
+                  {item.colorName} · размер {item.size} · {item.quantity} шт. ×{" "}
+                  {formatPrice(item.unitPrice)}
                 </p>
                 {!item.product?.isActive && (
                   <p className="text-xs text-muted-foreground">Товар недоступен в каталоге</p>

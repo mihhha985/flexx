@@ -217,6 +217,8 @@ npm run format:check
 
 ## Полезные ссылки внутри проекта
 
+- `scripts/import-amazing-red.ts` — импорт товара и первых трёх цветов через Puppeteer (`npm run import:amazing-red -- --url <ссылка>`). `--dry-run` только выводит данные; обычный запуск загружает галереи в настроенный S3/Джино через существующий сервис изображений и записывает товар одной транзакцией. Нужна существующая категория `puma` (или `--category <slug>`). При ошибке удаляются только файлы текущего импорта.
+
 - [README.md](./README.md) — запуск, архитектура и сценарии.
 - `DESIGN.md` в корне — обязательный источник дизайн-решений после его создания; сейчас файл отсутствует.
 - [src/app/globals.css](./src/app/globals.css) — токены и общие стили.
@@ -229,3 +231,13 @@ npm run format:check
 - [scripts/architecture.test.mjs](./scripts/architecture.test.mjs) — проверка границ архитектуры.
 
 Не оставляйте неиспользуемый код и не усложняйте решение без конкретной потребности. Каждый новый компонент должен вписываться в mobile-first сценарий магазина и его дизайн-систему.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

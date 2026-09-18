@@ -41,7 +41,7 @@ export function CartView() {
       const result = await createValidatedOrder({
         ...draft,
         items: items.map(({ product, size, quantity }) => ({
-          productId: product.id,
+          variantId: product.variantId,
           size,
           quantity,
         })),
@@ -101,7 +101,7 @@ export function CartView() {
         <div className="flex flex-col gap-3 lg:sticky lg:top-25 lg:self-start">
           {items.map((item) => (
             <CartItemRow
-              key={`${item.product.id}-${item.size}`}
+              key={`${item.product.variantId}-${item.size}`}
               item={item}
               isSubmitting={isSubmitting}
             />

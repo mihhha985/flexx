@@ -1,46 +1,57 @@
 // use prisma-next
-// Storefront product queries filter by visibility, so isActive is indexed.
 model Product {
   id          Int               @id @default(autoincrement())
   name        String
   slug        String            @unique
-  price       Float
   description String
-  avatar      String
-  images      String[]
+  country     String
   isActive    Boolean           @default(true)
-  stock       Int               @default(0)
-  detail      ProductDetail?
+  variants    ProductVariant[]
   categoryId  Int
   category    Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   orderItems  OrderItem[]
   createdAt   TimestamptzString @default(now())
   updatedAt   temporal.updatedAtString()
 
-  @@index([categoryId])
-  @@index([isActive])
+  @@index([categoryId, isActive])
 }
 
-enum Color {
-  @@type("pg/text@1")
+model ProductVariant {
+  id         Int                  @id @default(autoincrement())
+  productId  Int
+  product    Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  white   = "#FFFFFF"
-  black   = "#000000"
-  red     = "#FF0000"
-  blue    = "#0000FF"
-  green   = "#008000"
-  gray    = "#808080"
+  colorName  String
+  colorSlug  String
+  colorHex   String
+  price      Float
+  avatar     String
+  images     String[]
+  isActive   Boolean              @default(true)
+  order      Int
+  sizes      ProductVariantSize[]
+  orderItems OrderItem[]
+
+  @@unique([productId, colorSlug])
+  @@unique([productId, order])
+  @@index([productId, isActive, order])
+  @@check(expression: "price >= 0", name: "product_variant_price_nonnegative")
+  @@check(expression: "\"order\" >= 0", name: "product_variant_order_nonnegative")
+  @@map("product_variant")
 }
 
-model ProductDetail {
-  id        Int       @id @default(autoincrement())
-  color     Color
-  size      Int[]
-  country   String
-  productId Int       @unique
-  product   Product   @relation(fields: [productId], references: [id])
+model ProductVariantSize {
+  id        Int            @id @default(autoincrement())
+  variantId Int
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  size      Int
+  stock     Int            @default(0)
 
-  @@map("product_detail")
+  @@unique([variantId, size])
+  @@index([variantId])
+  @@check(expression: "size >= 35 AND size <= 48", name: "product_variant_size_supported")
+  @@check(expression: "stock >= 0", name: "product_variant_size_stock_nonnegative")
+  @@map("product_variant_size")
 }
 
 model Category {
@@ -79,19 +90,27 @@ model Order {
 
   @@index([status])
   @@index([customerEmail])
+  @@check(expression: "total >= 0", name: "order_total_nonnegative")
 }
 
 model OrderItem {
-  id              Int     @id @default(autoincrement())
-  orderId         Int
-  productId       Int
-  productName     String
-  size            Int?
-  unitPrice       Float
-  quantity        Int
-  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product         Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  id          Int             @id @default(autoincrement())
+  orderId     Int
+  productId   Int
+  variantId   Int?
+  productName String
+  colorName   String
+  colorSlug   String
+  size        Int
+  unitPrice   Float
+  quantity    Int
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
   @@index([productId])
+  @@index([variantId])
+  @@check(expression: "\"unitPrice\" >= 0", name: "order_item_price_nonnegative")
+  @@check(expression: "quantity > 0", name: "order_item_quantity_positive")
 }

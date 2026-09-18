@@ -9,7 +9,7 @@ const input = {
   customerPhone: "+7 (999) 123-45-67",
   shippingAddress: " Москва, ул. Примерная, 1 ",
   comment: " Позвоните заранее ",
-  items: [{ productId: 1, size: 42, quantity: 2 }],
+  items: [{ variantId: 1, size: 42, quantity: 2 }],
 }
 
 test("normalizes contact details and strips client-supplied totals, prices and status", () => {
@@ -25,22 +25,22 @@ test("normalizes contact details and strips client-supplied totals, prices and s
   assert.equal(result.comment, "Позвоните заранее")
   assert.equal("total" in result, false)
   assert.equal("status" in result, false)
-  assert.deepEqual(result.items, [{ productId: 1, size: 42, quantity: 2 }])
+  assert.deepEqual(result.items, [{ variantId: 1, size: 42, quantity: 2 }])
 })
 
 test("rejects empty carts, duplicate products and invalid quantities or IDs", () => {
   for (const items of [
     [],
     [input.items[0], input.items[0]],
-    [{ productId: 1, size: 34, quantity: 1 }],
-    [{ productId: 1, size: 49, quantity: 1 }],
-    [{ productId: 1, quantity: 0 }],
-    [{ productId: 1, quantity: -1 }],
-    [{ productId: 1, quantity: 1.5 }],
-    [{ productId: 1, quantity: "2" }],
-    [{ productId: 0, quantity: 1 }],
-    [{ productId: 1, quantity: Infinity }],
-    [{ productId: 1, quantity: 2147483648 }],
+    [{ variantId: 1, size: 34, quantity: 1 }],
+    [{ variantId: 1, size: 49, quantity: 1 }],
+    [{ variantId: 1, quantity: 0 }],
+    [{ variantId: 1, quantity: -1 }],
+    [{ variantId: 1, quantity: 1.5 }],
+    [{ variantId: 1, quantity: "2" }],
+    [{ variantId: 0, quantity: 1 }],
+    [{ variantId: 1, quantity: Infinity }],
+    [{ variantId: 1, quantity: 2147483648 }],
   ]) {
     assert.equal(orderSchema.safeParse({ ...input, items }).success, false)
   }
@@ -50,7 +50,7 @@ test("allows one product in different sizes", () => {
   assert.equal(
     orderSchema.safeParse({
       ...input,
-      items: [input.items[0], { productId: 1, size: 43, quantity: 1 }],
+      items: [input.items[0], { variantId: 1, size: 43, quantity: 1 }],
     }).success,
     true,
   )
@@ -64,7 +64,7 @@ test("rejects missing contacts, invalid email and phone, and oversized requests"
     { customerPhone: "abcdefghijk" },
     { shippingAddress: "  " },
     { comment: "x".repeat(2001) },
-    { items: Array.from({ length: 101 }, (_, index) => ({ productId: index + 1, quantity: 1 })) },
+    { items: Array.from({ length: 101 }, (_, index) => ({ variantId: index + 1, quantity: 1 })) },
   ]) {
     assert.equal(orderSchema.safeParse({ ...input, ...changes }).success, false)
   }

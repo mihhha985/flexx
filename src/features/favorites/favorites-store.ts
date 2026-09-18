@@ -10,15 +10,19 @@ type FavoritesState = {
   ready: boolean
   items: Product[]
   toggleItem: (product: Product) => void
-  removeItem: (productId: number) => void
+  removeItem: (variantId: number) => void
   setReady: () => void
 }
 
 const savedFavoriteProductFieldsSchema = z.object({
   id: z.number().int().positive(),
+  variantId: z.number().int().positive(),
   name: z.string(),
   slug: z.string(),
   description: z.string().optional(),
+  colorName: z.string(),
+  colorSlug: z.string(),
+  colorHex: z.string(),
   price: z.number().nonnegative(),
   stock: z.number().int().nonnegative(),
   isActive: z.boolean(),
@@ -70,16 +74,16 @@ export const useFavoritesStore = create<FavoritesState>()(
       ready: false,
       items: [],
       toggleItem: (product) => {
-        if (!Number.isInteger(product.id) || product.id < 1) return
+        if (!Number.isInteger(product.variantId) || product.variantId < 1) return
 
         set((state) => ({
-          items: state.items.some((item) => item.id === product.id)
-            ? state.items.filter((item) => item.id !== product.id)
+          items: state.items.some((item) => item.variantId === product.variantId)
+            ? state.items.filter((item) => item.variantId !== product.variantId)
             : [...state.items, product],
         }))
       },
-      removeItem: (productId) =>
-        set((state) => ({ items: state.items.filter((item) => item.id !== productId) })),
+      removeItem: (variantId) =>
+        set((state) => ({ items: state.items.filter((item) => item.variantId !== variantId) })),
       setReady: () => set({ ready: true }),
     }),
     {
@@ -94,7 +98,7 @@ export const useFavoritesStore = create<FavoritesState>()(
           items: saved.success
             ? saved.data.items.filter(
                 (item, index, items) =>
-                  items.findIndex((current) => current.id === item.id) === index,
+                  items.findIndex((current) => current.variantId === item.variantId) === index,
               )
             : current.items,
         }
@@ -106,5 +110,5 @@ export const useFavoritesStore = create<FavoritesState>()(
 
 export const selectFavoriteItemCount = (state: FavoritesState) => state.items.length
 
-export const selectIsFavorite = (productId: number) => (state: FavoritesState) =>
-  state.items.some((item) => item.id === productId)
+export const selectIsFavorite = (variantId: number) => (state: FavoritesState) =>
+  state.items.some((item) => item.variantId === variantId)

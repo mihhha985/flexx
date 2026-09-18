@@ -11,8 +11,12 @@ import {
 const storage = new Map<string, string>()
 const product: Product = {
   id: 1,
+  variantId: 11,
   name: "Товар",
   slug: "product",
+  colorName: "Чёрный",
+  colorSlug: "black",
+  colorHex: "#000000",
   price: 150,
   avatar: "https://cdn.example.com/products/product.jpg",
   images: [],
@@ -38,24 +42,24 @@ test("toggles products without duplicates and derives the count", () => {
   toggleItem(product)
   toggleItem(product)
   toggleItem(product)
-  toggleItem({ ...product, id: 2, slug: "second-product" })
+  toggleItem({ ...product, id: 2, variantId: 22, slug: "second-product" })
 
   assert.equal(selectFavoriteItemCount(useFavoritesStore.getState()), 2)
-  assert.equal(selectIsFavorite(product.id)(useFavoritesStore.getState()), true)
+  assert.equal(selectIsFavorite(product.variantId)(useFavoritesStore.getState()), true)
 })
 
 test("removes a favorite and persists the result", () => {
   const { toggleItem, removeItem } = useFavoritesStore.getState()
   toggleItem(product)
-  toggleItem({ ...product, id: 2, slug: "second-product" })
-  removeItem(product.id)
+  toggleItem({ ...product, id: 2, variantId: 22, slug: "second-product" })
+  removeItem(product.variantId)
 
   assert.deepEqual(
-    useFavoritesStore.getState().items.map((item) => item.id),
-    [2],
+    useFavoritesStore.getState().items.map((item) => item.variantId),
+    [22],
   )
   assert.deepEqual(JSON.parse(storage.get("kontur-favorites")!), {
-    state: { items: [{ ...product, id: 2, slug: "second-product" }] },
+    state: { items: [{ ...product, id: 2, variantId: 22, slug: "second-product" }] },
     version: 0,
   })
 })

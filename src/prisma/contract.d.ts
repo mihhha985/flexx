@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'e50f96053bcbca3fa511e37cc374157268dda8801d0dd4db0645b5014f803112'>;
+  StorageHashBase<'66d7d55f1ad43de8ae90cb378fe0a83f9e59f73c74c128dfb7073b0759098c2b'>;
 export type ExecutionHash =
   ExecutionHashBase<'db2a4b2fcbf69eb635558ae43399b655bdd2e4648bd5ac2b2a895afe15990314'>;
 export type ProfileHash =
@@ -265,8 +265,11 @@ export type FieldOutputTypes = {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly orderId: CodecTypes['pg/int4@1']['output'];
       readonly productId: CodecTypes['pg/int4@1']['output'];
+      readonly variantId: CodecTypes['pg/int4@1']['output'] | null;
       readonly productName: CodecTypes['pg/text@1']['output'];
-      readonly size: CodecTypes['pg/int4@1']['output'] | null;
+      readonly colorName: CodecTypes['pg/text@1']['output'];
+      readonly colorSlug: CodecTypes['pg/text@1']['output'];
+      readonly size: CodecTypes['pg/int4@1']['output'];
       readonly unitPrice: CodecTypes['pg/float8@1']['output'];
       readonly quantity: CodecTypes['pg/int4@1']['output'];
     };
@@ -274,22 +277,30 @@ export type FieldOutputTypes = {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly slug: CodecTypes['pg/text@1']['output'];
-      readonly price: CodecTypes['pg/float8@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'];
-      readonly avatar: CodecTypes['pg/text@1']['output'];
-      readonly images: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
+      readonly country: CodecTypes['pg/text@1']['output'];
       readonly isActive: CodecTypes['pg/bool@1']['output'];
-      readonly stock: CodecTypes['pg/int4@1']['output'];
       readonly categoryId: CodecTypes['pg/int4@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
-    readonly ProductDetail: {
+    readonly ProductVariant: {
       readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly color: '#FFFFFF' | '#000000' | '#FF0000' | '#0000FF' | '#008000' | '#808080';
-      readonly size: ReadonlyArray<CodecTypes['pg/int4@1']['output']>;
-      readonly country: CodecTypes['pg/text@1']['output'];
       readonly productId: CodecTypes['pg/int4@1']['output'];
+      readonly colorName: CodecTypes['pg/text@1']['output'];
+      readonly colorSlug: CodecTypes['pg/text@1']['output'];
+      readonly colorHex: CodecTypes['pg/text@1']['output'];
+      readonly price: CodecTypes['pg/float8@1']['output'];
+      readonly avatar: CodecTypes['pg/text@1']['output'];
+      readonly images: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
+      readonly isActive: CodecTypes['pg/bool@1']['output'];
+      readonly order: CodecTypes['pg/int4@1']['output'];
+    };
+    readonly ProductVariantSize: {
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly variantId: CodecTypes['pg/int4@1']['output'];
+      readonly size: CodecTypes['pg/int4@1']['output'];
+      readonly stock: CodecTypes['pg/int4@1']['output'];
     };
   };
 };
@@ -319,8 +330,11 @@ export type FieldInputTypes = {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly orderId: CodecTypes['pg/int4@1']['input'];
       readonly productId: CodecTypes['pg/int4@1']['input'];
+      readonly variantId: CodecTypes['pg/int4@1']['input'] | null;
       readonly productName: CodecTypes['pg/text@1']['input'];
-      readonly size: CodecTypes['pg/int4@1']['input'] | null;
+      readonly colorName: CodecTypes['pg/text@1']['input'];
+      readonly colorSlug: CodecTypes['pg/text@1']['input'];
+      readonly size: CodecTypes['pg/int4@1']['input'];
       readonly unitPrice: CodecTypes['pg/float8@1']['input'];
       readonly quantity: CodecTypes['pg/int4@1']['input'];
     };
@@ -328,22 +342,30 @@ export type FieldInputTypes = {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly slug: CodecTypes['pg/text@1']['input'];
-      readonly price: CodecTypes['pg/float8@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'];
-      readonly avatar: CodecTypes['pg/text@1']['input'];
-      readonly images: ReadonlyArray<CodecTypes['pg/text@1']['input']>;
+      readonly country: CodecTypes['pg/text@1']['input'];
       readonly isActive: CodecTypes['pg/bool@1']['input'];
-      readonly stock: CodecTypes['pg/int4@1']['input'];
       readonly categoryId: CodecTypes['pg/int4@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
-    readonly ProductDetail: {
+    readonly ProductVariant: {
       readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly color: '#FFFFFF' | '#000000' | '#FF0000' | '#0000FF' | '#008000' | '#808080';
-      readonly size: ReadonlyArray<CodecTypes['pg/int4@1']['input']>;
-      readonly country: CodecTypes['pg/text@1']['input'];
       readonly productId: CodecTypes['pg/int4@1']['input'];
+      readonly colorName: CodecTypes['pg/text@1']['input'];
+      readonly colorSlug: CodecTypes['pg/text@1']['input'];
+      readonly colorHex: CodecTypes['pg/text@1']['input'];
+      readonly price: CodecTypes['pg/float8@1']['input'];
+      readonly avatar: CodecTypes['pg/text@1']['input'];
+      readonly images: ReadonlyArray<CodecTypes['pg/text@1']['input']>;
+      readonly isActive: CodecTypes['pg/bool@1']['input'];
+      readonly order: CodecTypes['pg/int4@1']['input'];
+    };
+    readonly ProductVariantSize: {
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly variantId: CodecTypes['pg/int4@1']['input'];
+      readonly size: CodecTypes['pg/int4@1']['input'];
+      readonly stock: CodecTypes['pg/int4@1']['input'];
     };
   };
 };
@@ -370,34 +392,45 @@ export type StorageColumnTypes = {
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
     readonly orderItem: {
+      readonly colorName: CodecTypes['pg/text@1']['output'];
+      readonly colorSlug: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly orderId: CodecTypes['pg/int4@1']['output'];
       readonly productId: CodecTypes['pg/int4@1']['output'];
       readonly productName: CodecTypes['pg/text@1']['output'];
       readonly quantity: CodecTypes['pg/int4@1']['output'];
-      readonly size: CodecTypes['pg/int4@1']['output'] | null;
+      readonly size: CodecTypes['pg/int4@1']['output'];
       readonly unitPrice: CodecTypes['pg/float8@1']['output'];
+      readonly variantId: CodecTypes['pg/int4@1']['output'] | null;
     };
     readonly product: {
-      readonly avatar: CodecTypes['pg/text@1']['output'];
       readonly categoryId: CodecTypes['pg/int4@1']['output'];
+      readonly country: CodecTypes['pg/text@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly images: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
       readonly isActive: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-      readonly price: CodecTypes['pg/float8@1']['output'];
       readonly slug: CodecTypes['pg/text@1']['output'];
-      readonly stock: CodecTypes['pg/int4@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
-    readonly product_detail: {
-      readonly color: '#FFFFFF' | '#000000' | '#FF0000' | '#0000FF' | '#008000' | '#808080';
-      readonly country: CodecTypes['pg/text@1']['output'];
+    readonly product_variant: {
+      readonly avatar: CodecTypes['pg/text@1']['output'];
+      readonly colorHex: CodecTypes['pg/text@1']['output'];
+      readonly colorName: CodecTypes['pg/text@1']['output'];
+      readonly colorSlug: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly images: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
+      readonly isActive: CodecTypes['pg/bool@1']['output'];
+      readonly order: CodecTypes['pg/int4@1']['output'];
+      readonly price: CodecTypes['pg/float8@1']['output'];
       readonly productId: CodecTypes['pg/int4@1']['output'];
-      readonly size: ReadonlyArray<CodecTypes['pg/int4@1']['output']>;
+    };
+    readonly product_variant_size: {
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly size: CodecTypes['pg/int4@1']['output'];
+      readonly stock: CodecTypes['pg/int4@1']['output'];
+      readonly variantId: CodecTypes['pg/int4@1']['output'];
     };
   };
 };
@@ -424,34 +457,45 @@ export type StorageColumnInputTypes = {
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
     readonly orderItem: {
+      readonly colorName: CodecTypes['pg/text@1']['input'];
+      readonly colorSlug: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly orderId: CodecTypes['pg/int4@1']['input'];
       readonly productId: CodecTypes['pg/int4@1']['input'];
       readonly productName: CodecTypes['pg/text@1']['input'];
       readonly quantity: CodecTypes['pg/int4@1']['input'];
-      readonly size: CodecTypes['pg/int4@1']['input'] | null;
+      readonly size: CodecTypes['pg/int4@1']['input'];
       readonly unitPrice: CodecTypes['pg/float8@1']['input'];
+      readonly variantId: CodecTypes['pg/int4@1']['input'] | null;
     };
     readonly product: {
-      readonly avatar: CodecTypes['pg/text@1']['input'];
       readonly categoryId: CodecTypes['pg/int4@1']['input'];
+      readonly country: CodecTypes['pg/text@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly images: ReadonlyArray<CodecTypes['pg/text@1']['input']>;
       readonly isActive: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-      readonly price: CodecTypes['pg/float8@1']['input'];
       readonly slug: CodecTypes['pg/text@1']['input'];
-      readonly stock: CodecTypes['pg/int4@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
-    readonly product_detail: {
-      readonly color: '#FFFFFF' | '#000000' | '#FF0000' | '#0000FF' | '#008000' | '#808080';
-      readonly country: CodecTypes['pg/text@1']['input'];
+    readonly product_variant: {
+      readonly avatar: CodecTypes['pg/text@1']['input'];
+      readonly colorHex: CodecTypes['pg/text@1']['input'];
+      readonly colorName: CodecTypes['pg/text@1']['input'];
+      readonly colorSlug: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly images: ReadonlyArray<CodecTypes['pg/text@1']['input']>;
+      readonly isActive: CodecTypes['pg/bool@1']['input'];
+      readonly order: CodecTypes['pg/int4@1']['input'];
+      readonly price: CodecTypes['pg/float8@1']['input'];
       readonly productId: CodecTypes['pg/int4@1']['input'];
-      readonly size: ReadonlyArray<CodecTypes['pg/int4@1']['input']>;
+    };
+    readonly product_variant_size: {
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly size: CodecTypes['pg/int4@1']['input'];
+      readonly stock: CodecTypes['pg/int4@1']['input'];
+      readonly variantId: CodecTypes['pg/int4@1']['input'];
     };
   };
 };
@@ -619,7 +663,22 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
                 };
+                readonly variantId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
                 readonly productName: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly colorName: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly colorSlug: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
@@ -627,7 +686,7 @@ type ContractBase = Omit<
                 readonly size: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
-                  readonly nullable: true;
+                  readonly nullable: false;
                 };
                 readonly unitPrice: {
                   readonly nativeType: 'float8';
@@ -653,6 +712,12 @@ type ContractBase = Omit<
                   readonly name: 'orderItem_productId_idx_5858600a';
                   readonly prefix: 'orderItem_productId_idx';
                   readonly columns: readonly ['productId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'orderItem_variantId_idx_e16bb45d';
+                  readonly prefix: 'orderItem_variantId_idx';
+                  readonly columns: readonly ['variantId'];
                   readonly unique: false;
                 },
               ];
@@ -681,6 +746,18 @@ type ContractBase = Omit<
                     readonly columns: readonly ['id'];
                   };
                 },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'orderItem';
+                    readonly columns: readonly ['variantId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'product_variant';
+                    readonly columns: readonly ['id'];
+                  };
+                },
               ];
             };
             readonly product: {
@@ -704,22 +781,12 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly price: {
-                  readonly nativeType: 'float8';
-                  readonly codecId: 'pg/float8@1';
-                  readonly nullable: false;
-                };
                 readonly description: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly avatar: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly images: {
+                readonly country: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
@@ -731,15 +798,6 @@ type ContractBase = Omit<
                   readonly default: {
                     readonly kind: 'literal';
                     readonly value: DefaultLiteralValue<'pg/bool@1', true>;
-                  };
-                };
-                readonly stock: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
                   };
                 };
                 readonly categoryId: {
@@ -763,15 +821,15 @@ type ContractBase = Omit<
               uniques: readonly [{ readonly columns: readonly ['slug'] }];
               indexes: readonly [
                 {
-                  readonly name: 'product_categoryId_idx_15c304f2';
-                  readonly prefix: 'product_categoryId_idx';
-                  readonly columns: readonly ['categoryId'];
+                  readonly name: 'product_categoryId_isActive_idx_d7630c7f';
+                  readonly prefix: 'product_categoryId_isActive_idx';
+                  readonly columns: readonly ['categoryId', 'isActive'];
                   readonly unique: false;
                 },
                 {
-                  readonly name: 'product_isActive_idx_77fe3ba1';
-                  readonly prefix: 'product_isActive_idx';
-                  readonly columns: readonly ['isActive'];
+                  readonly name: 'product_categoryId_idx_15c304f2';
+                  readonly prefix: 'product_categoryId_idx';
+                  readonly columns: readonly ['categoryId'];
                   readonly unique: false;
                 },
               ];
@@ -790,7 +848,7 @@ type ContractBase = Omit<
                 },
               ];
             };
-            readonly product_detail: {
+            readonly product_variant: {
               columns: {
                 readonly id: {
                   readonly nativeType: 'int4';
@@ -801,35 +859,80 @@ type ContractBase = Omit<
                     readonly expression: 'autoincrement()';
                   };
                 };
-                readonly color: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly size: {
+                readonly productId: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
                 };
-                readonly country: {
+                readonly colorName: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly productId: {
+                readonly colorSlug: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly colorHex: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly price: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                };
+                readonly avatar: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly images: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly isActive: {
+                  readonly nativeType: 'bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                };
+                readonly order: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['productId'] }];
-              indexes: readonly [];
+              uniques: readonly [
+                { readonly columns: readonly ['productId', 'colorSlug'] },
+                { readonly columns: readonly ['productId', 'order'] },
+              ];
+              indexes: readonly [
+                {
+                  readonly name: 'product_variant_productId_isActive_order_idx_aa3b0c9c';
+                  readonly prefix: 'product_variant_productId_isActive_order_idx';
+                  readonly columns: readonly ['productId', 'isActive', 'order'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'product_variant_productId_idx_5858600a';
+                  readonly prefix: 'product_variant_productId_idx';
+                  readonly columns: readonly ['productId'];
+                  readonly unique: false;
+                },
+              ];
               foreignKeys: readonly [
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'product_detail';
+                    readonly tableName: 'product_variant';
                     readonly columns: readonly ['productId'];
                   };
                   readonly target: {
@@ -840,19 +943,64 @@ type ContractBase = Omit<
                 },
               ];
             };
-          };
-          readonly valueSet: {
-            readonly Color: {
-              readonly kind: 'valueSet';
-              readonly values: readonly [
-                '#FFFFFF',
-                '#000000',
-                '#FF0000',
-                '#0000FF',
-                '#008000',
-                '#808080',
+            readonly product_variant_size: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly variantId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly size: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly stock: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['variantId', 'size'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'product_variant_size_variantId_idx_e16bb45d';
+                  readonly prefix: 'product_variant_size_variantId_idx';
+                  readonly columns: readonly ['variantId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'product_variant_size';
+                    readonly columns: readonly ['variantId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'product_variant';
+                    readonly columns: readonly ['id'];
+                  };
+                },
               ];
             };
+          };
+          readonly valueSet: {
             readonly order_status: {
               readonly kind: 'valueSet';
               readonly values: readonly [
@@ -876,9 +1024,13 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly product: { readonly namespace: 'public' & NamespaceId; readonly model: 'Product' };
-    readonly product_detail: {
+    readonly product_variant: {
       readonly namespace: 'public' & NamespaceId;
-      readonly model: 'ProductDetail';
+      readonly model: 'ProductVariant';
+    };
+    readonly product_variant_size: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ProductVariantSize';
     };
     readonly category: { readonly namespace: 'public' & NamespaceId; readonly model: 'Category' };
     readonly order: { readonly namespace: 'public' & NamespaceId; readonly model: 'Order' };
@@ -1034,12 +1186,24 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
+              readonly variantId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly productName: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly colorName: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly colorSlug: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly size: {
-                readonly nullable: true;
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly unitPrice: {
@@ -1074,6 +1238,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly variant: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProductVariant';
+                };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['variantId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
             };
             readonly storage: {
               readonly table: 'orderItem';
@@ -1082,7 +1257,10 @@ type ContractBase = Omit<
                 readonly id: { readonly column: 'id' };
                 readonly orderId: { readonly column: 'orderId' };
                 readonly productId: { readonly column: 'productId' };
+                readonly variantId: { readonly column: 'variantId' };
                 readonly productName: { readonly column: 'productName' };
+                readonly colorName: { readonly column: 'colorName' };
+                readonly colorSlug: { readonly column: 'colorSlug' };
                 readonly size: { readonly column: 'size' };
                 readonly unitPrice: { readonly column: 'unitPrice' };
                 readonly quantity: { readonly column: 'quantity' };
@@ -1103,30 +1281,17 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly price: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
-              };
               readonly description: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly avatar: {
+              readonly country: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly images: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-                readonly many: true;
               };
               readonly isActive: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
-              };
-              readonly stock: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly categoryId: {
                 readonly nullable: false;
@@ -1159,21 +1324,21 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
-              readonly detail: {
+              readonly orderItems: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'ProductDetail';
+                  readonly model: 'OrderItem';
                 };
-                readonly cardinality: '1:1';
+                readonly cardinality: '1:N';
                 readonly on: {
                   readonly localFields: readonly ['id'];
                   readonly targetFields: readonly ['productId'];
                 };
               };
-              readonly orderItems: {
+              readonly variants: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'OrderItem';
+                  readonly model: 'ProductVariant';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
@@ -1189,43 +1354,71 @@ type ContractBase = Omit<
                 readonly id: { readonly column: 'id' };
                 readonly name: { readonly column: 'name' };
                 readonly slug: { readonly column: 'slug' };
-                readonly price: { readonly column: 'price' };
                 readonly description: { readonly column: 'description' };
-                readonly avatar: { readonly column: 'avatar' };
-                readonly images: { readonly column: 'images' };
+                readonly country: { readonly column: 'country' };
                 readonly isActive: { readonly column: 'isActive' };
-                readonly stock: { readonly column: 'stock' };
                 readonly categoryId: { readonly column: 'categoryId' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
-          readonly ProductDetail: {
+          readonly ProductVariant: {
             readonly fields: {
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
-              readonly color: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly size: {
+              readonly productId: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
-                readonly many: true;
               };
-              readonly country: {
+              readonly colorName: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly productId: {
+              readonly colorSlug: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly colorHex: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly price: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly avatar: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly images: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly many: true;
+              };
+              readonly isActive: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly order: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
             };
             readonly relations: {
+              readonly orderItems: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'OrderItem';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['variantId'];
+                };
+              };
               readonly product: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -1237,32 +1430,80 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly sizes: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProductVariantSize';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['variantId'];
+                };
+              };
             };
             readonly storage: {
-              readonly table: 'product_detail';
+              readonly table: 'product_variant';
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly id: { readonly column: 'id' };
-                readonly color: { readonly column: 'color' };
-                readonly size: { readonly column: 'size' };
-                readonly country: { readonly column: 'country' };
                 readonly productId: { readonly column: 'productId' };
+                readonly colorName: { readonly column: 'colorName' };
+                readonly colorSlug: { readonly column: 'colorSlug' };
+                readonly colorHex: { readonly column: 'colorHex' };
+                readonly price: { readonly column: 'price' };
+                readonly avatar: { readonly column: 'avatar' };
+                readonly images: { readonly column: 'images' };
+                readonly isActive: { readonly column: 'isActive' };
+                readonly order: { readonly column: 'order' };
+              };
+            };
+          };
+          readonly ProductVariantSize: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly variantId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly size: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly stock: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly variant: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProductVariant';
+                };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['variantId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'product_variant_size';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly variantId: { readonly column: 'variantId' };
+                readonly size: { readonly column: 'size' };
+                readonly stock: { readonly column: 'stock' };
               };
             };
           };
         };
         readonly enum: {
-          readonly Color: {
-            readonly codecId: 'pg/text@1';
-            readonly members: readonly [
-              { readonly name: 'white'; readonly value: '#FFFFFF' },
-              { readonly name: 'black'; readonly value: '#000000' },
-              { readonly name: 'red'; readonly value: '#FF0000' },
-              { readonly name: 'blue'; readonly value: '#0000FF' },
-              { readonly name: 'green'; readonly value: '#008000' },
-              { readonly name: 'gray'; readonly value: '#808080' },
-            ];
-          };
           readonly order_status: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [

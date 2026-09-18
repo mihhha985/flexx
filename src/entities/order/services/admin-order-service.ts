@@ -6,7 +6,7 @@ import { getAdminOrders } from "@/src/entities/order/repository/get-admin-orders
 export async function getOrdersForAdmin() {
   await requireAdmin()
   try {
-    return getAdminOrders()
+    return await getAdminOrders()
   } catch (error) {
     console.error("Не удалось загрузить список заказов", error)
     throw error

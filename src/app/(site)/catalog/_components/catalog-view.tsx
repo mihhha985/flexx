@@ -16,7 +16,7 @@ export function CatalogView({ visibleProducts }: { visibleProducts: Product[] })
       {visibleProducts.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 max-[359px]:grid-cols-1 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
           {visibleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.variantId} product={product} />
           ))}
         </div>
       ) : (

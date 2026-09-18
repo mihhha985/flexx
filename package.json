@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=22.12.0"
   },
   "packageManager": "npm@10.9.0",
   "type": "module",
@@ -33,7 +33,8 @@
     "format:check": "prettier --check src scripts *.ts *.mjs *.json *.md",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/test.mjs",
-    "check": "npm run lint && npm run typecheck && npm test"
+    "check": "npm run lint && npm run typecheck && npm test",
+    "import:amazing-red": "node --env-file=.env --conditions=react-server --import tsx scripts/import-amazing-red.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1131.0",
@@ -71,6 +72,7 @@
     "pg": "8.22.0",
     "prettier": "3.9.6",
     "prisma": "8.0.0-rc.12",
+    "puppeteer": "^25.11.0",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3"
   },

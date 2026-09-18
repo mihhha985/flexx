@@ -16,7 +16,7 @@ export async function getAdminOrders() {
   )
     .include("items", (items) =>
       items
-        .select("id", "productName", "size", "unitPrice", "quantity")
+        .select("id", "productName", "colorName", "colorSlug", "size", "unitPrice", "quantity")
         .include("product", (product) => product.select("slug", "isActive")),
     )
     .orderBy([(order) => order.createdAt.desc(), (order) => order.id.desc()])

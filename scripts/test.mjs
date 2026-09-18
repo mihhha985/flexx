@@ -20,6 +20,7 @@ for (const args of [
     ...client,
     "scripts/service-worker.test.mjs",
     "scripts/architecture.test.mjs",
+    "scripts/import-amazing-red.test.ts",
   ],
   ["--conditions=react-server", "--import", "tsx", "--test", ...server],
 ]) {

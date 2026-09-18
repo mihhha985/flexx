@@ -1,82 +1,55 @@
 "use server"
 
-import { revalidateCatalog } from "@/src/shared/lib/revalidate-catalog"
 import { z } from "zod"
+
 import { requireAdmin } from "@/src/entities/admin/services/session-service"
+import type { UpdateProductState } from "@/src/entities/product/domain"
+import { revalidateCatalog } from "@/src/shared/lib/revalidate-catalog"
 import * as repository from "../repository/manage-product"
-import {
-  createProductFormSchema,
-  MAX_PRODUCT_IMAGES,
-  type UpdateProductState,
-} from "@/src/entities/product/domain"
+import { parseCreateProductForm, productFormErrors } from "./product-form-data"
 import {
   deleteProductImage,
   deleteUploadedProductImages,
-  getProductImageFile,
-  getProductImageFiles,
   ProductImageStorageError,
-  uploadProductImage,
   type UploadedProductImage,
 } from "./product-image-storage"
+import { uploadVariantMedia, validateVariantMedia } from "./product-variant-media"
 
 export async function createProductAction(
   _state: UpdateProductState,
   formData: FormData,
 ): Promise<UpdateProductState> {
   await requireAdmin()
-  const parsed = createProductFormSchema.safeParse({
-    ...Object.fromEntries(formData),
-    size: formData.getAll("size"),
-  })
-  const errors: NonNullable<UpdateProductState["errors"]> = parsed.success
-    ? {}
-    : parsed.error.flatten().fieldErrors
+  const parsed = parseCreateProductForm(formData)
+  if (!parsed.success) return productFormErrors(parsed.error)
 
-  const { file: avatarFile, error: avatarError } = getProductImageFile(formData.get("avatar"))
-  if (avatarError) errors.avatar = [avatarError]
-  else if (!avatarFile) errors.avatar = ["Добавьте главное изображение товара."]
-
-  const { files: imageFiles, error: imagesError } = getProductImageFiles(formData.getAll("images"))
-  if (imagesError) errors.images = [imagesError]
-  else if (imageFiles.length > MAX_PRODUCT_IMAGES)
-    errors.images = [`Можно добавить не больше ${MAX_PRODUCT_IMAGES} изображений.`]
-
-  if (
-    !parsed.success ||
-    !avatarFile ||
-    avatarError ||
-    imagesError ||
-    imageFiles.length > MAX_PRODUCT_IMAGES
-  )
-    return { errors }
+  const mediaDrafts = validateVariantMedia(formData, parsed.data.variants)
+  if (Object.keys(mediaDrafts.errors).length) return { variantErrors: mediaDrafts.errors }
 
   const uploads: UploadedProductImage[] = []
-  let mediaErrorField: "avatar" | "images" = "avatar"
   try {
+    const uploaded = await uploadVariantMedia(mediaDrafts.drafts, uploads)
     await repository.withProductTransaction(async (transaction) => {
       const { category, duplicate } = await transaction.getProductCreateContext(parsed.data)
       if (!category) throw new ProductFormError({ categoryId: ["Выбранная категория не найдена."] })
       if (duplicate) throw new ProductFormError({ slug: ["Товар с таким слагом уже существует."] })
 
-      uploads.push(await uploadProductImage(avatarFile))
-      mediaErrorField = "images"
-      for (const imageFile of imageFiles) uploads.push(await uploadProductImage(imageFile))
-
-      const product = await transaction.createProduct({
+      await transaction.createProduct({
         ...parsed.data,
-        avatar: uploads[0].url,
-        images: uploads.slice(1).map((image) => image.url),
+        variants: parsed.data.variants.map((variant, index) => ({
+          ...variant,
+          ...uploaded.media[index],
+        })),
       })
-      await transaction.saveProductDetail(product.id, parsed.data, false)
     })
   } catch (error) {
     await cleanupUploadedImages(uploads, "создания")
     if (error instanceof ProductFormError) return { errors: error.errors }
-    if (error instanceof ProductImageStorageError)
-      return { errors: { [mediaErrorField]: [error.message] } }
+    if (error instanceof ProductImageStorageError) return { message: error.message }
     console.error("Не удалось создать товар", error)
     return { message: "Не удалось создать товар. Проверьте данные и попробуйте ещё раз." }
   }
+
   revalidateCatalog()
   return { success: true, message: "Товар создан и доступен в каталоге." }
 }
@@ -105,27 +78,36 @@ export async function setProductActive(id: number, isActive: boolean) {
 
 export async function deleteProductAction(id: number) {
   await requireAdmin()
-  if (!z.number().int().positive().safeParse(id).success)
+  if (!z.number().int().positive().safeParse(id).success) {
     return { success: false, error: "Некорректный номер товара." }
+  }
   try {
     const orderItem = await repository.getProductOrderItem(id)
-    if (orderItem)
+    if (orderItem) {
       return {
         success: false,
         error: "Товар используется в заказах и не может быть удалён. Его можно скрыть из каталога.",
       }
+    }
     const media = await repository.getProductMedia(id)
     if (!media) return { success: false, error: "Товар не найден. Обновите страницу." }
 
-    // The foreign key also protects orders created concurrently with this check.
-    await repository.deleteProduct(id)
-    for (const imageUrl of [media.avatar, ...media.images]) {
-      try {
+    const imageUrls = new Set(
+      media.variants.flatMap((variant) => [variant.avatar, ...variant.images]),
+    )
+    try {
+      for (const imageUrl of imageUrls) {
         await deleteProductImage(imageUrl)
-      } catch (cleanupError) {
-        console.error("Не удалось удалить изображение удалённого товара", cleanupError)
+      }
+    } catch (error) {
+      console.error("Не удалось удалить изображения товара перед удалением записи", error)
+      return {
+        success: false,
+        error:
+          "Не удалось удалить все изображения из хранилища. Запись товара сохранена. Повторите удаление.",
       }
     }
+    await repository.deleteProduct(id)
   } catch (error) {
     console.error("Не удалось удалить товар", error)
     return {

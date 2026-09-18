@@ -20,8 +20,12 @@
       "model": "Product",
       "namespace": "public"
     },
-    "product_detail": {
-      "model": "ProductDetail",
+    "product_variant": {
+      "model": "ProductVariant",
+      "namespace": "public"
+    },
+    "product_variant_size": {
+      "model": "ProductVariantSize",
       "namespace": "public"
     }
   },
@@ -29,35 +33,6 @@
     "namespaces": {
       "public": {
         "enum": {
-          "Color": {
-            "codecId": "pg/text@1",
-            "members": [
-              {
-                "name": "white",
-                "value": "#FFFFFF"
-              },
-              {
-                "name": "black",
-                "value": "#000000"
-              },
-              {
-                "name": "red",
-                "value": "#FF0000"
-              },
-              {
-                "name": "blue",
-                "value": "#0000FF"
-              },
-              {
-                "name": "green",
-                "value": "#008000"
-              },
-              {
-                "name": "gray",
-                "value": "#808080"
-              }
-            ]
-          },
           "order_status": {
             "codecId": "pg/text@1",
             "members": [
@@ -311,6 +286,20 @@
           },
           "OrderItem": {
             "fields": {
+              "colorName": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "colorSlug": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -347,7 +336,7 @@
                 }
               },
               "size": {
-                "nullable": true,
+                "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
@@ -357,6 +346,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "variantId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               }
@@ -391,10 +387,31 @@
                   "model": "Product",
                   "namespace": "public"
                 }
+              },
+              "variant": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "variantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "ProductVariant",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
               "fields": {
+                "colorName": {
+                  "column": "colorName"
+                },
+                "colorSlug": {
+                  "column": "colorSlug"
+                },
                 "id": {
                   "column": "id"
                 },
@@ -415,6 +432,9 @@
                 },
                 "unitPrice": {
                   "column": "unitPrice"
+                },
+                "variantId": {
+                  "column": "variantId"
                 }
               },
               "namespaceId": "public",
@@ -423,17 +443,17 @@
           },
           "Product": {
             "fields": {
-              "avatar": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
               "categoryId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "country": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -445,6 +465,153 @@
                 }
               },
               "description": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "isActive": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "slug": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "category": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "categoryId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Category",
+                  "namespace": "public"
+                }
+              },
+              "orderItems": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "productId"
+                  ]
+                },
+                "to": {
+                  "model": "OrderItem",
+                  "namespace": "public"
+                }
+              },
+              "variants": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "productId"
+                  ]
+                },
+                "to": {
+                  "model": "ProductVariant",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "categoryId": {
+                  "column": "categoryId"
+                },
+                "country": {
+                  "column": "country"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "description": {
+                  "column": "description"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "isActive": {
+                  "column": "isActive"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "slug": {
+                  "column": "slug"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "product"
+            }
+          },
+          "ProductVariant": {
+            "fields": {
+              "avatar": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "colorHex": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "colorName": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "colorSlug": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -473,10 +640,10 @@
                   "kind": "scalar"
                 }
               },
-              "name": {
+              "order": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/text@1",
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
@@ -487,59 +654,15 @@
                   "kind": "scalar"
                 }
               },
-              "slug": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "stock": {
+              "productId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
-              },
-              "updatedAt": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "kind": "scalar"
-                }
               }
             },
             "relations": {
-              "category": {
-                "cardinality": "N:1",
-                "on": {
-                  "localFields": [
-                    "categoryId"
-                  ],
-                  "targetFields": [
-                    "id"
-                  ]
-                },
-                "to": {
-                  "model": "Category",
-                  "namespace": "public"
-                }
-              },
-              "detail": {
-                "cardinality": "1:1",
-                "on": {
-                  "localFields": [
-                    "id"
-                  ],
-                  "targetFields": [
-                    "productId"
-                  ]
-                },
-                "to": {
-                  "model": "ProductDetail",
-                  "namespace": "public"
-                }
-              },
               "orderItems": {
                 "cardinality": "1:N",
                 "on": {
@@ -547,104 +670,14 @@
                     "id"
                   ],
                   "targetFields": [
-                    "productId"
+                    "variantId"
                   ]
                 },
                 "to": {
                   "model": "OrderItem",
                   "namespace": "public"
                 }
-              }
-            },
-            "storage": {
-              "fields": {
-                "avatar": {
-                  "column": "avatar"
-                },
-                "categoryId": {
-                  "column": "categoryId"
-                },
-                "createdAt": {
-                  "column": "createdAt"
-                },
-                "description": {
-                  "column": "description"
-                },
-                "id": {
-                  "column": "id"
-                },
-                "images": {
-                  "column": "images"
-                },
-                "isActive": {
-                  "column": "isActive"
-                },
-                "name": {
-                  "column": "name"
-                },
-                "price": {
-                  "column": "price"
-                },
-                "slug": {
-                  "column": "slug"
-                },
-                "stock": {
-                  "column": "stock"
-                },
-                "updatedAt": {
-                  "column": "updatedAt"
-                }
               },
-              "namespaceId": "public",
-              "table": "product"
-            }
-          },
-          "ProductDetail": {
-            "fields": {
-              "color": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                },
-                "valueSet": {
-                  "entityKind": "enum",
-                  "entityName": "Color",
-                  "namespaceId": "public",
-                  "plane": "domain"
-                }
-              },
-              "country": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "id": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
-              "productId": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
-              "size": {
-                "many": true,
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              }
-            },
-            "relations": {
               "product": {
                 "cardinality": "N:1",
                 "on": {
@@ -659,28 +692,125 @@
                   "model": "Product",
                   "namespace": "public"
                 }
+              },
+              "sizes": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "variantId"
+                  ]
+                },
+                "to": {
+                  "model": "ProductVariantSize",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
               "fields": {
-                "color": {
-                  "column": "color"
+                "avatar": {
+                  "column": "avatar"
                 },
-                "country": {
-                  "column": "country"
+                "colorHex": {
+                  "column": "colorHex"
+                },
+                "colorName": {
+                  "column": "colorName"
+                },
+                "colorSlug": {
+                  "column": "colorSlug"
                 },
                 "id": {
                   "column": "id"
                 },
+                "images": {
+                  "column": "images"
+                },
+                "isActive": {
+                  "column": "isActive"
+                },
+                "order": {
+                  "column": "order"
+                },
+                "price": {
+                  "column": "price"
+                },
                 "productId": {
                   "column": "productId"
-                },
-                "size": {
-                  "column": "size"
                 }
               },
               "namespaceId": "public",
-              "table": "product_detail"
+              "table": "product_variant"
+            }
+          },
+          "ProductVariantSize": {
+            "fields": {
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "size": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "stock": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "variantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "variant": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "variantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "ProductVariant",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "id": {
+                  "column": "id"
+                },
+                "size": {
+                  "column": "size"
+                },
+                "stock": {
+                  "column": "stock"
+                },
+                "variantId": {
+                  "column": "variantId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "product_variant_size"
             }
           }
         }
@@ -750,6 +880,11 @@
                   "expression": "\"status\" IN ('pending', 'confirmed', 'paid', 'shipped', 'completed', 'cancelled')",
                   "name": "order_status_check_ce97390a",
                   "prefix": "order_status_check"
+                },
+                {
+                  "expression": "total >= 0",
+                  "name": "order_total_nonnegative_80ff4d1c",
+                  "prefix": "order_total_nonnegative"
                 }
               ],
               "columns": {
@@ -860,7 +995,29 @@
               ]
             },
             "orderItem": {
+              "checks": [
+                {
+                  "expression": "\"unitPrice\" >= 0",
+                  "name": "order_item_price_nonnegative_07e3086a",
+                  "prefix": "order_item_price_nonnegative"
+                },
+                {
+                  "expression": "quantity > 0",
+                  "name": "order_item_quantity_positive_4402679f",
+                  "prefix": "order_item_quantity_positive"
+                }
+              ],
               "columns": {
+                "colorName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "colorSlug": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -893,12 +1050,17 @@
                 "size": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
-                  "nullable": true
+                  "nullable": false
                 },
                 "unitPrice": {
                   "codecId": "pg/float8@1",
                   "nativeType": "float8",
                   "nullable": false
+                },
+                "variantId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -935,6 +1097,23 @@
                     "namespaceId": "public",
                     "tableName": "product"
                   }
+                },
+                {
+                  "onDelete": "setNull",
+                  "source": {
+                    "columns": [
+                      "variantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "orderItem"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "product_variant"
+                  }
                 }
               ],
               "indexes": [
@@ -953,6 +1132,14 @@
                   "name": "orderItem_productId_idx_5858600a",
                   "prefix": "orderItem_productId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "variantId"
+                  ],
+                  "name": "orderItem_variantId_idx_e16bb45d",
+                  "prefix": "orderItem_variantId_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -963,22 +1150,15 @@
               "uniques": []
             },
             "product": {
-              "checks": [
-                {
-                  "expression": "array_position(\"images\", NULL) IS NULL",
-                  "name": "product_images_elem_not_null_2f12556f",
-                  "prefix": "product_images_elem_not_null"
-                }
-              ],
               "columns": {
-                "avatar": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
                 "categoryId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
+                  "nullable": false
+                },
+                "country": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
                   "nullable": false
                 },
                 "createdAt": {
@@ -1004,12 +1184,6 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "images": {
-                  "codecId": "pg/text@1",
-                  "many": true,
-                  "nativeType": "text",
-                  "nullable": false
-                },
                 "isActive": {
                   "codecId": "pg/bool@1",
                   "default": {
@@ -1024,23 +1198,9 @@
                   "nativeType": "text",
                   "nullable": false
                 },
-                "price": {
-                  "codecId": "pg/float8@1",
-                  "nativeType": "float8",
-                  "nullable": false
-                },
                 "slug": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
-                  "nullable": false
-                },
-                "stock": {
-                  "codecId": "pg/int4@1",
-                  "default": {
-                    "kind": "literal",
-                    "value": 0
-                  },
-                  "nativeType": "int4",
                   "nullable": false
                 },
                 "updatedAt": {
@@ -1079,10 +1239,11 @@
                 },
                 {
                   "columns": [
+                    "categoryId",
                     "isActive"
                   ],
-                  "name": "product_isActive_idx_77fe3ba1",
-                  "prefix": "product_isActive_idx",
+                  "name": "product_categoryId_isActive_idx_d7630c7f",
+                  "prefix": "product_categoryId_isActive_idx",
                   "unique": false
                 }
               ],
@@ -1099,32 +1260,41 @@
                 }
               ]
             },
-            "product_detail": {
+            "product_variant": {
               "checks": [
                 {
-                  "expression": "\"color\" IN ('#FFFFFF', '#000000', '#FF0000', '#0000FF', '#008000', '#808080')",
-                  "name": "product_detail_color_check_4fe16565",
-                  "prefix": "product_detail_color_check"
+                  "expression": "array_position(\"images\", NULL) IS NULL",
+                  "name": "product_variant_images_elem_not_null_2f12556f",
+                  "prefix": "product_variant_images_elem_not_null"
                 },
                 {
-                  "expression": "array_position(\"size\", NULL) IS NULL",
-                  "name": "product_detail_size_elem_not_null_a8715850",
-                  "prefix": "product_detail_size_elem_not_null"
+                  "expression": "\"order\" >= 0",
+                  "name": "product_variant_order_nonnegative_3ac28d09",
+                  "prefix": "product_variant_order_nonnegative"
+                },
+                {
+                  "expression": "price >= 0",
+                  "name": "product_variant_price_nonnegative_faabb23d",
+                  "prefix": "product_variant_price_nonnegative"
                 }
               ],
               "columns": {
-                "color": {
+                "avatar": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
-                  "nullable": false,
-                  "valueSet": {
-                    "entityKind": "valueSet",
-                    "entityName": "Color",
-                    "namespaceId": "public",
-                    "plane": "storage"
-                  }
+                  "nullable": false
                 },
-                "country": {
+                "colorHex": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "colorName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "colorSlug": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
@@ -1138,26 +1308,46 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "productId": {
+                "images": {
+                  "codecId": "pg/text@1",
+                  "many": true,
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "isActive": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "order": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "size": {
+                "price": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "productId": {
                   "codecId": "pg/int4@1",
-                  "many": true,
                   "nativeType": "int4",
                   "nullable": false
                 }
               },
               "foreignKeys": [
                 {
+                  "onDelete": "cascade",
                   "source": {
                     "columns": [
                       "productId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "product_detail"
+                    "tableName": "product_variant"
                   },
                   "target": {
                     "columns": [
@@ -1168,7 +1358,26 @@
                   }
                 }
               ],
-              "indexes": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "productId"
+                  ],
+                  "name": "product_variant_productId_idx_5858600a",
+                  "prefix": "product_variant_productId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "productId",
+                    "isActive",
+                    "order"
+                  ],
+                  "name": "product_variant_productId_isActive_order_idx_aa3b0c9c",
+                  "prefix": "product_variant_productId_isActive_order_idx",
+                  "unique": false
+                }
+              ],
               "primaryKey": {
                 "columns": [
                   "id"
@@ -1177,24 +1386,106 @@
               "uniques": [
                 {
                   "columns": [
-                    "productId"
+                    "productId",
+                    "colorSlug"
+                  ]
+                },
+                {
+                  "columns": [
+                    "productId",
+                    "order"
+                  ]
+                }
+              ]
+            },
+            "product_variant_size": {
+              "checks": [
+                {
+                  "expression": "stock >= 0",
+                  "name": "product_variant_size_stock_nonnegative_fd296d5d",
+                  "prefix": "product_variant_size_stock_nonnegative"
+                },
+                {
+                  "expression": "size >= 35 AND size <= 48",
+                  "name": "product_variant_size_supported_fb05850b",
+                  "prefix": "product_variant_size_supported"
+                }
+              ],
+              "columns": {
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "size": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "stock": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "variantId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "variantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "product_variant_size"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "product_variant"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "variantId"
+                  ],
+                  "name": "product_variant_size_variantId_idx_e16bb45d",
+                  "prefix": "product_variant_size_variantId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "variantId",
+                    "size"
                   ]
                 }
               ]
             }
           },
           "valueSet": {
-            "Color": {
-              "kind": "valueSet",
-              "values": [
-                "#FFFFFF",
-                "#000000",
-                "#FF0000",
-                "#0000FF",
-                "#008000",
-                "#808080"
-              ]
-            },
             "order_status": {
               "kind": "valueSet",
               "values": [
@@ -1212,7 +1503,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "e50f96053bcbca3fa511e37cc374157268dda8801d0dd4db0645b5014f803112"
+    "storageHash": "66d7d55f1ad43de8ae90cb378fe0a83f9e59f73c74c128dfb7073b0759098c2b"
   },
   "execution": {
     "executionHash": "db2a4b2fcbf69eb635558ae43399b655bdd2e4648bd5ac2b2a895afe15990314",

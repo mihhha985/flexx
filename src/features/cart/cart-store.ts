@@ -18,17 +18,21 @@ type CartState = {
   ready: boolean
   items: CartItem[]
   addItem: (product: Product, size: number, quantity?: number) => void
-  updateQuantity: (productId: number, size: number, quantity: number) => void
-  removeItem: (productId: number, size: number) => void
+  updateQuantity: (variantId: number, size: number, quantity: number) => void
+  removeItem: (variantId: number, size: number) => void
   clearCart: () => void
   setReady: () => void
 }
 
 const savedCartProductFieldsSchema = z.object({
   id: z.number().int(),
+  variantId: z.number().int().positive(),
   name: z.string(),
   slug: z.string(),
   description: z.string().optional(),
+  colorName: z.string(),
+  colorSlug: z.string(),
+  colorHex: z.string(),
   price: z.number().nonnegative(),
   stock: z.number().int().positive(),
   isActive: z.boolean(),
@@ -101,12 +105,9 @@ export const useCartStore = create<CartState>()(
 
         set((state) => {
           const existing = state.items.find(
-            (item) => item.product.id === product.id && item.size === size,
+            (item) => item.product.variantId === product.variantId && item.size === size,
           )
-          const quantityOfOtherSizes = state.items
-            .filter((item) => item.product.id === product.id && item.size !== size)
-            .reduce((sum, item) => sum + item.quantity, 0)
-          const maximumQuantity = product.stock - quantityOfOtherSizes
+          const maximumQuantity = product.stock
           if (maximumQuantity < 1) return state
           const item = {
             product,
@@ -117,40 +118,33 @@ export const useCartStore = create<CartState>()(
           return {
             items: existing
               ? state.items.map((current) =>
-                  current.product.id === product.id && current.size === size ? item : current,
+                  current.product.variantId === product.variantId && current.size === size
+                    ? item
+                    : current,
                 )
               : [...state.items, item],
           }
         })
       },
-      updateQuantity: (productId, size, quantity) => {
+      updateQuantity: (variantId, size, quantity) => {
         if (!Number.isInteger(quantity)) return
 
         set((state) => ({
           items: state.items.map((item) =>
-            item.product.id === productId && item.size === size
+            item.product.variantId === variantId && item.size === size
               ? {
                   ...item,
-                  quantity: Math.max(
-                    1,
-                    Math.min(
-                      quantity,
-                      item.product.stock -
-                        state.items
-                          .filter(
-                            (current) => current.product.id === productId && current.size !== size,
-                          )
-                          .reduce((sum, current) => sum + current.quantity, 0),
-                    ),
-                  ),
+                  quantity: Math.max(1, Math.min(quantity, item.product.stock)),
                 }
               : item,
           ),
         }))
       },
-      removeItem: (productId, size) =>
+      removeItem: (variantId, size) =>
         set((state) => ({
-          items: state.items.filter((item) => item.product.id !== productId || item.size !== size),
+          items: state.items.filter(
+            (item) => item.product.variantId !== variantId || item.size !== size,
+          ),
         })),
       clearCart: () => set({ items: [] }),
       setReady: () => set({ ready: true }),
@@ -170,10 +164,7 @@ export const useCartStore = create<CartState>()(
           ...current,
           items: saved.success
             ? saved.data.items.reduce<CartItem[]>((items, item) => {
-                const reserved = items
-                  .filter((current) => current.product.id === item.product.id)
-                  .reduce((sum, current) => sum + current.quantity, 0)
-                const quantity = Math.min(item.quantity, Math.max(0, item.product.stock - reserved))
+                const quantity = Math.min(item.quantity, item.product.stock)
                 return quantity > 0 ? [...items, { ...item, quantity }] : items
               }, [])
             : current.items,

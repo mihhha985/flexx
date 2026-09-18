@@ -3,13 +3,12 @@
 import { useState } from "react"
 import { Button } from "react-aria-components"
 
-import type { Product } from "@/src/entities/product/domain"
 import { cn } from "@/src/shared/lib/utils"
 
 export function ProductGallery({
   product,
 }: {
-  product: Pick<Product, "name" | "avatar" | "images">
+  product: { name: string; avatar: string; images: readonly string[] }
 }) {
   const photos = Array.from(new Set([product.avatar, ...product.images])).filter(Boolean)
   const [selectedIndex, setSelectedIndex] = useState(0)

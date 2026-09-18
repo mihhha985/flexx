@@ -1,93 +1,91 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
-import { createProductSchema, MAX_PRODUCT_IMAGES, updateProductSchema } from "./domain"
+import { createProductFormSchema, updateProductFormSchema } from "./domain"
+
+const variant = {
+  colorName: "  Чёрный  ",
+  colorSlug: "black",
+  colorHex: "#000000",
+  price: "1499.50",
+  order: "0",
+  isActive: true,
+  sizes: [
+    { size: "42", stock: "3" },
+    { size: "43", stock: "0" },
+  ],
+}
 
 const input = {
   id: "1",
-  name: "  Чайник  ",
-  slug: "electric-kettle",
+  name: "  Кроссовки  ",
+  slug: "running-shoes",
   categoryId: "2",
-  price: "1499.50",
-  stock: "12",
-  description: "  Электрический чайник.  ",
-  avatar: "https://cdn.example.com/products/kettle.jpg",
-  images: [
-    "https://cdn.example.com/products/kettle-side.jpg",
-    "https://cdn.example.com/products/kettle-back.jpg",
-  ],
-  color: "#FFFFFF",
-  size: ["42", "43"],
   country: "  Россия  ",
+  description: "  Лёгкие кроссовки.  ",
+  variants: [variant],
 }
 
-test("normalizes product edits and validates the product gallery", () => {
-  const result = updateProductSchema.parse(input)
+test("normalizes a product with color variants and size stock", () => {
+  const result = updateProductFormSchema.parse(input)
 
-  assert.deepEqual(result, {
-    id: 1,
-    name: "Чайник",
-    slug: "electric-kettle",
-    categoryId: 2,
-    price: 1499.5,
-    stock: 12,
-    description: "Электрический чайник.",
-    avatar: "https://cdn.example.com/products/kettle.jpg",
-    images: [
-      "https://cdn.example.com/products/kettle-side.jpg",
-      "https://cdn.example.com/products/kettle-back.jpg",
-    ],
-    color: "#FFFFFF",
-    size: [42, 43],
-    country: "Россия",
-  })
+  assert.equal(result.id, 1)
+  assert.equal(result.name, "Кроссовки")
+  assert.equal(result.country, "Россия")
+  assert.equal(result.variants[0].colorName, "Чёрный")
+  assert.equal(result.variants[0].price, 1499.5)
+  assert.deepEqual(result.variants[0].sizes, [
+    { size: 42, stock: 3 },
+    { size: 43, stock: 0 },
+  ])
 })
 
-test("rejects invalid product edits", () => {
-  for (const changes of [
-    { id: "0" },
-    { name: "   " },
-    { slug: "Не валидный" },
-    { categoryId: "" },
-    { price: "-1" },
-    { stock: "1.5" },
-    { description: "" },
-    { avatar: "not-a-url" },
-    { images: ["not-a-url"] },
-    { images: [input.avatar, input.avatar] },
-    {
-      images: Array.from(
-        { length: MAX_PRODUCT_IMAGES + 1 },
-        (_, index) => `https://cdn.example.com/products/gallery-${index}.jpg`,
-      ),
-    },
-    { color: "#123456" },
-    { size: [] },
-    { size: ["34"] },
-    { size: ["49"] },
-    { size: ["42", "42"] },
-    { country: "" },
+test("requires exactly one active primary variant and unique slugs and order", () => {
+  for (const variants of [
+    [{ ...variant, order: "1" }],
+    [{ ...variant, isActive: false }],
+    [variant, { ...variant, colorName: "Белый" }],
+    [variant, { ...variant, colorSlug: "white", order: "0" }],
   ]) {
-    assert.equal(updateProductSchema.safeParse({ ...input, ...changes }).success, false)
+    assert.equal(createProductFormSchema.safeParse({ ...input, variants }).success, false)
   }
 })
 
-test("creating a product validates fields without requiring an id or accepting visibility overrides", () => {
-  const { id: _id, ...fields } = input
-  void _id
-  const result = createProductSchema.parse({ ...fields, id: "999", isActive: false })
-  assert.equal(result.name, "Чайник")
-  assert.equal(result.price, 1499.5)
-  assert.equal(result.avatar, input.avatar)
-  assert.deepEqual(result.images, input.images)
-  assert.equal("id" in result, false)
-  assert.equal("isActive" in result, false)
+test("validates variant prices, colors, slugs and size rows", () => {
   for (const changes of [
-    { categoryId: "" },
-    { price: "Infinity" },
-    { stock: "-1" },
-    { slug: "../product" },
+    { colorName: "" },
+    { colorSlug: "Белый цвет" },
+    { colorHex: "black" },
+    { price: "-1" },
+    { sizes: [] },
+    { sizes: [{ size: "34", stock: "1" }] },
+    { sizes: [{ size: "42", stock: "-1" }] },
+    {
+      sizes: [
+        { size: "42", stock: "1" },
+        { size: "42", stock: "2" },
+      ],
+    },
   ]) {
-    assert.equal(createProductSchema.safeParse({ ...fields, ...changes }).success, false)
+    assert.equal(
+      createProductFormSchema.safeParse({ ...input, variants: [{ ...variant, ...changes }] })
+        .success,
+      false,
+    )
+  }
+})
+
+test("creation ignores an id and validates common product fields", () => {
+  const result = createProductFormSchema.parse(input)
+  assert.equal("id" in result, false)
+
+  for (const changes of [
+    { name: "" },
+    { slug: "../product" },
+    { categoryId: "" },
+    { country: "" },
+    { description: "" },
+  ]) {
+    assert.equal(createProductFormSchema.safeParse({ ...input, ...changes }).success, false)
   }
 })

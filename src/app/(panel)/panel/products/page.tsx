@@ -5,8 +5,14 @@ import { ProductsTable } from "./products-table"
 
 export const metadata: Metadata = { title: "Товары" }
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string | string[] }>
+}) {
   const [data, categories] = await Promise.all([getProductsForAdmin(), getCategoriesForAdmin()])
+  const savedParam = (await searchParams).saved
+  const saved = Array.isArray(savedParam) ? savedParam[0] : savedParam
   return (
     <section className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-6">
       <div className="flex flex-col gap-2">
@@ -15,7 +21,11 @@ export default async function Page() {
           Управление товарами: изображения, цены, остатки и видимость в каталоге.
         </p>
       </div>
-      <ProductsTable data={data} categories={categories} />
+      <ProductsTable
+        data={data}
+        categories={categories}
+        saved={saved === "created" || saved === "updated" ? saved : undefined}
+      />
     </section>
   )
 }

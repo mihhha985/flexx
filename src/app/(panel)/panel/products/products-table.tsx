@@ -1,9 +1,10 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import type { ColumnDef } from "@tanstack/react-table"
 import { FolderPlusIcon, PackagePlusIcon, PlusIcon } from "lucide-react"
+import { toast } from "sonner"
 import type { AdminCategory } from "@/src/entities/category/services/admin-category-service"
 import type { AdminProduct } from "@/src/entities/product/services/admin-product-service"
 import {
@@ -55,8 +56,27 @@ function getColumns(
       accessorFn: (row) => categoryNames.get(row.categoryId) ?? "—",
       header: "Категория",
     },
-    { accessorKey: "price", header: "Цена", cell: ({ row }) => formatPrice(row.original.price) },
-    { accessorKey: "stock", header: "Остаток" },
+    {
+      id: "price",
+      accessorFn: (row) => row.variants.find((variant) => variant.order === 0)?.price ?? 0,
+      header: "Цена",
+      cell: ({ getValue }) => formatPrice(getValue<number>()),
+    },
+    {
+      id: "variants",
+      accessorFn: (row) => row.variants.length,
+      header: "Цветов",
+    },
+    {
+      id: "stock",
+      accessorFn: (row) =>
+        row.variants.reduce(
+          (total, variant) =>
+            total + variant.sizes.reduce((variantTotal, size) => variantTotal + size.stock, 0),
+          0,
+        ),
+      header: "Остаток",
+    },
     {
       id: "isActive",
       accessorFn: (row) => (row.isActive ? "В каталоге" : "Скрыт"),
@@ -91,11 +111,20 @@ function getColumns(
 export function ProductsTable({
   data,
   categories,
+  saved,
 }: {
   data: AdminProduct[]
   categories: AdminCategory[]
+  saved?: "created" | "updated"
 }) {
   const router = useRouter()
+  useEffect(() => {
+    if (!saved) return
+    toast.success(
+      saved === "created" ? "Товар создан и доступен в каталоге." : "Изменения сохранены.",
+    )
+    router.replace("/panel/products", { scroll: false })
+  }, [router, saved])
   const columns = useMemo(
     () =>
       getColumns(

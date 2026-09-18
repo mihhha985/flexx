@@ -2,24 +2,18 @@
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { ArrowDownIcon, ArrowUpIcon, ImagePlusIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
+
+import type { AdminCategory } from "@/src/entities/category/services/admin-category-service"
 import {
-  Button as AriaButton,
-  ColorSwatch,
-  ColorSwatchPicker,
-  ColorSwatchPickerItem,
-  ComboBox,
-  Input as AriaInput,
-  ListBox,
-  ListBoxItem,
-  Popover,
-} from "react-aria-components"
-import { CheckIcon, ChevronDownIcon, Trash2Icon, XIcon } from "lucide-react"
+  MAX_PRODUCT_IMAGES,
+  MAX_PRODUCT_VARIANTS,
+  productSizes,
+} from "@/src/entities/product/domain"
+import type { AdminProduct } from "@/src/entities/product/services/admin-product-service"
 import { createProductAction } from "@/src/entities/product/services/manage-product-service"
 import { updateProductAction } from "@/src/entities/product/services/update-product-service"
-import { MAX_PRODUCT_IMAGES, productColors, productSizes } from "@/src/entities/product/domain"
-import type { AdminCategory } from "@/src/entities/category/services/admin-category-service"
-import type { AdminProduct } from "@/src/entities/product/services/admin-product-service"
 import { Button, LinkButton } from "@/src/shared/ui/button"
 import {
   Card,
@@ -29,59 +23,69 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/shared/ui/card"
-import { Field, FieldError, FieldGroup, FieldLabel, FieldTitle } from "@/src/shared/ui/field"
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/src/shared/ui/field"
 import { Input } from "@/src/shared/ui/input"
 import { Textarea } from "@/src/shared/ui/textarea"
-import { cn } from "@/src/shared/lib/utils"
 
 type ProductFormProps = {
   product?: AdminProduct
   categories: AdminCategory[]
 }
 
-type ProductImageField = {
-  id: number
-  fileName: string
+type SizeDraft = { size: number; stock: number }
+type VariantDraft = {
+  key: string
+  id?: number
+  colorName: string
+  colorSlug: string
+  colorHex: string
+  price: string
+  isActive: boolean
+  avatar?: string
+  images: string[]
+  pendingImagesCount: number
+  sizes: SizeDraft[]
 }
 
-function getSelectedFiles(form: HTMLFormElement, name: string) {
-  return Array.from(form.elements).flatMap((element) =>
-    element instanceof HTMLInputElement && element.type === "file" && element.name === name
-      ? Array.from(element.files ?? [])
-      : [],
-  )
+function newVariant(key: string): VariantDraft {
+  return {
+    key,
+    colorName: "",
+    colorSlug: "",
+    colorHex: "#000000",
+    price: "0",
+    isActive: true,
+    images: [],
+    pendingImagesCount: 0,
+    sizes: [],
+  }
 }
 
-function replaceFormFiles(formData: FormData, name: string, files: File[]) {
-  formData.delete(name)
-  for (const file of files) formData.append(name, file, file.name)
-}
-
-function describeFiles(files: File[]) {
-  return files.map((file, index) => ({
-    index: index + 1,
-    size: file.size,
-    type: file.type || "не указан",
-    hasName: Boolean(file.name),
+function initialVariants(product: AdminProduct | undefined): VariantDraft[] {
+  if (!product) return [newVariant("variant-0")]
+  return product.variants.map((variant) => ({
+    key: `variant-${variant.id}`,
+    id: variant.id,
+    colorName: variant.colorName,
+    colorSlug: variant.colorSlug,
+    colorHex: variant.colorHex,
+    price: String(variant.price),
+    isActive: variant.isActive,
+    avatar: variant.avatar,
+    images: [...variant.images],
+    pendingImagesCount: 0,
+    sizes: variant.sizes.map((item) => ({ size: item.size, stock: item.stock })),
   }))
 }
 
 export function ProductForm({ product, categories }: ProductFormProps) {
   const router = useRouter()
-  const nextImageId = useRef(1)
-  const submittedMedia = useRef<{
-    avatar: ReturnType<typeof describeFiles>
-    images: ReturnType<typeof describeFiles>
-  } | null>(null)
-  const [color, setColor] = useState(product?.detail?.color ?? productColors[0].value)
-  const [sizes, setSizes] = useState(
-    () => new Set((product?.detail?.size ?? []).map((size) => String(size))),
+  const nextVariantKey = useRef(1)
+  const [variants, setVariants] = useState(() => initialVariants(product))
+  const initialPrimary = product?.variants.find((variant) => variant.order === 0)
+  const [primaryKey, setPrimaryKey] = useState(
+    initialPrimary ? `variant-${initialPrimary.id}` : "variant-0",
   )
-  const [retainedImages, setRetainedImages] = useState(() => new Set(product?.images ?? []))
-  const [imageFields, setImageFields] = useState<ProductImageField[]>(() =>
-    (product?.images.length ?? 0) < MAX_PRODUCT_IMAGES ? [{ id: 0, fileName: "" }] : [],
-  )
-  const [sizeSearch, setSizeSearch] = useState("")
   const [state, action, pending] = useActionState(
     product ? updateProductAction : createProductAction,
     {},
@@ -89,31 +93,53 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
   useEffect(() => {
     if (!state.success) return
+    router.push(`/panel/products?saved=${product ? "updated" : "created"}`)
+  }, [product, router, state.success])
 
-    toast.success(state.message)
-    router.push("/panel/products")
-    router.refresh()
-  }, [router, state.message, state.success])
-
-  useEffect(() => {
-    if (state.success || (!state.message && !state.errors)) return
-
-    console.error("Ошибка сохранения товара", {
-      message: state.message,
-      errors: state.errors,
-      media: submittedMedia.current,
-    })
-  }, [state])
-
-  const ensureEmptyImageField = (fields: ProductImageField[], retainedCount: number) => {
-    const selectedFields = fields.filter((field) => field.fileName)
-    return retainedCount + selectedFields.length < MAX_PRODUCT_IMAGES
-      ? [...selectedFields, { id: nextImageId.current++, fileName: "" }]
-      : selectedFields
+  function updateVariant(key: string, update: Partial<VariantDraft>) {
+    setVariants((current) =>
+      current.map((variant) => (variant.key === key ? { ...variant, ...update } : variant)),
+    )
   }
 
-  const selectedImageCount = imageFields.filter((field) => field.fileName).length
-  const totalImageCount = retainedImages.size + selectedImageCount
+  function removeVariant(key: string) {
+    setVariants((current) => {
+      if (current.length === 1) return current
+      const next = current.filter((variant) => variant.key !== key)
+      if (primaryKey === key) setPrimaryKey(next[0].key)
+      return next
+    })
+  }
+
+  function moveVariant(index: number, direction: -1 | 1) {
+    setVariants((current) => {
+      const target = index + direction
+      if (target < 0 || target >= current.length) return current
+      const next = [...current]
+      ;[next[index], next[target]] = [next[target], next[index]]
+      return next
+    })
+  }
+
+  function addSize(key: string, size: number) {
+    setVariants((current) =>
+      current.map((variant) =>
+        variant.key !== key || variant.sizes.some((item) => item.size === size)
+          ? variant
+          : {
+              ...variant,
+              sizes: [...variant.sizes, { size, stock: 0 }].sort(
+                (left, right) => left.size - right.size,
+              ),
+            },
+      ),
+    )
+  }
+
+  const primaryIndex = Math.max(
+    0,
+    variants.findIndex((variant) => variant.key === primaryKey),
+  )
 
   return (
     <form
@@ -123,29 +149,19 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       onSubmit={(event) => {
         event.preventDefault()
         if (pending) return
-
-        const form = event.currentTarget
-        const avatarFiles = getSelectedFiles(form, "avatar")
-        const imageFiles = getSelectedFiles(form, "images")
-        const formData = new FormData(form)
-
-        replaceFormFiles(formData, "avatar", avatarFiles)
-        replaceFormFiles(formData, "images", imageFiles)
-        submittedMedia.current = {
-          avatar: describeFiles(avatarFiles),
-          images: describeFiles(imageFiles),
-        }
-        startTransition(() => action(formData))
+        startTransition(() => action(new FormData(event.currentTarget)))
       }}
     >
+      <input type="hidden" name="variantCount" value={variants.length} />
+      <input type="hidden" name="primaryVariant" value={primaryIndex} />
+      {product ? <input type="hidden" name="id" value={product.id} /> : null}
+
       <Card>
-        {product && <input type="hidden" name="id" value={product.id} />}
         <CardHeader className="border-b">
           <CardTitle>Данные товара</CardTitle>
           <CardDescription>
-            {product
-              ? "Измените данные товара и его характеристики, затем сохраните изменения."
-              : "Заполните данные и характеристики. После создания товар появится в каталоге."}
+            Общие сведения задаются один раз, а цена, фотографии и остатки настраиваются для каждого
+            цвета отдельно.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -185,7 +201,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                 defaultValue={String(product?.categoryId ?? categories[0]?.id ?? "")}
                 disabled={pending}
                 aria-invalid={Boolean(state.errors?.categoryId)}
-                className="ui-focus h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-base outline-none disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 aria-invalid:border-destructive"
+                className="ui-focus h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-base outline-none disabled:bg-muted disabled:opacity-50 aria-invalid:border-destructive"
                 required
               >
                 {categories.map((category) => (
@@ -196,318 +212,12 @@ export function ProductForm({ product, categories }: ProductFormProps) {
               </select>
               <FieldError>{state.errors?.categoryId?.[0]}</FieldError>
             </Field>
-            <Field data-invalid={Boolean(state.errors?.price)}>
-              <FieldLabel htmlFor="product-price">Цена</FieldLabel>
-              <Input
-                id="product-price"
-                name="price"
-                type="number"
-                defaultValue={String(product?.price ?? 0)}
-                min="0"
-                max="999999999.99"
-                step="0.01"
-                disabled={pending}
-                aria-invalid={Boolean(state.errors?.price)}
-                required
-              />
-              <FieldError>{state.errors?.price?.[0]}</FieldError>
-            </Field>
-            <Field data-invalid={Boolean(state.errors?.stock)}>
-              <FieldLabel htmlFor="product-stock">Остаток</FieldLabel>
-              <Input
-                id="product-stock"
-                name="stock"
-                type="number"
-                defaultValue={String(product?.stock ?? 0)}
-                min="0"
-                max="2147483647"
-                step="1"
-                disabled={pending}
-                aria-invalid={Boolean(state.errors?.stock)}
-                required
-              />
-              <FieldError>{state.errors?.stock?.[0]}</FieldError>
-            </Field>
-            <Field data-invalid={Boolean(state.errors?.avatar)}>
-              <FieldLabel htmlFor="product-avatar">Главное изображение</FieldLabel>
-              <Input
-                id="product-avatar"
-                name="avatar"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={pending}
-                aria-invalid={Boolean(state.errors?.avatar)}
-                aria-required={!product}
-              />
-              <p className="text-sm text-muted-foreground">
-                JPG, PNG или WebP, до 5 МБ. При создании товара главное изображение обязательно.
-              </p>
-              {product?.avatar && (
-                // The configured Jino public URL is not known until runtime, so Next Image cannot be configured safely.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={product.avatar}
-                  alt={`Текущее главное изображение ${product.name}`}
-                  className="aspect-square w-24 rounded-md border border-border bg-muted object-contain p-2"
-                />
-              )}
-              <FieldError>{state.errors?.avatar?.[0]}</FieldError>
-            </Field>
-            <Field className="sm:col-span-2" data-invalid={Boolean(state.errors?.images)}>
-              <div className="flex flex-wrap items-end justify-between gap-2">
-                <FieldTitle>Дополнительные изображения</FieldTitle>
-                <span className="text-sm text-muted-foreground" aria-live="polite">
-                  {totalImageCount} из {MAX_PRODUCT_IMAGES}
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Добавляйте изображения по одному. После выбора файла появится следующее поле. JPG,
-                PNG или WebP, каждый файл до 5 МБ.
-              </p>
-              {product?.images.length ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                  {product.images.map((image, index) =>
-                    retainedImages.has(image) ? (
-                      <div
-                        key={image}
-                        className="flex min-w-0 flex-col gap-2 rounded-lg border border-border bg-muted p-2"
-                      >
-                        <input type="hidden" name="retainedImage" value={image} />
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={image}
-                          alt={`Дополнительное изображение ${index + 1} товара ${product.name}`}
-                          className="aspect-square w-full rounded-md object-contain"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="xs"
-                          isDisabled={pending}
-                          onPress={() => {
-                            const nextImages = new Set(retainedImages)
-                            nextImages.delete(image)
-                            setRetainedImages(nextImages)
-                            setImageFields((fields) =>
-                              ensureEmptyImageField(fields, nextImages.size),
-                            )
-                          }}
-                        >
-                          <Trash2Icon data-icon="inline-start" />
-                          Удалить
-                        </Button>
-                      </div>
-                    ) : null,
-                  )}
-                </div>
-              ) : null}
-              <div className="flex flex-col gap-3">
-                {imageFields.map((field, index) => (
-                  <Field key={field.id}>
-                    <FieldLabel htmlFor={`product-image-${field.id}`}>
-                      Новое изображение {retainedImages.size + index + 1}
-                    </FieldLabel>
-                    <div className="flex items-start gap-2">
-                      <Input
-                        id={`product-image-${field.id}`}
-                        name="images"
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        disabled={pending}
-                        aria-invalid={Boolean(state.errors?.images)}
-                        onChange={(event) => {
-                          const fileName = event.currentTarget.files?.[0]?.name ?? ""
-                          setImageFields((fields) =>
-                            ensureEmptyImageField(
-                              fields.map((currentField) =>
-                                currentField.id === field.id
-                                  ? { ...currentField, fileName }
-                                  : currentField,
-                              ),
-                              retainedImages.size,
-                            ),
-                          )
-                        }}
-                      />
-                      {field.fileName ? (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          isDisabled={pending}
-                          aria-label={`Удалить файл ${field.fileName}`}
-                          onPress={() =>
-                            setImageFields((fields) =>
-                              ensureEmptyImageField(
-                                fields.filter((currentField) => currentField.id !== field.id),
-                                retainedImages.size,
-                              ),
-                            )
-                          }
-                        >
-                          <Trash2Icon />
-                        </Button>
-                      ) : null}
-                    </div>
-                  </Field>
-                ))}
-              </div>
-              {totalImageCount === MAX_PRODUCT_IMAGES ? (
-                <p className="text-sm text-muted-foreground">Достигнут лимит изображений.</p>
-              ) : null}
-              <FieldError>{state.errors?.images?.[0]}</FieldError>
-            </Field>
-            <Field data-invalid={Boolean(state.errors?.color)}>
-              <FieldLabel>Цвет</FieldLabel>
-              <input name="color" type="hidden" value={color} />
-              <ColorSwatchPicker
-                aria-label="Цвет"
-                value={color}
-                onChange={(selectedColor) => {
-                  const nextColor = productColors.find(
-                    (option) => option.value === selectedColor.toString("hex"),
-                  )
-                  if (nextColor) setColor(nextColor.value)
-                }}
-                className="flex flex-wrap gap-2"
-              >
-                {productColors.map((option) => (
-                  <ColorSwatchPickerItem
-                    key={option.value}
-                    color={option.value}
-                    aria-label={option.label}
-                    isDisabled={pending}
-                    className={({ isSelected }) =>
-                      cn(
-                        "ui-focus relative flex size-11 items-center justify-center rounded-md border border-input outline-none transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50",
-                        isSelected &&
-                          "border-foreground ring-2 ring-ring ring-offset-2 ring-offset-background",
-                      )
-                    }
-                  >
-                    {({ isSelected }) => (
-                      <>
-                        <ColorSwatch color={option.value} className="size-7 rounded-sm" />
-                        {isSelected && (
-                          <CheckIcon
-                            aria-hidden="true"
-                            className={cn(
-                              "pointer-events-none absolute size-4",
-                              option.value === "#FFFFFF" || option.value === "#808080"
-                                ? "text-foreground"
-                                : "text-primary-foreground",
-                            )}
-                          />
-                        )}
-                      </>
-                    )}
-                  </ColorSwatchPickerItem>
-                ))}
-              </ColorSwatchPicker>
-              <p className="text-sm text-muted-foreground">
-                {productColors.find((option) => option.value === color)?.label}
-              </p>
-              <FieldError>{state.errors?.color?.[0]}</FieldError>
-            </Field>
-            <Field data-invalid={Boolean(state.errors?.size)}>
-              <FieldLabel htmlFor="product-size">Размеры</FieldLabel>
-              {Array.from(sizes).map((size) => (
-                <input key={size} name="size" type="hidden" value={size} />
-              ))}
-              <ComboBox
-                aria-label="Размеры"
-                inputValue={sizeSearch}
-                onInputChange={setSizeSearch}
-                onSelectionChange={(key) => {
-                  if (key === null) return
-
-                  const selectedSize = String(key)
-                  setSizes((currentSizes) => {
-                    const nextSizes = new Set(currentSizes)
-                    if (nextSizes.has(selectedSize)) nextSizes.delete(selectedSize)
-                    else nextSizes.add(selectedSize)
-                    return nextSizes
-                  })
-                  setSizeSearch("")
-                }}
-                isDisabled={pending}
-                className="relative"
-              >
-                <div className="relative">
-                  <AriaInput
-                    id="product-size"
-                    placeholder="Найдите или выберите размеры"
-                    className="ui-focus h-12 w-full rounded-md border border-input bg-background py-3 pr-12 pl-3 text-base/6 text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50"
-                  />
-                  <AriaButton
-                    type="button"
-                    aria-label="Показать размеры"
-                    className="ui-focus absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-md outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <ChevronDownIcon aria-hidden="true" className="size-5" />
-                  </AriaButton>
-                </div>
-                <Popover className="z-50 mt-1 w-(--trigger-width) overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-sm">
-                  <ListBox className="grid max-h-72 w-full grid-cols-3 gap-2 overflow-y-auto p-2 sm:grid-cols-4">
-                    {productSizes.map((size) => (
-                      <ListBoxItem
-                        key={size}
-                        id={String(size)}
-                        textValue={String(size)}
-                        className={() =>
-                          cn(
-                            "ui-focus flex min-h-12 w-full items-center justify-center rounded-md text-lg font-semibold tabular-nums outline-none transition-colors duration-150",
-                            sizes.has(String(size))
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-muted data-focused:bg-muted",
-                          )
-                        }
-                      >
-                        {size}
-                      </ListBoxItem>
-                    ))}
-                  </ListBox>
-                </Popover>
-              </ComboBox>
-              {sizes.size ? (
-                <div
-                  aria-label="Выбранные размеры"
-                  className="grid w-full grid-cols-3 gap-2 sm:grid-cols-4"
-                >
-                  {Array.from(sizes, Number)
-                    .sort((a, b) => a - b)
-                    .map((size) => (
-                      <AriaButton
-                        key={size}
-                        type="button"
-                        onPress={() =>
-                          setSizes((currentSizes) => {
-                            const nextSizes = new Set(currentSizes)
-                            nextSizes.delete(String(size))
-                            return nextSizes
-                          })
-                        }
-                        className="ui-focus inline-flex min-h-12 w-full items-center justify-center gap-1.5 rounded-md bg-secondary px-3 text-base font-semibold tabular-nums text-secondary-foreground outline-none hover:bg-border"
-                      >
-                        {size}
-                        <XIcon aria-hidden="true" className="size-4" />
-                        <span className="sr-only">Удалить размер {size}</span>
-                      </AriaButton>
-                    ))}
-                </div>
-              ) : (
-                <p aria-live="polite" className="text-sm text-muted-foreground">
-                  Выберите хотя бы один размер
-                </p>
-              )}
-              <FieldError>{state.errors?.size?.[0]}</FieldError>
-            </Field>
             <Field data-invalid={Boolean(state.errors?.country)}>
-              <FieldLabel htmlFor="product-country">Страна</FieldLabel>
+              <FieldLabel htmlFor="product-country">Страна-производитель</FieldLabel>
               <Input
                 id="product-country"
                 name="country"
-                defaultValue={product?.detail?.country ?? ""}
+                defaultValue={product?.country ?? ""}
                 maxLength={200}
                 disabled={pending}
                 aria-invalid={Boolean(state.errors?.country)}
@@ -529,7 +239,383 @@ export function ProductForm({ product, categories }: ProductFormProps) {
               <FieldError>{state.errors?.description?.[0]}</FieldError>
             </Field>
           </FieldGroup>
-          <FieldError className="mt-6">{!state.success && state.message}</FieldError>
+        </CardContent>
+
+        <section className="border-t" aria-labelledby="product-variants-title">
+          <div className="flex flex-wrap items-start justify-between gap-3 px-6 py-5">
+            <div>
+              <h2 id="product-variants-title" className="font-semibold">
+                Цвета и размеры
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Основной цвет с порядком 0 показывается в каталоге.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              isDisabled={pending || variants.length >= MAX_PRODUCT_VARIANTS}
+              onPress={() => {
+                const variant = newVariant(`new-${nextVariantKey.current++}`)
+                setVariants((current) => [...current, variant])
+              }}
+            >
+              <PlusIcon data-icon="inline-start" /> Добавить цвет
+            </Button>
+          </div>
+          <FieldError className="px-6 pb-3">{state.errors?.variants?.[0]}</FieldError>
+
+          {variants.map((variant, index) => {
+            const errors = state.variantErrors?.[index]
+            const availableSizes = productSizes.filter(
+              (size) => !variant.sizes.some((item) => item.size === size),
+            )
+            return (
+              <fieldset key={variant.key} className="border-t px-6 py-6">
+                <legend className="sr-only">Цвет {index + 1}</legend>
+                {variant.id ? (
+                  <input type="hidden" name={`variants.${index}.id`} value={variant.id} />
+                ) : null}
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span
+                      aria-hidden="true"
+                      className="size-8 rounded-md border border-border"
+                      style={{ backgroundColor: variant.colorHex }}
+                    />
+                    <div>
+                      <p className="font-medium">{variant.colorName || `Цвет ${index + 1}`}</p>
+                      <label className="mt-1 flex min-h-11 items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="primaryVariantControl"
+                          checked={primaryKey === variant.key}
+                          disabled={pending}
+                          onChange={() => {
+                            setPrimaryKey(variant.key)
+                            updateVariant(variant.key, { isActive: true })
+                          }}
+                        />
+                        Основной цвет
+                      </label>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Переместить цвет выше"
+                      isDisabled={pending || index === 0}
+                      onPress={() => moveVariant(index, -1)}
+                    >
+                      <ArrowUpIcon />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Переместить цвет ниже"
+                      isDisabled={pending || index === variants.length - 1}
+                      onPress={() => moveVariant(index, 1)}
+                    >
+                      <ArrowDownIcon />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Удалить цвет"
+                      isDisabled={pending || variants.length === 1}
+                      onPress={() => removeVariant(variant.key)}
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </div>
+                </div>
+
+                <FieldGroup className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field data-invalid={Boolean(errors?.colorName)}>
+                    <FieldLabel htmlFor={`variant-${variant.key}-name`}>Название цвета</FieldLabel>
+                    <Input
+                      id={`variant-${variant.key}-name`}
+                      name={`variants.${index}.colorName`}
+                      value={variant.colorName}
+                      onChange={(event) =>
+                        updateVariant(variant.key, { colorName: event.target.value })
+                      }
+                      maxLength={100}
+                      disabled={pending}
+                      required
+                    />
+                    <FieldError>{errors?.colorName?.[0]}</FieldError>
+                  </Field>
+                  <Field data-invalid={Boolean(errors?.colorSlug)}>
+                    <FieldLabel htmlFor={`variant-${variant.key}-slug`}>Слаг цвета</FieldLabel>
+                    <Input
+                      id={`variant-${variant.key}-slug`}
+                      name={`variants.${index}.colorSlug`}
+                      value={variant.colorSlug}
+                      onChange={(event) =>
+                        updateVariant(variant.key, { colorSlug: event.target.value })
+                      }
+                      maxLength={100}
+                      disabled={pending}
+                      required
+                    />
+                    <FieldError>{errors?.colorSlug?.[0]}</FieldError>
+                  </Field>
+                  <Field data-invalid={Boolean(errors?.colorHex)}>
+                    <FieldLabel htmlFor={`variant-${variant.key}-hex`}>Цвет</FieldLabel>
+                    <div className="flex gap-2">
+                      <Input
+                        id={`variant-${variant.key}-picker`}
+                        type="color"
+                        value={variant.colorHex}
+                        onChange={(event) =>
+                          updateVariant(variant.key, { colorHex: event.target.value.toUpperCase() })
+                        }
+                        disabled={pending}
+                        className="w-14 shrink-0 p-1"
+                        aria-label="Выбрать цвет"
+                      />
+                      <Input
+                        id={`variant-${variant.key}-hex`}
+                        name={`variants.${index}.colorHex`}
+                        value={variant.colorHex}
+                        onChange={(event) =>
+                          updateVariant(variant.key, { colorHex: event.target.value })
+                        }
+                        maxLength={7}
+                        disabled={pending}
+                        required
+                      />
+                    </div>
+                    <FieldError>{errors?.colorHex?.[0]}</FieldError>
+                  </Field>
+                  <Field data-invalid={Boolean(errors?.price)}>
+                    <FieldLabel htmlFor={`variant-${variant.key}-price`}>Цена</FieldLabel>
+                    <Input
+                      id={`variant-${variant.key}-price`}
+                      name={`variants.${index}.price`}
+                      type="number"
+                      value={variant.price}
+                      onChange={(event) =>
+                        updateVariant(variant.key, { price: event.target.value })
+                      }
+                      min="0"
+                      max="999999999.99"
+                      step="0.01"
+                      disabled={pending}
+                      required
+                    />
+                    <FieldError>{errors?.price?.[0]}</FieldError>
+                  </Field>
+                </FieldGroup>
+
+                <label className="mt-4 flex min-h-11 items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    name={`variants.${index}.isActive`}
+                    checked={variant.isActive}
+                    disabled={pending || primaryKey === variant.key}
+                    onChange={(event) =>
+                      updateVariant(variant.key, { isActive: event.target.checked })
+                    }
+                  />
+                  Показывать этот цвет покупателям
+                </label>
+                <FieldError>{errors?.isActive?.[0]}</FieldError>
+
+                <div className="mt-6 grid gap-5 lg:grid-cols-2">
+                  <Field data-invalid={Boolean(errors?.avatar)}>
+                    <FieldLabel htmlFor={`variant-${variant.key}-avatar`}>
+                      Главное изображение
+                    </FieldLabel>
+                    <Input
+                      id={`variant-${variant.key}-avatar`}
+                      name={`variants.${index}.avatar`}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={pending}
+                      aria-required={!variant.avatar}
+                    />
+                    {variant.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={variant.avatar}
+                        alt={`Главное изображение цвета ${variant.colorName}`}
+                        className="aspect-square w-24 rounded-md border border-border bg-muted object-contain p-2"
+                      />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">JPG, PNG или WebP, до 5 МБ.</p>
+                    )}
+                    <FieldError>{errors?.avatar?.[0]}</FieldError>
+                  </Field>
+                  <Field data-invalid={Boolean(errors?.images)}>
+                    <FieldLabel htmlFor={`variant-${variant.key}-images`}>
+                      Дополнительные изображения
+                    </FieldLabel>
+                    <Input
+                      id={`variant-${variant.key}-images`}
+                      name={`variants.${index}.images`}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      disabled={pending}
+                      onChange={(event) => {
+                        const filesCount = event.currentTarget.files?.length ?? 0
+                        const availableSlots = MAX_PRODUCT_IMAGES - variant.images.length
+                        if (filesCount > availableSlots) {
+                          event.currentTarget.value = ""
+                          updateVariant(variant.key, { pendingImagesCount: 0 })
+                          toast.error(
+                            `Можно выбрать ещё не больше ${availableSlots} изображений для этого цвета.`,
+                          )
+                          return
+                        }
+                        updateVariant(variant.key, { pendingImagesCount: filesCount })
+                      }}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      JPG, PNG или WebP, до 5 МБ каждое. Всего до {MAX_PRODUCT_IMAGES} изображений
+                      для этого цвета.
+                    </p>
+                    {variant.pendingImagesCount ? (
+                      <p className="text-sm text-muted-foreground" aria-live="polite">
+                        Выбрано новых: {variant.pendingImagesCount}. После сохранения:{" "}
+                        {variant.images.length + variant.pendingImagesCount} из {MAX_PRODUCT_IMAGES}
+                        .
+                      </p>
+                    ) : null}
+                    {variant.images.length ? (
+                      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                        {variant.images.map((image, imageIndex) => (
+                          <div key={image} className="flex min-w-0 flex-col gap-1">
+                            <input
+                              type="hidden"
+                              name={`variants.${index}.retainedImage`}
+                              value={image}
+                            />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={image}
+                              alt={`Изображение ${imageIndex + 1} цвета ${variant.colorName}`}
+                              className="aspect-square w-full rounded-md border border-border object-contain p-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="xs"
+                              isDisabled={pending}
+                              onPress={() =>
+                                updateVariant(variant.key, {
+                                  images: variant.images.filter((current) => current !== image),
+                                })
+                              }
+                            >
+                              <Trash2Icon data-icon="inline-start" /> Удалить
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <ImagePlusIcon className="size-4" /> Галерея пока пуста
+                      </div>
+                    )}
+                    <FieldError>{errors?.images?.[0]}</FieldError>
+                  </Field>
+                </div>
+
+                <div className="mt-6">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium">Размеры и остатки</p>
+                      <p className="mt-1 text-sm text-muted-foreground">Система размеров: EU.</p>
+                    </div>
+                    <select
+                      value=""
+                      disabled={pending || !availableSizes.length}
+                      onChange={(event) => {
+                        if (event.target.value) addSize(variant.key, Number(event.target.value))
+                      }}
+                      aria-label={`Добавить размер для цвета ${variant.colorName || index + 1}`}
+                      className="ui-focus h-11 rounded-md border border-input bg-background px-3 text-sm outline-none disabled:bg-muted disabled:opacity-50"
+                    >
+                      <option value="">Добавить размер</option>
+                      {availableSizes.map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {variant.sizes.length ? (
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {variant.sizes.map((item) => (
+                        <div
+                          key={item.size}
+                          className="flex min-w-0 items-end gap-2 rounded-md border border-border p-3"
+                        >
+                          <input type="hidden" name={`variants.${index}.size`} value={item.size} />
+                          <Field className="min-w-0 flex-1">
+                            <FieldLabel htmlFor={`variant-${variant.key}-stock-${item.size}`}>
+                              Размер {item.size}
+                            </FieldLabel>
+                            <Input
+                              id={`variant-${variant.key}-stock-${item.size}`}
+                              name={`variants.${index}.stock`}
+                              type="number"
+                              value={item.stock}
+                              min="0"
+                              step="1"
+                              disabled={pending}
+                              onChange={(event) =>
+                                updateVariant(variant.key, {
+                                  sizes: variant.sizes.map((current) =>
+                                    current.size === item.size
+                                      ? { ...current, stock: Number(event.target.value) }
+                                      : current,
+                                  ),
+                                })
+                              }
+                              required
+                            />
+                          </Field>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Удалить размер ${item.size}`}
+                            isDisabled={pending}
+                            onPress={() =>
+                              updateVariant(variant.key, {
+                                sizes: variant.sizes.filter(
+                                  (current) => current.size !== item.size,
+                                ),
+                              })
+                            }
+                          >
+                            <Trash2Icon />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      Добавьте хотя бы один размер.
+                    </p>
+                  )}
+                  <FieldError className="mt-2">{errors?.sizes?.[0]}</FieldError>
+                </div>
+              </fieldset>
+            )
+          })}
+        </section>
+
+        <CardContent>
+          <FieldError>{!state.success && state.message}</FieldError>
         </CardContent>
         <CardFooter className="justify-end border-t pt-6">
           <LinkButton href="/panel/products" variant="outline" isDisabled={pending}>

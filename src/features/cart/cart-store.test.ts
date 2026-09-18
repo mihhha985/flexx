@@ -7,8 +7,12 @@ import { selectCartItemCount, selectCartTotal, useCartStore } from "@/src/featur
 const storage = new Map<string, string>()
 const product: Product & Pick<ProductWithCategory, "category"> = {
   id: 1,
+  variantId: 11,
   name: "Товар",
   slug: "product",
+  colorName: "Чёрный",
+  colorSlug: "black",
+  colorHex: "#000000",
   price: 150,
   avatar: "https://cdn.example.com/products/product.jpg",
   images: [],
@@ -34,18 +38,18 @@ test("combines repeated products, caps stock and derives cart totals", () => {
   const { addItem, updateQuantity } = useCartStore.getState()
   addItem(product, 42, 2)
   addItem(product, 42, 10)
-  addItem({ ...product, id: 2, price: 200 }, 43, 2)
+  addItem({ ...product, id: 2, variantId: 22, price: 200 }, 43, 2)
   assert.equal(useCartStore.getState().items.length, 2)
   assert.equal(selectCartItemCount(useCartStore.getState()), 7)
   assert.equal(selectCartTotal(useCartStore.getState()), 1150)
 
-  updateQuantity(1, 42, 0)
+  updateQuantity(product.variantId, 42, 0)
   assert.equal(useCartStore.getState().items[0].quantity, 1)
-  updateQuantity(1, 42, 100)
+  updateQuantity(product.variantId, 42, 100)
   assert.equal(useCartStore.getState().items[0].quantity, 5)
 })
 
-test("keeps sizes in separate lines and never exceeds the shared product stock", () => {
+test("keeps sizes in separate lines with independent size stock", () => {
   const { addItem, updateQuantity } = useCartStore.getState()
   addItem(product, 42, 3)
   addItem(product, 43, 3)
@@ -53,11 +57,11 @@ test("keeps sizes in separate lines and never exceeds the shared product stock",
     useCartStore.getState().items.map((item) => ({ size: item.size, quantity: item.quantity })),
     [
       { size: 42, quantity: 3 },
-      { size: 43, quantity: 2 },
+      { size: 43, quantity: 3 },
     ],
   )
-  updateQuantity(product.id, 42, 5)
-  assert.equal(useCartStore.getState().items[0].quantity, 3)
+  updateQuantity(product.variantId, 42, 5)
+  assert.equal(useCartStore.getState().items[0].quantity, 5)
 })
 
 test("rejects unavailable products and invalid quantities", () => {
@@ -66,18 +70,18 @@ test("rejects unavailable products and invalid quantities", () => {
   for (const quantity of [0, -1, 1.5, NaN, Infinity]) addItem(product, 42, quantity)
   assert.deepEqual(useCartStore.getState().items, [])
   addItem(product, 42)
-  updateQuantity(product.id, 42, NaN)
+  updateQuantity(product.variantId, 42, NaN)
   assert.equal(useCartStore.getState().items[0].quantity, 1)
 })
 
 test("removes a product and persists an empty cart after checkout", () => {
   const { addItem, removeItem, clearCart } = useCartStore.getState()
   addItem(product, 42)
-  addItem({ ...product, id: 2 }, 43)
-  removeItem(product.id, 42)
+  addItem({ ...product, id: 2, variantId: 22 }, 43)
+  removeItem(product.variantId, 42)
   assert.deepEqual(
-    useCartStore.getState().items.map((item) => item.product.id),
-    [2],
+    useCartStore.getState().items.map((item) => item.product.variantId),
+    [22],
   )
   clearCart()
   assert.deepEqual(JSON.parse(storage.get("kontur-cart")!), {

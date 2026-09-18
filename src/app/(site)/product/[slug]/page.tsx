@@ -24,7 +24,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug)
-  if (!product) notFound()
+  const primaryVariant = product?.variants[0]
+  if (!product || !primaryVariant) notFound()
 
   const description = toMetaDescription(product.description)
   const url = `/product/${product.slug}`
@@ -40,36 +41,48 @@ export async function generateMetadata({
       siteName: "FLEXX",
       locale: "ru_RU",
       type: "website",
-      images: [{ url: product.avatar, alt: product.name }],
+      images: [{ url: primaryVariant.avatar, alt: product.name }],
     },
     twitter: {
       card: "summary_large_image",
       title: `${product.name} | FLEXX`,
       description,
-      images: [product.avatar],
+      images: [primaryVariant.avatar],
     },
   }
 }
 
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ProductPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ color?: string | string[] }>
+}) {
   const product = await getProductBySlug((await params).slug)
-  if (!product) notFound()
+  if (!product || !product.variants.length) notFound()
+  const requestedColor = (await searchParams).color
+  const colorSlug = Array.isArray(requestedColor) ? requestedColor[0] : requestedColor
+  const variant =
+    product.variants.find((candidate) => candidate.colorSlug === colorSlug) ?? product.variants[0]
+  const stock = variant.sizes.reduce((total, item) => total + item.stock, 0)
+  const variantUrl = `/product/${product.slug}?color=${variant.colorSlug}`
 
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description,
-    image: [product.avatar, ...product.images],
-    sku: String(product.id),
+    image: [variant.avatar, ...variant.images],
+    sku: String(variant.id),
+    color: variant.colorName,
     category: product.category.name,
     offers: {
       "@type": "Offer",
-      url: new URL(`/product/${product.slug}`, SITE_URL).toString(),
+      url: new URL(variantUrl, SITE_URL).toString(),
       priceCurrency: "RUB",
-      price: product.price.toFixed(2),
-      availability:
-        product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      price: variant.price.toFixed(2),
+      availability: stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition",
     },
   }
@@ -102,12 +115,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)]">
         <div className="flex flex-col gap-5">
           <Card className="py-0">
-            <ProductGallery product={product} />
+            <ProductGallery
+              key={variant.id}
+              product={{ name: product.name, avatar: variant.avatar, images: variant.images }}
+            />
             <CardHeader>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{product.category.name}</Badge>
                 <Badge variant="outline">
-                  {product.stock > 0 ? `В наличии: ${product.stock}` : "Нет в наличии"}
+                  {stock > 0 ? `В наличии: ${stock}` : "Нет в наличии"}
                 </Badge>
               </div>
               <CardTitle className="text-2xl sm:text-3xl">{product.name}</CardTitle>
@@ -148,7 +164,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <PackageCheckIcon className="text-muted-foreground" />
               <CardTitle>О товаре</CardTitle>
               <CardDescription>
-                Страна-производитель: {product.detail?.country} · Категория «{product.category.name}
+                Страна-производитель: {product.country} · Категория «{product.category.name}
                 ». Актуальное наличие показываем перед добавлением в корзину.
               </CardDescription>
             </CardHeader>
@@ -161,7 +177,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
 
         <aside className="lg:sticky lg:top-20 lg:self-start">
-          <ProductPurchase product={product} />
+          <ProductPurchase key={variant.id} product={product} variant={variant} />
         </aside>
       </div>
     </div>
