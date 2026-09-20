@@ -34,12 +34,39 @@ export function parseSourceUrl(value: string): string {
 
 export function parseColor(url: string) {
   const pathname = new URL(parseSourceUrl(url)).pathname
-  const colorSlug = pathname
-    .match(/-(black|white|grey|beige|brown)-[a-z0-9]+\/$/i)?.[1]
-    ?.toLowerCase()
-  if (!colorSlug)
-    throw new Error(`Неизвестный цвет в ссылке: ${url}. Добавьте цвет в скрипт импорта.`)
-  return { colorSlug, colorHex: colorHexes[colorSlug] }
+  const colorSlug = pathname.match(/-([a-z]+)-[a-z0-9]+\/$/i)?.[1]?.toLowerCase() ?? "white"
+  // Keep the source slug so unknown colors do not collide with the white variant.
+  return { colorSlug, colorHex: colorHexes[colorSlug] ?? "#FFFFFF" }
+}
+
+export function parseVariantColors(urls: string[]) {
+  const colors = urls.map(parseColor)
+  return colors.map((color, index) => {
+    if (colors.filter((candidate) => candidate.colorSlug === color.colorSlug).length === 1) {
+      return color
+    }
+    const article = new URL(parseSourceUrl(urls[index])).pathname.match(/-([a-z0-9]+)\/$/i)?.[1]
+    return {
+      ...color,
+      colorSlug: `${color.colorSlug}-${article?.toLowerCase() ?? index + 1}`,
+    }
+  })
+}
+
+export function selectVariantUrls(urls: string[], random: () => number = Math.random): string[] {
+  const byArticle = new Map<string, string>()
+  for (const value of urls) {
+    const url = parseSourceUrl(value)
+    const article = new URL(url).pathname.match(/-([a-z0-9]+)\/$/i)?.[1]?.toLowerCase()
+    if (!article) throw new Error(`Не удалось определить артикул: ${url}`)
+    if (!byArticle.has(article)) byArticle.set(article, url)
+  }
+  const unique = [...byArticle.values()]
+  for (let index = unique.length - 1; index > 0; index--) {
+    const selected = Math.floor(random() * (index + 1))
+    ;[unique[index], unique[selected]] = [unique[selected], unique[index]]
+  }
+  return unique.slice(0, 3)
 }
 
 const imageSchema = z.url().refine((value) => new URL(value).protocol === "https:")
@@ -47,10 +74,7 @@ const textSchema = z.string().trim().min(1)
 const sourceSchema = z.object({
   name: textSchema.max(200),
   description: textSchema.max(10000),
-  links: z
-    .array(z.object({ url: sourceUrlSchema }))
-    .min(1)
-    .max(3),
+  links: z.array(z.object({ url: sourceUrlSchema })).min(1),
 })
 
 export function productSlug(url: string): string {
@@ -100,9 +124,7 @@ export async function readProductPage(page: Page) {
     await page.evaluate(() => {
       const links = Array.from(
         document.querySelectorAll<HTMLAnchorElement>(".product-specs__colors a.all-colors__item"),
-      )
-        .slice(0, 3)
-        .map((link) => ({ url: link.href }))
+      ).map((link) => ({ url: link.href }))
       return {
         name: document.querySelector("h1.product-specs__title")?.textContent?.trim(),
         description: document.querySelector(".tab__description")?.textContent?.trim(),
@@ -128,7 +150,9 @@ export async function scrapeProduct(url: string = PRODUCT_URL) {
     const page = await browser.newPage()
     page.setDefaultTimeout(30_000)
     await visit(page, url)
-    const { name, description, links } = await readProductPage(page)
+    const { name, description, links: availableLinks } = await readProductPage(page)
+    const links = selectVariantUrls(availableLinks.map((link) => link.url)).map((url) => ({ url }))
+    const colors = parseVariantColors(links.map((link) => link.url))
     const variants = []
     for (const [order, link] of links.entries()) {
       if (page.url() !== link.url) await visit(page, link.url)
@@ -148,7 +172,7 @@ export async function scrapeProduct(url: string = PRODUCT_URL) {
           ),
         ).map((image) => image.src),
       }))
-      const color = parseColor(link.url)
+      const color = colors[order]
       const images = z
         .array(imageSchema)
         .min(1)
@@ -165,7 +189,7 @@ export async function scrapeProduct(url: string = PRODUCT_URL) {
       })
     }
     if (new Set(variants.map((variant) => variant.colorSlug)).size !== variants.length) {
-      throw new Error("Выбранные варианты должны иметь разные цвета")
+      throw new Error("На странице найдены варианты с одинаковыми цветом и артикулом")
     }
     return { name, description, country: "германия", slug: productSlug(url), variants }
   } finally {
