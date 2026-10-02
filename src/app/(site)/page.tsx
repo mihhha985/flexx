@@ -16,6 +16,7 @@ import {
 import { MainCategoryList } from "@/src/app/(site)/_components/main-category-list"
 import { RandomProductList } from "@/src/app/(site)/_components/random-product-list"
 import { LinkButton } from "@/src/shared/ui/button"
+import { MainSlider } from "./_components/main-slider"
 
 export const dynamic = "force-dynamic"
 export const metadata: Metadata = { alternates: { canonical: "/" } }
@@ -46,51 +47,7 @@ const purchaseBenefits = [
 export default function Home() {
   return (
     <div className="flex flex-col gap-12 sm:gap-16 lg:gap-20">
-      <section className="relative isolate overflow-hidden rounded-xl bg-muted md:min-h-136">
-        <Image
-          src="/images/home-hero-sneaker.png"
-          alt="Чёрно-белый высокий кроссовок на каменной подставке"
-          fill
-          priority
-          sizes="(max-width: 767px) 0px, (max-width: 1280px) 100vw, 1280px"
-          className="hidden object-cover md:block"
-        />
-        <div className="relative z-10 flex flex-col items-start gap-6 px-6 py-8 sm:px-10 sm:py-12 md:max-w-[47%] md:justify-center md:py-20 lg:px-16">
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-            Интернет-магазин обуви
-          </p>
-          <h1 className="text-4xl/[2.5rem] font-bold tracking-tight sm:text-5xl/[3.25rem] lg:text-[4rem]/[4.25rem]">
-            Шаг навстречу своему стилю
-          </h1>
-          <p className="max-w-md text-base text-muted-foreground sm:text-lg/7">
-            Выбирайте обувь в каталоге и оформляйте заказ без регистрации и лишних шагов.
-          </p>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <LinkButton href="/catalog" size="lg" className="w-full sm:w-auto">
-              Смотреть каталог
-              <ArrowRightIcon data-icon="inline-end" />
-            </LinkButton>
-            <LinkButton
-              href="/contacts"
-              variant="outline"
-              size="lg"
-              className="w-full bg-background/80 sm:w-auto"
-            >
-              Помощь с выбором
-            </LinkButton>
-          </div>
-        </div>
-        <div className="relative aspect-4/3 w-full md:hidden">
-          <Image
-            src="/images/home-hero-sneaker.png"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[68%_center]"
-          />
-        </div>
-      </section>
+      <MainSlider />
 
       <section className="flex flex-col gap-4 sm:gap-6" aria-labelledby="home-categories">
         <div className="flex items-end justify-between gap-4">
