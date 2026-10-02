@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useMemo, useState } from "react"
+import Image from "next/image"
 import type { ColumnDef } from "@tanstack/react-table"
 import { FolderPlusIcon, PlusIcon } from "lucide-react"
 import type { AdminCategory } from "@/src/entities/category/services/admin-category-service"
@@ -29,7 +30,23 @@ function getColumns(onEdit: (category: AdminCategory) => void): ColumnDef<AdminC
       ),
     },
     { accessorKey: "slug", header: "Слаг" },
-    { accessorKey: "icon", header: "Изображение" },
+    {
+      accessorKey: "icon",
+      header: "Изображение",
+      enableSorting: false,
+      cell: ({ row }) =>
+        row.original.icon.startsWith("/") ? (
+          <Image
+            src={row.original.icon}
+            alt={row.original.name}
+            width={48}
+            height={48}
+            className="size-12 rounded-lg bg-muted object-contain p-1"
+          />
+        ) : (
+          <span className="text-muted-foreground">Фото пока нет</span>
+        ),
+    },
     { accessorKey: "order", header: "Порядок" },
     { accessorKey: "productCount", header: "Товаров" },
     {

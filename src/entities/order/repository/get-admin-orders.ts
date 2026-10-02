@@ -11,6 +11,7 @@ export async function getAdminOrders() {
     "customerEmail",
     "customerPhone",
     "shippingAddress",
+    "comment",
     "total",
     "createdAt",
   )

@@ -83,7 +83,7 @@ export function OrderStatsCards({ stats }: { stats: BriefStats }) {
 
         return (
           <Card key={card.title} size="sm">
-            <CardHeader>
+            <CardHeader className="flex-1">
               <CardTitle>{card.title}</CardTitle>
               <CardDescription>{card.description}</CardDescription>
               <CardAction>
@@ -93,7 +93,7 @@ export function OrderStatsCards({ stats }: { stats: BriefStats }) {
                 </Badge>
               </CardAction>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex h-10 shrink-0 items-center">
               <p className="font-heading text-3xl font-semibold tracking-tight tabular-nums">
                 {card.value}
               </p>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useId, useState } from "react"
+import { useId, useState, type ReactNode } from "react"
 import {
   flexRender,
   getCoreRowModel,
@@ -40,6 +40,7 @@ type DataTableProps<TData extends { id: number }> = {
   emptyDescription: string
   searchLabel?: string
   globalFilterColumns?: string[]
+  filters?: ReactNode
 }
 
 export function DataTable<TData extends { id: number }>({
@@ -50,6 +51,7 @@ export function DataTable<TData extends { id: number }>({
   emptyDescription,
   searchLabel = "Поиск",
   globalFilterColumns,
+  filters,
 }: DataTableProps<TData>) {
   const searchId = useId()
   const [sorting, setSorting] = useState<SortingState>([])
@@ -81,23 +83,26 @@ export function DataTable<TData extends { id: number }>({
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <Field className="max-w-md">
-        <FieldLabel htmlFor={searchId}>{searchLabel}</FieldLabel>
-        <InputGroup>
-          <InputGroupAddon>
-            <SearchIcon />
-          </InputGroupAddon>
-          <InputGroupInput
-            id={searchId}
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value)
-              table.setPageIndex(0)
-            }}
-          />
-        </InputGroup>
-      </Field>
+      <div className="flex flex-wrap items-end gap-4">
+        <Field className="w-full min-w-0 max-w-md sm:min-w-64 sm:flex-1">
+          <FieldLabel htmlFor={searchId}>{searchLabel}</FieldLabel>
+          <InputGroup>
+            <InputGroupAddon>
+              <SearchIcon />
+            </InputGroupAddon>
+            <InputGroupInput
+              id={searchId}
+              placeholder={searchPlaceholder}
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value)
+                table.setPageIndex(0)
+              }}
+            />
+          </InputGroup>
+        </Field>
+        {filters}
+      </div>
       <div className="overflow-hidden rounded-lg border">
         <Table
           aria-label={label}

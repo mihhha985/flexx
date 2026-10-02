@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useId, useMemo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import type { ColumnDef } from "@tanstack/react-table"
 import { FolderPlusIcon, PackagePlusIcon, PlusIcon } from "lucide-react"
 import { toast } from "sonner"
@@ -25,6 +25,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/ui/empty"
 import { formatPrice } from "@/src/shared/lib/format-price"
+import { Field, FieldLabel } from "@/src/shared/ui/field"
 
 function shortenName(name: string) {
   const characters = Array.from(name)
@@ -118,13 +119,34 @@ export function ProductsTable({
   saved?: "created" | "updated"
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const categoryFilterId = useId()
+  const statusFilterId = useId()
+  const statusParam = searchParams.get("status")
+  const selectedStatus = statusParam === "active" || statusParam === "hidden" ? statusParam : ""
+  const selectedCategory = categories.find(
+    (category) => category.slug === searchParams.get("category"),
+  )
+  const filteredData = useMemo(
+    () =>
+      selectedCategory || selectedStatus
+        ? data.filter(
+            (product) =>
+              (!selectedCategory || product.categoryId === selectedCategory.id) &&
+              (!selectedStatus || product.isActive === (selectedStatus === "active")),
+          )
+        : data,
+    [data, selectedCategory, selectedStatus],
+  )
   useEffect(() => {
     if (!saved) return
     toast.success(
       saved === "created" ? "Товар создан и доступен в каталоге." : "Изменения сохранены.",
     )
-    router.replace("/panel/products", { scroll: false })
-  }, [router, saved])
+    const url = new URL(window.location.href)
+    url.searchParams.delete("saved")
+    window.history.replaceState(null, "", url)
+  }, [saved])
   const columns = useMemo(
     () =>
       getColumns(
@@ -133,6 +155,13 @@ export function ProductsTable({
       ),
     [categories, router],
   )
+
+  function updateFilter(parameter: "category" | "status", value: string) {
+    const url = new URL(window.location.href)
+    if (value) url.searchParams.set(parameter, value)
+    else url.searchParams.delete(parameter)
+    window.history.replaceState(null, "", url)
+  }
 
   if (!categories.length) {
     return (
@@ -196,12 +225,49 @@ export function ProductsTable({
       <CardContent>
         <DataTable
           columns={columns}
-          data={data}
+          data={filteredData}
           label="Список товаров"
           searchLabel="Поиск по товарам"
           searchPlaceholder="Название, слаг, категория или статус…"
           globalFilterColumns={["id", "name", "slug", "category", "isActive"]}
-          emptyDescription="Создайте первый товар, чтобы наполнить каталог."
+          filters={
+            <>
+              <Field className="w-full min-w-0 sm:w-56">
+                <FieldLabel htmlFor={categoryFilterId}>Категория</FieldLabel>
+                <select
+                  id={categoryFilterId}
+                  value={selectedCategory?.slug ?? ""}
+                  onChange={(event) => updateFilter("category", event.target.value)}
+                  className="ui-focus h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-base outline-none"
+                >
+                  <option value="">Все категории</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.slug}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field className="w-full min-w-0 sm:w-56">
+                <FieldLabel htmlFor={statusFilterId}>Статус</FieldLabel>
+                <select
+                  id={statusFilterId}
+                  value={selectedStatus}
+                  onChange={(event) => updateFilter("status", event.target.value)}
+                  className="ui-focus h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-base outline-none"
+                >
+                  <option value="">Все статусы</option>
+                  <option value="active">В каталоге</option>
+                  <option value="hidden">Скрыт</option>
+                </select>
+              </Field>
+            </>
+          }
+          emptyDescription={
+            selectedCategory || selectedStatus
+              ? "Нет товаров с выбранными фильтрами. Измените категорию или статус."
+              : "Создайте первый товар, чтобы наполнить каталог."
+          }
         />
       </CardContent>
     </Card>
