@@ -15,7 +15,7 @@ export default function Menu() {
 
   return (
     <div className="flex items-center">
-      <nav className="hidden items-center gap-1 md:flex" aria-label="Основная навигация">
+      <nav className="hidden items-center gap-4 md:flex" aria-label="Основная навигация">
         {navigation.map((item) => {
           const active = isNavigationActive(pathname, item.href)
 
@@ -24,10 +24,7 @@ export default function Menu() {
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "sm" }),
-                active && "underline",
-              )}
+              className={`menu-link`}
             >
               <span className="flex items-center gap-1">{item.label}</span>
             </Link>

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "react-aria-components"
+import { AnimatePresence, motion } from "motion/react"
 
 import { cn } from "@/src/shared/lib/utils"
 
@@ -17,23 +18,24 @@ export function ProductGallery({
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <div className="relative aspect-square overflow-hidden rounded-t-xl bg-muted">
-        {selectedPhoto ? (
-          // The configured S3 public URL is only known at runtime, so Next Image cannot be configured safely.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={selectedPhoto}
-            alt={
-              selectedIndex === 0
-                ? `Главное изображение товара ${product.name}`
-                : `Дополнительное изображение ${selectedIndex} товара ${product.name}`
-            }
-            className="absolute inset-0 size-full object-contain p-4 sm:p-6"
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
-            Фото пока нет
-          </div>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {selectedPhoto ? (
+            <motion.img
+              key={selectedPhoto}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              src={selectedPhoto}
+              alt={
+                selectedIndex === 0
+                  ? `Главное изображение товара ${product.name}`
+                  : `Дополнительное изображение ${selectedIndex} товара ${product.name}`
+              }
+              className="absolute inset-0 size-full object-contain p-4 sm:p-6"
+            />
+          ) : null}
+        </AnimatePresence>
         {photos.length > 1 ? (
           <span
             className="absolute right-3 bottom-3 rounded-full bg-background/90 px-3 py-1.5 text-xs font-medium text-foreground"

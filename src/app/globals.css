@@ -162,6 +162,37 @@
   }
 }
 
+@utility menu-link {
+  position: relative;
+  display: inline-block;
+  padding: 0.5rem;
+  color: var(--foreground);
+  font-weight: 500;
+  text-decoration: none;
+
+  &::before {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.25rem;
+    left: 0.5rem;
+    width: 0;
+    height: 2px;
+    content: "";
+    background-color: var(--foreground);
+    transition: width 280ms ease;
+  }
+
+  &:hover::before,
+  &:focus-visible::before {
+    width: calc(100% - 1rem);
+  }
+
+  &[aria-current="page"]::before {
+    width: calc(100% - 1rem);
+  }
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
