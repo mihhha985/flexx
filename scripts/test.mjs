@@ -21,6 +21,7 @@ for (const args of [
     "scripts/service-worker.test.mjs",
     "scripts/architecture.test.mjs",
     "scripts/import-amazing-red.test.ts",
+    "scripts/seed-orders.test.ts",
   ],
   ["--conditions=react-server", "--import", "tsx", "--test", ...server],
 ]) {
